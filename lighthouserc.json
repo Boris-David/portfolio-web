@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "npx next start -p 4311",
+      "startServerCommand": "npx wrangler dev --port 4311",
       "url": ["http://localhost:4311/", "http://localhost:4311/en"],
       "numberOfRuns": 3,
       "settings": { "preset": "desktop" }

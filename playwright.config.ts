@@ -1,10 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Les tests de bout en bout tournent sur la **construction de production**, pas
- * sur le serveur de développement : c'est le seul moyen de tester ce que verra
- * un visiteur — le même HTML statique, les mêmes images optimisées, le même
- * JavaScript. Un `next dev` testerait un artefact qui n'est jamais livré.
+ * Les tests de bout en bout tournent sur la **construction de production servie
+ * par Cloudflare**, pas sur le serveur de développement de Next.
+ *
+ * `wrangler dev` exécute le même magasin d'actifs statiques que la production :
+ * la même résolution d'URL (`/en` → `en.html`), le même `_headers`, la même page
+ * 404. Les tests voient donc ce que verra un visiteur, en-têtes de sécurité
+ * compris — ce qu'aucun serveur statique improvisé n'aurait garanti.
  */
 const PORT = 3111;
 
@@ -33,7 +36,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: `npm run build && npx next start -p ${PORT}`,
+    command: `npm run build && npx wrangler dev --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

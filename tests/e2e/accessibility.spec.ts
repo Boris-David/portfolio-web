@@ -196,6 +196,7 @@ test.describe("le responsive", () => {
     await expect(cv).toBeVisible();
     // L'intitulé disparaît, le nom accessible reste entier.
     await expect(cv).toHaveAttribute("aria-label", /résumé/i);
+    await expect(cv).toHaveAttribute("aria-label", /new tab/i);
     const box = await cv.boundingBox();
     expect(box?.width).toBeGreaterThanOrEqual(44);
     expect(box?.height).toBeGreaterThanOrEqual(44);
