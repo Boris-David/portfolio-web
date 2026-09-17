@@ -91,6 +91,27 @@ jobs:
             echo "Le site en ligne porte le contenu courant."
           fi
 
+  # La fixture des tests unitaires est une **capture datée** de l'API. Elle rend
+  # la suite déterministe et hors ligne — et, si elle dérive sans qu'on
+  # l'apprenne, elle redevient la seconde source de vérité qu'on vient de
+  # supprimer : les tests continueraient de passer sur une forme qui n'existe
+  # plus.
+  #
+  # Ce contrôle vit ici, et pas dans la CI des pull requests : il tape l'API en
+  # production, et une suite qui dépend d'un service extérieur devient rouge
+  # pour des raisons qui ne regardent pas ce dépôt.
+  contrat:
+    name: La fixture décrit encore ce que l'API sert
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:contract
+
   republier:
     name: Republier le site
     needs: comparer
