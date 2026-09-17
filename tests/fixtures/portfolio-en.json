@@ -1,0 +1,1660 @@
+{
+  "meta": {
+    "locale": "en",
+    "contentVersion": "m6yzYcq8sta4bduuFvWIYl"
+  },
+  "data": {
+    "profile": {
+      "name": {
+        "display": "Amissan Amoussou-G.",
+        "full": "Amissan Boris-David Amoussou-Guenou"
+      },
+      "headline": "Senior iOS Engineer",
+      "availability": "Open to opportunities",
+      "location": "French Riviera, France",
+      "remote": "Fully remote, or mostly remote",
+      "languages": "French · professional English (TOEIC 840)",
+      "summary": [
+        [
+          {
+            "text": "I build the ",
+            "style": "plain"
+          },
+          {
+            "text": "mobile ticketing",
+            "style": "strong"
+          },
+          {
+            "text": " at ",
+            "style": "plain"
+          },
+          {
+            "text": "Instant System",
+            "style": "strong"
+          },
+          {
+            "text": ", and it is my area of expertise. I have worked in a large corporation and in a ten-person startup alike, and I go about it the same way every time: I take a scope, I learn it thoroughly, and I make it dependable.",
+            "style": "plain"
+          }
+        ],
+        [
+          {
+            "text": "What I bring beyond the code is facts, not adjectives: ",
+            "style": "plain"
+          },
+          {
+            "text": "I owned the ticketing of an entire app portfolio alone for a year",
+            "style": "strong"
+          },
+          {
+            "text": ", and the anti-fraud library that protects our digital tickets began as my own initiative — it now runs on both of our platforms.",
+            "style": "plain"
+          }
+        ]
+      ],
+      "showcase": {
+        "media": {
+          "id": "journal",
+          "alt": "KCalories' main screen: the day's food diary.",
+          "caption": "KCalories — on the App Store"
+        },
+        "caseStudy": "kcalories"
+      },
+      "contact": {
+        "email": "amissan.ag@outlook.fr",
+        "title": "Let's work together.",
+        "body": "I am looking for an iOS developer role — mid-level, senior or lead. The label matters less than the rest: what matters is that my voice carries weight in technical decisions.",
+        "links": [
+          {
+            "id": "github",
+            "label": "GitHub",
+            "url": "https://github.com/Boris-David"
+          },
+          {
+            "id": "linkedin",
+            "label": "LinkedIn",
+            "url": "https://www.linkedin.com/in/boris-david-amoussou-guenou-434169174"
+          }
+        ]
+      },
+      "footer": {
+        "role": "iOS engineer",
+        "location": "French Riviera, France · remote"
+      }
+    },
+    "metrics": [
+      {
+        "id": "contributed-reach",
+        "value": "~5",
+        "unit": "M",
+        "countTo": null,
+        "caption": "users of the apps I have contributed to"
+      },
+      {
+        "id": "experience",
+        "value": "6",
+        "unit": "yrs",
+        "countTo": 6,
+        "caption": "of iOS engineering, since October 2020"
+      },
+      {
+        "id": "kcalories-crash-free",
+        "value": "> 99.8",
+        "unit": "%",
+        "countTo": null,
+        "caption": "crash-free sessions on KCalories"
+      }
+    ],
+    "sections": [
+      {
+        "id": "case-studies",
+        "eyebrow": "Case studies",
+        "title": "Two projects told the way a product engineer would",
+        "intro": [
+          {
+            "text": "The problem, the decisions I made, and what they produced. What is being judged here is not Swift syntax — it is technical judgement.",
+            "style": "plain"
+          }
+        ],
+        "note": null
+      },
+      {
+        "id": "apps",
+        "eyebrow": "In production",
+        "title": "33 apps, 3 territories, one platform",
+        "intro": [
+          {
+            "text": "At Instant System, transport apps are built white-label on a shared platform. ",
+            "style": "plain"
+          },
+          {
+            "text": "The ticketing layer I build and maintain ships inside every one of these",
+            "style": "strong"
+          },
+          {
+            "text": " — from Lyon to Tuscany, all the way to French Polynesia.",
+            "style": "plain"
+          }
+        ],
+        "note": [
+          {
+            "text": "Apps published by transport authorities and their operators. My contribution covers the mobile ticketing layer — purchase, usage, validation and inspection — and its integration into each app.",
+            "style": "plain"
+          }
+        ]
+      },
+      {
+        "id": "depth",
+        "eyebrow": "Technical depth",
+        "title": "Where I go deep",
+        "intro": [
+          {
+            "text": "Three subjects explored properly, rather than fifteen technologies listed. These are the ones I can be challenged on for an hour.",
+            "style": "plain"
+          }
+        ],
+        "note": null
+      },
+      {
+        "id": "background",
+        "eyebrow": "Background",
+        "title": "Experience, education and certifications",
+        "intro": null,
+        "note": null
+      }
+    ],
+    "caseStudies": [
+      {
+        "slug": "mobile-ticketing",
+        "title": "Mobile ticketing for transport networks",
+        "subtitle": "Instant System · since May 2023 · in production",
+        "intro": [
+          {
+            "text": "I joined a team with ",
+            "style": "plain"
+          },
+          {
+            "text": "no mobile developer at all",
+            "style": "strong"
+          },
+          {
+            "text": ", alone on the ticketing scope of the whole portfolio — for a year. Here are five workstreams, each with the problem that triggered it and what it produced.",
+            "style": "plain"
+          }
+        ],
+        "link": null,
+        "chapters": [
+          {
+            "slug": "authentication",
+            "title": "Authentication that logged people out for no reason",
+            "subtitle": "Inherited code nobody wanted to touch — rebuilt on actors",
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "When several requests received an unauthorised response ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "at the same time",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ", each one fired its own token refresh. The concurrent refreshes invalidated one another, and the user ended up ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "signed out for no apparent reason",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". The authentication code dated back to 2019 and nobody wanted to touch it.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decision",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I took the initiative on the rebuild, moving to ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "async/await",
+                        "style": "code"
+                      },
+                      {
+                        "text": " with an ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "actor",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " holding the authentication state.",
+                        "style": "plain"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Why an actor rather than a lock:",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " a lock protects state provided you remember to take it everywhere — nothing checks that, and a lock held across an await is a deadlock waiting to happen. With an actor, isolation becomes a ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "property of the type",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ": every access from outside is necessarily serialised, and forgetting is no longer possible.",
+                        "style": "plain"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "The heart of the fix: the ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "in-flight refresh task is remembered",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". Concurrent requests do not start a new one, they await the same one. A single refresh, however many simultaneous calls — plus a guard against retry loops on the same call.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Result",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Authentication on TCL became markedly more stable.",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " No more unexplained sign-outs — the kind you never reproduce in testing and only ever see in production.",
+                        "style": "plain"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "tags",
+                    "items": [
+                      "actor",
+                      "async/await",
+                      "Task",
+                      "Sendable"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "slug": "qr-code-fraud",
+            "title": "QR code fraud",
+            "subtitle": "An innovation-sprint initiative that became a paid feature",
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "A digital ticket is displayed as a QR code. Fraudsters would take a ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "screenshot",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " and pass it on — and at inspection, nothing told the copy apart from the original.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decision",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "During an ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "innovation sprint",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ", I took the initiative of designing an internal library that ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "masks the screen content",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " as soon as a capture or a recording is under way. The ticket stays readable to its holder, and disappears from anything that could be shared.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Result",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Rolled out across ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "every app",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ", then ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "adopted on the new platform",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". Clients are pleased with it — to the point that it became a ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "feature they pay for",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". A sprint idea turned into a line of revenue.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "slug": "card-top-up",
+            "title": "Card top-up on the Lyon network",
+            "subtitle": "From proof of concept to production, built almost single-handedly",
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "The Lyon network had been waiting to let riders ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "top up a transport card from their phone",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". On iOS, everything was still to be done: the ticketing vendor's SDK had never been integrated.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decision",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I first ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "proved the integration with a POC",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " — a POC should not show that it works, it should show what will break in production. Then I built ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "almost the entire feature on iOS single-handedly",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ", through to release.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Result",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Shipped. I am now ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "one of the technical leads on the TCL app",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ", which I know inside out, and I am driving the ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "m-ticket launch",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " on it.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "slug": "clean-architecture",
+            "title": "Carrying clean architecture all the way",
+            "subtitle": "The product owns the default, the vendor overrides only its difference",
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "The per-vendor ticketing abstraction had been laid down by the tech lead. But implementations that were ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "entirely vendor-independent",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " still lived inside the vendor modules — duplicated once per supplier.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decision",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "created the module for a new vendor",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " even though it had few specifics: keeping it outside would have been quicker, but would have left a hole in the architecture. End-to-end consistency was worth the extra code.",
+                        "style": "plain"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "And I ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "argued for — and obtained — lifting vendor-independent implementations up to the product",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". Vendors now override only what they actually mean to change.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Result",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Less duplication between suppliers, and a ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "clear rule that holds without arbitration",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ": the product owns the default behaviour, the vendor overrides only its difference.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "slug": "new-platform",
+            "title": "Launching the new platform",
+            "subtitle": "Oùra and Tuscany, across every functional area",
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "The new product platform, in clean architecture with dependency injection, had to carry the whole of ticketing — with no regression against a platform proven over years.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decision",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I worked across ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "every functional area",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ": purchase catalogue, cart, parameterised products, purchase history, beneficiary management, buying on someone's behalf. And I wrote the ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "internal QR code generation library",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " from an encoded payload — the building block behind ticket validation and inspection.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Result",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "Platform launched on ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "Oùra",
+                        "style": "strong"
+                      },
+                      {
+                        "text": " (Auvergne-Rhône-Alpes) and in ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "Tuscany",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ". That is where I learned SwiftUI, dependency injection and this architecture — ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "in production, on a shipped product",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ".",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "media": [],
+        "tags": [
+          "Swift",
+          "SwiftUI",
+          "UIKit",
+          "Swift Concurrency",
+          "Actors",
+          "Clean Architecture",
+          "SPM modules",
+          "Dependency injection",
+          "XcodeGen",
+          "Jenkins",
+          "fastlane · match"
+        ]
+      },
+      {
+        "slug": "kcalories",
+        "title": "KCalories — four stacks, alone, in five months",
+        "subtitle": "Personal project · published on the App Store",
+        "intro": null,
+        "link": {
+          "label": "App Store",
+          "url": "https://apps.apple.com/fr/app/kcalories/id6761574750"
+        },
+        "chapters": [
+          {
+            "slug": "product",
+            "title": null,
+            "subtitle": null,
+            "panels": [
+              {
+                "kind": "problem",
+                "heading": "Problem",
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I paid for three nutrition tracking apps. Price was never the obstacle — ",
+                        "style": "plain"
+                      },
+                      {
+                        "text": "none of them had everything",
+                        "style": "strong"
+                      },
+                      {
+                        "text": ": fasting, calorie tracking, keto tracking by net carbs, and an interface you do not have to put up with.",
+                        "style": "plain"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "text": [
+                      {
+                        "text": "I also wanted to find out whether I could carry a whole product, not just an iOS layer.",
+                        "style": "plain"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "decision",
+                "heading": "Decisions & delivery",
+                "blocks": [
+                  {
+                    "type": "list",
+                    "items": [
+                      [
+                        {
+                          "text": "Build all four stacks myself",
+                          "style": "strong"
+                        },
+                        {
+                          "text": " rather than assembling services: iOS app, backend, admin back-office, marketing page. Carrying the product end to end was the point, not the means.",
+                          "style": "plain"
+                        }
+                      ],
+                      [
+                        {
+                          "text": "Strict architecture and SPM modules from day one",
+                          "style": "strong"
+                        },
+                        {
+                          "text": ", when nothing yet demanded it — boundaries get drawn before there is anything to put behind them, or they never get drawn at all.",
+                          "style": "plain"
+                        }
+                      ],
+                      [
+                        {
+                          "text": "Feature flags and continuous integration from week one",
+                          "style": "strong"
+                        },
+                        {
+                          "text": ", to ship without blocking and without manual ritual.",
+                          "style": "plain"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              },
+              {
+                "kind": "result",
+                "heading": "Results",
+                "blocks": [
+                  {
+                    "type": "list",
+                    "items": [
+                      [
+                        {
+                          "text": "Published on the App Store five months",
+                          "style": "strong"
+                        },
+                        {
+                          "text": " after the first line of code.",
+                          "style": "plain"
+                        }
+                      ],
+                      [
+                        {
+                          "text": "Over 99.8% crash-free sessions",
+                          "style": "strong"
+                        },
+                        {
+                          "text": " — quality is measured, not claimed.",
+                          "style": "plain"
+                        }
+                      ],
+                      [
+                        {
+                          "text": "Version 2.0 twenty days",
+                          "style": "strong"
+                        },
+                        {
+                          "text": " after 1.0: the delivery pipeline held.",
+                          "style": "plain"
+                        }
+                      ],
+                      [
+                        {
+                          "text": "Available in ",
+                          "style": "plain"
+                        },
+                        {
+                          "text": "French and English",
+                          "style": "strong"
+                        },
+                        {
+                          "text": ", with two complete themes.",
+                          "style": "plain"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "media": [
+          {
+            "id": "jeune",
+            "alt": "Intermittent fasting screen, built into the diary.",
+            "caption": "Fasting, inside the diary"
+          },
+          {
+            "id": "traversee",
+            "alt": "The six physiological phases of fasting.",
+            "caption": "The six physiological phases"
+          },
+          {
+            "id": "regimes-keto",
+            "alt": "Diet selection, including the ketogenic diet.",
+            "caption": "Diets and net carbs"
+          },
+          {
+            "id": "themes",
+            "alt": "The two visual themes of the app.",
+            "caption": "Two complete themes"
+          }
+        ],
+        "tags": [
+          "SwiftUI",
+          "SwiftData",
+          "Clean Architecture",
+          "SPM modules",
+          "Feature flags",
+          "Backend",
+          "Back-office",
+          "CI/CD",
+          "FR · EN"
+        ]
+      }
+    ],
+    "apps": {
+      "verifiedAt": "2026-09-17",
+      "items": [
+        {
+          "slug": "ales-y",
+          "name": "Ales'Y",
+          "territory": "Alès",
+          "appStoreId": "1568307294",
+          "appStoreUrl": "https://apps.apple.com/fr/app/alesy/id1568307294",
+          "role": "ticketing"
+        },
+        {
+          "slug": "at-bus",
+          "name": "at bus",
+          "territory": "Tuscany, Italy",
+          "appStoreId": "1636455849",
+          "appStoreUrl": "https://apps.apple.com/fr/app/at-bus/id1636455849",
+          "role": "ticketing"
+        },
+        {
+          "slug": "auxr-m",
+          "name": "AuxR_M",
+          "territory": "Auxerre",
+          "appStoreId": "6475961624",
+          "appStoreUrl": "https://apps.apple.com/fr/app/auxr-m-le-bus/id6475961624",
+          "role": "ticketing"
+        },
+        {
+          "slug": "bibus",
+          "name": "Bibus",
+          "territory": "Brest",
+          "appStoreId": "1469372029",
+          "appStoreUrl": "https://apps.apple.com/fr/app/bibus/id1469372029",
+          "role": "ticketing"
+        },
+        {
+          "slug": "choletbus",
+          "name": "Choletbus",
+          "territory": "Cholet",
+          "appStoreId": "1375557619",
+          "appStoreUrl": "https://apps.apple.com/fr/app/choletbus/id1375557619",
+          "role": "ticketing"
+        },
+        {
+          "slug": "citibus",
+          "name": "Citibus",
+          "territory": "Narbonne",
+          "appStoreId": "1211228399",
+          "appStoreUrl": "https://apps.apple.com/fr/app/citibus/id1211228399",
+          "role": "ticketing"
+        },
+        {
+          "slug": "clermoov",
+          "name": "Clermoov",
+          "territory": "Clermont-Ferrand",
+          "appStoreId": "1593178553",
+          "appStoreUrl": "https://apps.apple.com/fr/app/clermoov/id1593178553",
+          "role": "ticketing"
+        },
+        {
+          "slug": "envia",
+          "name": "ENVIA",
+          "territory": "Arles",
+          "appStoreId": "6612028427",
+          "appStoreUrl": "https://apps.apple.com/fr/app/envia/id6612028427",
+          "role": "ticketing"
+        },
+        {
+          "slug": "envibus",
+          "name": "Envibus",
+          "territory": "Sophia Antipolis",
+          "appStoreId": "1441409420",
+          "appStoreUrl": "https://apps.apple.com/fr/app/envibus-cap-azur/id1441409420",
+          "role": "ticketing"
+        },
+        {
+          "slug": "impulsyon",
+          "name": "impulsyon",
+          "territory": "La Roche-sur-Yon",
+          "appStoreId": "1218911819",
+          "appStoreUrl": "https://apps.apple.com/fr/app/impulsyon-la-roche-sur-yon/id1218911819",
+          "role": "ticketing"
+        },
+        {
+          "slug": "irigo",
+          "name": "Irigo",
+          "territory": "Angers",
+          "appStoreId": "598934011",
+          "appStoreUrl": "https://apps.apple.com/fr/app/irigo/id598934011",
+          "role": "ticketing"
+        },
+        {
+          "slug": "izilo",
+          "name": "Izilo",
+          "territory": "Lorient",
+          "appStoreId": "1409695018",
+          "appStoreUrl": "https://apps.apple.com/fr/app/izilo/id1409695018",
+          "role": "ticketing"
+        },
+        {
+          "slug": "jv-malin",
+          "name": "JV Malin",
+          "territory": "Centre-Val de Loire",
+          "appStoreId": "934859202",
+          "appStoreUrl": "https://apps.apple.com/fr/app/jvmalin/id934859202",
+          "role": "ticketing"
+        },
+        {
+          "slug": "lio",
+          "name": "liO",
+          "territory": "Occitanie",
+          "appStoreId": "1477980319",
+          "appStoreUrl": "https://apps.apple.com/fr/app/lio-occitanie/id1477980319",
+          "role": "ticketing"
+        },
+        {
+          "slug": "mobilites-tcm-tcat",
+          "name": "Mobilités TCM & TCAT",
+          "territory": "Troyes",
+          "appStoreId": "1064410903",
+          "appStoreUrl": "https://apps.apple.com/fr/app/mobilit%C3%A9s-by-tcm-tcat/id1064410903",
+          "role": "ticketing"
+        },
+        {
+          "slug": "my-astuce",
+          "name": "My Astuce",
+          "territory": "Rouen",
+          "appStoreId": "550492144",
+          "appStoreUrl": "https://apps.apple.com/fr/app/my-astuce/id550492144",
+          "role": "ticketing"
+        },
+        {
+          "slug": "metropole-mobilite",
+          "name": "Métropole Mobilité",
+          "territory": "Aix-Marseille",
+          "appStoreId": "1516283411",
+          "appStoreUrl": "https://apps.apple.com/fr/app/la-m%C3%A9tropole-mobilite/id1516283411",
+          "role": "ticketing"
+        },
+        {
+          "slug": "ondea",
+          "name": "Ondea",
+          "territory": "Grand Lac",
+          "appStoreId": "1022819776",
+          "appStoreUrl": "https://apps.apple.com/fr/app/ondea/id1022819776",
+          "role": "ticketing"
+        },
+        {
+          "slug": "oura",
+          "name": "Oùra",
+          "territory": "Auvergne-Rhône-Alpes",
+          "appStoreId": "1496323667",
+          "appStoreUrl": "https://apps.apple.com/fr/app/o%C3%B9ra/id1496323667",
+          "role": "ticketing"
+        },
+        {
+          "slug": "palm-bus",
+          "name": "Palm Bus",
+          "territory": "Cannes",
+          "appStoreId": "1133998027",
+          "appStoreUrl": "https://apps.apple.com/fr/app/palm-bus-cap-azur/id1133998027",
+          "role": "ticketing"
+        },
+        {
+          "slug": "qub",
+          "name": "QUB",
+          "territory": "Quimper",
+          "appStoreId": "1046521320",
+          "appStoreUrl": "https://apps.apple.com/fr/app/qub-lappli/id1046521320",
+          "role": "ticketing"
+        },
+        {
+          "slug": "rlv-mobilites",
+          "name": "RLV Mobilités",
+          "territory": "Riom",
+          "appStoreId": "6747768439",
+          "appStoreUrl": "https://apps.apple.com/fr/app/rlv-mobilit%C3%A9s/id6747768439",
+          "role": "ticketing"
+        },
+        {
+          "slug": "ruban",
+          "name": "Ruban",
+          "territory": "Porte de l'Isère",
+          "appStoreId": "1545373705",
+          "appStoreUrl": "https://apps.apple.com/fr/app/ruban/id1545373705",
+          "role": "ticketing"
+        },
+        {
+          "slug": "reseau-mistral",
+          "name": "Réseau Mistral",
+          "territory": "Toulon",
+          "appStoreId": "429896529",
+          "appStoreUrl": "https://apps.apple.com/fr/app/r%C3%A9seau-mistral/id429896529",
+          "role": "ticketing"
+        },
+        {
+          "slug": "reseau-tac",
+          "name": "Réseau TAC",
+          "territory": "Charleville-Mézières",
+          "appStoreId": "6746128528",
+          "appStoreUrl": "https://apps.apple.com/fr/app/r%C3%A9seau-tac/id6746128528",
+          "role": "ticketing"
+        },
+        {
+          "slug": "setram",
+          "name": "Setram",
+          "territory": "Le Mans",
+          "appStoreId": "1399018127",
+          "appStoreUrl": "https://apps.apple.com/fr/app/setram/id1399018127",
+          "role": "ticketing"
+        },
+        {
+          "slug": "sibra",
+          "name": "Sibra",
+          "territory": "Annecy",
+          "appStoreId": "1047139539",
+          "appStoreUrl": "https://apps.apple.com/fr/app/sibra/id1047139539",
+          "role": "ticketing"
+        },
+        {
+          "slug": "tac-mobilites",
+          "name": "TAC Mobilités",
+          "territory": "Annemasse",
+          "appStoreId": "1019613481",
+          "appStoreUrl": "https://apps.apple.com/fr/app/tac-mobilit%C3%A9s/id1019613481",
+          "role": "ticketing"
+        },
+        {
+          "slug": "tcl",
+          "name": "TCL",
+          "territory": "Lyon",
+          "appStoreId": "579379606",
+          "appStoreUrl": "https://apps.apple.com/fr/app/tcl/id579379606",
+          "role": "ticketing"
+        },
+        {
+          "slug": "tere-tahiti",
+          "name": "Tere Tahiti",
+          "territory": "French Polynesia",
+          "appStoreId": "6737310055",
+          "appStoreUrl": "https://apps.apple.com/fr/app/tere-tahiti-mobilit%C3%A9s/id6737310055",
+          "role": "ticketing"
+        },
+        {
+          "slug": "tub",
+          "name": "TUB",
+          "territory": "Saint-Brieuc",
+          "appStoreId": "1100130027",
+          "appStoreUrl": "https://apps.apple.com/fr/app/tub/id1100130027",
+          "role": "ticketing"
+        },
+        {
+          "slug": "tul",
+          "name": "TUL",
+          "territory": "Laval",
+          "appStoreId": "1069887708",
+          "appStoreUrl": "https://apps.apple.com/fr/app/tul-laval/id1069887708",
+          "role": "ticketing"
+        },
+        {
+          "slug": "twisto",
+          "name": "Twisto",
+          "territory": "Caen",
+          "appStoreId": "592996452",
+          "appStoreUrl": "https://apps.apple.com/fr/app/twisto/id592996452",
+          "role": "ticketing"
+        },
+        {
+          "slug": "mail-orange",
+          "name": "Mail Orange",
+          "territory": "Orange",
+          "appStoreId": "580161193",
+          "appStoreUrl": "https://apps.apple.com/fr/app/mail-orange-messagerie-email/id580161193",
+          "role": "features"
+        },
+        {
+          "slug": "kcalories",
+          "name": "KCalories",
+          "territory": "Personal project",
+          "appStoreId": "6761574750",
+          "appStoreUrl": "https://apps.apple.com/fr/app/kcalories/id6761574750",
+          "role": "end-to-end"
+        }
+      ]
+    },
+    "expertise": [
+      {
+        "id": "concurrency",
+        "title": "Concurrency and shared state",
+        "body": [
+          {
+            "text": "Session tokens, their renewal and error paths are where concurrent access produces the bugs you can never reproduce. Actors, ",
+            "style": "plain"
+          },
+          {
+            "text": "async/await",
+            "style": "code"
+          },
+          {
+            "text": ", isolation: what the compiler guarantees on my behalf beats what I promise to check.",
+            "style": "plain"
+          }
+        ]
+      },
+      {
+        "id": "boundaries",
+        "title": "Boundaries and modularisation",
+        "body": [
+          {
+            "text": "Clean Architecture in separate modules rather than folders, and modules that depend on a contract, never on an implementation. A boundary the compiler does not refuse is not a boundary — it is a convention that eventually gets forgotten.",
+            "style": "plain"
+          }
+        ]
+      },
+      {
+        "id": "delivery",
+        "title": "From code to shipped product",
+        "body": [
+          {
+            "text": "Project generation from a spec rather than a binary file, signing handled by fastlane and match, pipelines per product and per module, feature flags to decouple shipping from releasing. Whatever is not automated ends up not being done.",
+            "style": "plain"
+          }
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "slug": "instant-system",
+        "role": "iOS Engineer",
+        "organisation": "Instant System",
+        "location": "Sophia Antipolis",
+        "start": "2023-05",
+        "end": null,
+        "roles": [
+          "Technical lead, ticketing",
+          "Scrum Master · since February 2025",
+          "AI ambassador",
+          "Mentor"
+        ],
+        "highlights": [
+          [
+            {
+              "text": "Sole mobile developer",
+              "style": "strong"
+            },
+            {
+              "text": " on the ticketing scope for a year, across the whole portfolio: stabilising production and building features.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Built ",
+              "style": "plain"
+            },
+            {
+              "text": "transport card top-up almost single-handedly",
+              "style": "strong"
+            },
+            {
+              "text": " on the TCL app, where I am now one of the technical leads.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Two ",
+              "style": "plain"
+            },
+            {
+              "text": "internal libraries",
+              "style": "strong"
+            },
+            {
+              "text": " designed and shipped: on-screen anti-fraud protection for tickets, and validation QR code generation.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Created the module for a new ticketing vendor",
+              "style": "strong"
+            },
+            {
+              "text": ", and ",
+              "style": "plain"
+            },
+            {
+              "text": "lifted vendor-independent implementations up to the product",
+              "style": "strong"
+            },
+            {
+              "text": " — argued for, then obtained.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Complete rebuild of session handling",
+              "style": "strong"
+            },
+            {
+              "text": " — tokens, renewal, retry, sign-out — on actors and ",
+              "style": "plain"
+            },
+            {
+              "text": "async/await",
+              "style": "code"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Onboarded every mobile developer",
+              "style": "strong"
+            },
+            {
+              "text": " who joined after me, iOS and Android; official mentor to an iOS developer.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Architecture workshops with the CTO",
+              "style": "strong"
+            },
+            {
+              "text": " and the architects; client demos; conducting hiring interviews.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Scrum Master",
+              "style": "strong"
+            },
+            {
+              "text": " of my team without stepping away from development — and still one of its main technical contributors.",
+              "style": "plain"
+            }
+          ]
+        ],
+        "stack": [
+          "Swift",
+          "SwiftUI",
+          "UIKit",
+          "Swift Concurrency, actors, async/await",
+          "Combine",
+          "Clean Architecture, 3 then 4 layers",
+          "dependency injection",
+          "SPM, XCFrameworks, CocoaPods",
+          "XcodeGen and YAML specs",
+          "Jenkins",
+          "fastlane",
+          "match",
+          "Bitbucket",
+          "SAFe"
+        ]
+      },
+      {
+        "slug": "mail-orange",
+        "role": "iOS Engineer",
+        "organisation": "Mail Orange — Orange, via Inetum",
+        "location": "Mougins",
+        "start": "2022-01",
+        "end": "2023-04",
+        "roles": [],
+        "highlights": [
+          [
+            {
+              "text": "Features and fixes on a mail app with ",
+              "style": "plain"
+            },
+            {
+              "text": "around one million users",
+              "style": "strong"
+            },
+            {
+              "text": ", in a team of three iOS developers.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Topics owned ",
+              "style": "plain"
+            },
+            {
+              "text": "end to end",
+              "style": "strong"
+            },
+            {
+              "text": " from the first weeks: drafts, attachment handling.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Maintained ",
+              "style": "plain"
+            },
+            {
+              "text": "compatibility across iOS versions",
+              "style": "strong"
+            },
+            {
+              "text": " and the ",
+              "style": "plain"
+            },
+            {
+              "text": "iPad layout",
+              "style": "strong"
+            },
+            {
+              "text": ", on a codebase heavily used on tablets.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Worked on a heterogeneous codebase — VIPER in the composer, MVP elsewhere.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Took part in refinements and technical decisions; worked with ",
+              "style": "plain"
+            },
+            {
+              "text": "third-party teams",
+              "style": "strong"
+            },
+            {
+              "text": " on integrated services.",
+              "style": "plain"
+            }
+          ]
+        ],
+        "stack": [
+          "Swift",
+          "Objective-C",
+          "Programmatic UIKit, xib, storyboards, Auto Layout",
+          "MVP",
+          "VIPER",
+          "Delegate, Observer",
+          "UIDocumentPicker",
+          "app extensions",
+          "CocoaPods",
+          "SAFe"
+        ]
+      },
+      {
+        "slug": "stiilt",
+        "role": "iOS Engineer — apprenticeship",
+        "organisation": "STIILT",
+        "location": "Nice",
+        "start": "2020-10",
+        "end": "2021-10",
+        "roles": [],
+        "highlights": [
+          [
+            {
+              "text": "Full migration from Objective-C to Swift",
+              "style": "strong"
+            },
+            {
+              "text": " of a premium car-sharing app already live on the App Store — the codebase went from ",
+              "style": "plain"
+            },
+            {
+              "text": "30% to over 92% Swift in one year",
+              "style": "strong"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Migration carried out ",
+              "style": "plain"
+            },
+            {
+              "text": "alongside a colleague's feature releases",
+              "style": "strong"
+            },
+            {
+              "text": " on the same codebase, without interrupting production. The strategy was mine.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Rebuilt the networking layer, profiling and optimisation.",
+              "style": "plain"
+            }
+          ]
+        ],
+        "stack": [
+          "Objective-C → Swift",
+          "UIKit",
+          "MVC",
+          "storyboards, xib",
+          "CocoaPods",
+          "incremental migration on a live app"
+        ]
+      }
+    ],
+    "background": {
+      "education": [
+        {
+          "slug": "master-ingenierie-informatique",
+          "degree": "Master's degree in Software Engineering",
+          "school": "Université Côte d'Azur — Nice",
+          "detail": null,
+          "startYear": 2020,
+          "endYear": 2021
+        },
+        {
+          "slug": "diplome-ingenieur-polytech",
+          "degree": "Engineering degree in Computer Science",
+          "school": "Polytech Nice Sophia Antipolis",
+          "detail": "Ambient & Mobile Intelligence track",
+          "startYear": 2019,
+          "endYear": 2021
+        },
+        {
+          "slug": "ingenieur-travaux-informatiques",
+          "degree": "Bachelor of Engineering in Computer Science",
+          "school": "Institut Africain d'Informatique — Lomé",
+          "detail": null,
+          "startYear": 2016,
+          "endYear": 2019
+        }
+      ],
+      "certifications": [
+        {
+          "slug": "professional-scrum-master-i",
+          "name": "Professional Scrum Master I",
+          "issuer": "Scrum.org",
+          "awardedOn": "2025-11",
+          "verifyUrl": "https://www.scrum.org/certificates/1267010"
+        },
+        {
+          "slug": "safe-6-practitioner",
+          "name": "Certified SAFe 6 Practitioner",
+          "issuer": "Scaled Agile",
+          "awardedOn": "2025",
+          "verifyUrl": "https://community.scaledagile.com/s/certification-verification"
+        }
+      ],
+      "openProjects": [
+        {
+          "slug": "advanced-calendar",
+          "name": "Advanced Calendar",
+          "description": [
+            {
+              "text": "SwiftUI calendar component, bridged over UIKit to move past the limits of ",
+              "style": "plain"
+            },
+            {
+              "text": "UICalendarView",
+              "style": "code"
+            },
+            {
+              "text": ". Written because the framework was not enough.",
+              "style": "plain"
+            }
+          ],
+          "sourceUrl": null
+        },
+        {
+          "slug": "news-app",
+          "name": "News App",
+          "description": [
+            {
+              "text": "MVVM news feed, live parsing, signing handled by fastlane and match. Written for the Instant System technical interview.",
+              "style": "plain"
+            }
+          ],
+          "sourceUrl": "https://github.com/Boris-David/NewsApp"
+        }
+      ]
+    },
+    "skills": [
+      {
+        "id": "languages",
+        "title": "Languages",
+        "items": [
+          "Swift",
+          "Objective-C"
+        ]
+      },
+      {
+        "id": "interface",
+        "title": "Interface",
+        "items": [
+          "SwiftUI",
+          "UIKit",
+          "Auto Layout",
+          "Dynamic Type",
+          "iPad",
+          "App extensions"
+        ]
+      },
+      {
+        "id": "concurrency",
+        "title": "Concurrency",
+        "items": [
+          "async/await",
+          "Actors",
+          "Swift Concurrency",
+          "Combine",
+          "GCD"
+        ]
+      },
+      {
+        "id": "architecture",
+        "title": "Architecture",
+        "items": [
+          "Clean Architecture",
+          "MVVM",
+          "MVP",
+          "VIPER",
+          "Dependency injection",
+          "SPM modules",
+          "Feature flags"
+        ]
+      },
+      {
+        "id": "tooling",
+        "title": "Tooling & CI/CD",
+        "items": [
+          "Xcode",
+          "XcodeGen",
+          "SPM",
+          "CocoaPods",
+          "XCFrameworks",
+          "fastlane",
+          "match",
+          "Jenkins",
+          "Git",
+          "Bitbucket"
+        ]
+      },
+      {
+        "id": "practice",
+        "title": "Practice",
+        "items": [
+          "SAFe",
+          "Scrum",
+          "Code review",
+          "Unit testing",
+          "Refinement",
+          "Mentoring"
+        ]
+      }
+    ]
+  }
+}

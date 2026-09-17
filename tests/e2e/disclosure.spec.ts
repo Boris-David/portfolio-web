@@ -8,7 +8,19 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
  * contenu entre en cascade, et qu'une interruption ne fait pas sauter la carte.
  */
 
-const firstWorkstream = (page: Page) => page.getByTestId("workstream-authentification");
+/**
+ * Le premier chantier dépliable, désigné par sa **structure** et non par son
+ * slug.
+ *
+ * Ce fichier teste un comportement — replier, déplier, animer, sans
+ * JavaScript — pas un contenu. Y écrire un identifiant éditorial le couplait à
+ * la source : le contenu venant désormais de l'API, le slug est passé de
+ * « authentification » à « authentication » sans que rien ne change à l'écran,
+ * et onze tests de comportement sont tombés pour une raison qui ne les regarde
+ * pas.
+ */
+const WORKSTREAM = '[data-testid^="workstream-"]';
+const firstWorkstream = (page: Page) => page.locator(WORKSTREAM).first();
 const summaryOf = (card: Locator) => card.locator("summary");
 
 test.describe("les chantiers dépliables", () => {
@@ -110,7 +122,7 @@ test.describe("les chantiers dépliables", () => {
      * et on mesurerait autre chose que ce qu'on croit.
      */
     const heights = await page.evaluate(async () => {
-      const card = document.querySelector('[data-testid="workstream-authentification"]');
+      const card = document.querySelector('[data-testid^="workstream-"]');
       const wrap = card?.querySelector<HTMLElement>(".disclosure__wrap");
       const summary = card?.querySelector("summary");
       if (!wrap || !summary) throw new Error("carte introuvable");
@@ -231,8 +243,23 @@ test.describe("sans JavaScript", () => {
     expect(invisible).toBe(0);
 
     await expect(page.locator(".app-card")).toHaveCount(33);
-    // Les chiffres de preuve sont rendus par le serveur, pas par le compteur.
-    await expect(page.locator(".proof__value").first()).toContainText("33");
+
+    /**
+     * Les chiffres de preuve sont rendus **par le serveur**, pas par le
+     * compteur : sans JavaScript, chacun affiche déjà sa valeur finale.
+     *
+     * L'assertion portait sur une tuile « 33 » qui n'existe plus — l'auteur a
+     * retiré la répétition du compte de réseaux. La remplacer par « ~5 M »
+     * recouplerait ce test de comportement au contenu du jour. Ce qu'on vérifie
+     * est l'invariant : chaque tuile porte un nombre, et aucune n'est restée sur
+     * l'état de départ du compteur.
+     */
+    const values = await page.locator(".proof__value").allInnerTexts();
+    expect(values.length).toBeGreaterThan(0);
+    for (const value of values) {
+      expect(value, "une tuile sans chiffre").toMatch(/\d/);
+      expect(value.trim(), "une tuile figée sur l'état initial du compteur").not.toBe("0");
+    }
   });
 
   test("laisse les cartes se déplier nativement", async ({ page }) => {

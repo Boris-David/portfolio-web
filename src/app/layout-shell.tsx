@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans } from "next/font/google";
 import { IconSprite } from "@/components/Icon";
-import { getSiteContent } from "@/content/source";
+import { getContentVersion, getSiteContent } from "@/content/source";
 import type { Locale } from "@/content/types";
 import { absoluteUrl, LOCALES, pathForLocale, SITE_URL } from "@/lib/site";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
@@ -44,6 +44,23 @@ export async function buildMetadata(locale: Locale): Promise<Metadata> {
 
   return {
     metadataBase: new URL(SITE_URL),
+    /**
+     * Le **témoin de fraîcheur** exigé par l'ADR 0006.
+     *
+     * L'empreinte du contenu sur lequel cette page a été construite, publiée
+     * dans la page elle-même. L'API sert la sienne dans `meta.contentVersion` :
+     * comparer les deux répond en une requête à la seule question qu'on ne
+     * pouvait pas poser jusqu'ici — *le site en ligne a-t-il été construit sur
+     * le contenu courant ?*
+     *
+     * Sans lui, un site figé sur du contenu périmé est **indiscernable** d'un
+     * site à jour : tout répond 200, tout s'affiche, et la page ment.
+     *
+     * Elle voyage avec la page plutôt que dans un fichier à part parce qu'un
+     * gestionnaire de route remettrait un Worker sur le chemin chaud de chaque
+     * page vue, ce que l'hébergement gratuit ne supporte pas (ADR 0005).
+     */
+    other: { "content-version": await getContentVersion(locale) },
     title: meta.title,
     description: meta.description,
     alternates: {

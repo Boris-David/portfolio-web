@@ -1,47 +1,62 @@
 import type { Locale, ProductionApp, SiteContent } from "@/content/types";
-import { fr } from "@/content/locales/fr";
-import { en } from "@/content/locales/en";
-import { localizeTerritory } from "@/content/locales/territories";
-import appsData from "@/content/data/apps.json";
+import type { SiteChrome } from "@/content/chrome/types";
+import { frChrome } from "@/content/chrome/fr";
+import { enChrome } from "@/content/chrome/en";
+import { adapt, adaptApps, readVerifiedAt } from "@/content/api/adapt";
+import { fetchPortfolio } from "@/content/api/fetch";
 
 /**
  * La frontière entre « d'où vient le contenu » et « comment il s'affiche ».
  *
- * Aujourd'hui le contenu est local. Demain il viendra de `portfolio-api`,
- * consommé **au build** (ADR 0002 : le web ne fait aucune requête au runtime).
- * Ce port existe pour que cette bascule ne touche aucun composant : les pages
- * appellent `getSiteContent` et `getProductionApps`, jamais un fichier.
+ * Elle a tenu sa promesse : le contenu vient désormais de `portfolio-api`
+ * (ADR 0002), consommé **au build** (ADR 0005), et **aucun composant n'a été
+ * rouvert**. Les pages appelaient déjà `getSiteContent(locale)`, ces fonctions
+ * étaient déjà `async` alors que rien n'attendait — c'est précisément ce que
+ * cette anticipation achetait.
  *
- * Les deux fonctions sont `async` alors que rien n'attend ici — volontairement.
- * Une source distante est asynchrone ; rendre la signature asynchrone plus tard
- * obligerait à rouvrir chaque appelant, c'est-à-dire exactement la réécriture
- * qu'on veut éviter.
+ * Ce qui reste au site, c'est le **chrome** : les libellés qui n'existent que
+ * parce qu'il y a une page. La ligne de partage est écrite dans
+ * `chrome/types.ts` ; elle se résume à : *est du contenu ce qui resterait vrai
+ * si le site n'existait pas.*
  */
 
-interface AppsFile {
-  readonly verifiedAt: string;
-  readonly count: number;
-  readonly apps: readonly ProductionApp[];
-}
+const CHROME: Readonly<Record<Locale, SiteChrome>> = { fr: frChrome, en: enChrome };
 
-const file = appsData as unknown as AppsFile;
-
-const CONTENT: Record<Locale, SiteContent> = { fr, en };
+/**
+ * Le contenu adapté est mémoïsé comme la requête l'est.
+ *
+ * Pas pour le temps gagné — l'adaptation coûte une milliseconde. Pour
+ * l'**identité** : toutes les pages d'une même langue partagent alors le même
+ * objet, et deux rendus ne peuvent pas diverger. Sans ça, « le contenu de la
+ * page » et « le contenu des métadonnées » sont deux valeurs distinctes qu'il
+ * faudrait croire égales.
+ */
+const adapted = new Map<Locale, Promise<SiteContent>>();
 
 export async function getSiteContent(locale: Locale): Promise<SiteContent> {
-  return CONTENT[locale];
+  const cached = adapted.get(locale);
+  if (cached !== undefined) return cached;
+
+  const pending = fetchPortfolio(locale).then((payload) => adapt(payload, CHROME[locale]));
+  adapted.set(locale, pending);
+  return pending;
+}
+
+/** Vide le cache d'adaptation — réservé aux tests, avec celui du transport. */
+export function resetSiteContentCache(): void {
+  adapted.clear();
 }
 
 /**
- * Les applications en production, territoire déjà rendu dans la langue
- * demandée. Le tri se fait ici et non à l'affichage : un ordre décidé par la
- * source est un ordre stable entre les deux langues, et l'ordre de la grille
- * est une information en soi.
+ * Les applications en production, dans l'ordre décidé par la source.
+ *
+ * Le tri vivait ici et n'y est plus : l'API sert une liste ordonnée, et deux
+ * tris — un par client — finiraient par diverger. La localisation des
+ * territoires a disparu pour la même raison : l'API sert déjà les trois
+ * exonymes, et une seconde table aurait été une seconde vérité.
  */
 export async function getProductionApps(locale: Locale): Promise<readonly ProductionApp[]> {
-  return [...file.apps]
-    .map((app) => ({ ...app, territory: localizeTerritory(app.territory, locale) }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale, { sensitivity: "base" }));
+  return adaptApps((await fetchPortfolio(locale)).data);
 }
 
 /** La couche de billettique — celles dont la grille de la section 02 rend compte. */
@@ -51,6 +66,18 @@ export async function getTicketingApps(locale: Locale): Promise<readonly Product
 }
 
 /** La date de vérification des identifiants App Store, publiée telle quelle. */
-export function getAppsVerifiedAt(): string {
-  return file.verifiedAt;
+export async function getAppsVerifiedAt(locale: Locale): Promise<string> {
+  return readVerifiedAt((await fetchPortfolio(locale)).data);
+}
+
+/**
+ * L'empreinte du contenu embarqué dans cette construction.
+ *
+ * C'est le **témoin de fraîcheur** exigé par l'ADR 0006 : le site la publie,
+ * l'API sert la sienne, et les comparer dit en une requête si la page en ligne
+ * a été construite sur le contenu courant. Sans ce témoin, un site figé sur du
+ * contenu périmé est indiscernable d'un site à jour.
+ */
+export async function getContentVersion(locale: Locale): Promise<string> {
+  return (await fetchPortfolio(locale)).contentVersion;
 }

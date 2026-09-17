@@ -84,6 +84,20 @@ on:
     types: [completed]
     branches: [main]
 
+  # Le contenu a changé dans `portfolio-api`. Le site est un export statique :
+  # il ne « rafraîchit » rien, il se **reconstruit**. C'est le chemin rapide de
+  # la propagation entre dépôts — quelques secondes après le déploiement de
+  # l'API. Voir l'ADR 0007.
+  repository_dispatch:
+    types: [contenu-mis-a-jour]
+
+  # Appelable par le témoin de fraîcheur, qui republie quand il constate que le
+  # site en ligne a été construit sur un contenu périmé. Un workflow réutilisable
+  # évite d'avoir deux descriptions du déploiement — et n'exige aucun jeton, là
+  # où `gh workflow run` avec le `GITHUB_TOKEN` ne déclencherait rien : GitHub
+  # refuse qu'un workflow s'enchaîne sur lui-même par ce jeton.
+  workflow_call:
+
   # Reste déclenchable à la main : republier sans nouveau commit — rotation de
   # jeton, purge d'actifs, retour arrière.
   workflow_dispatch:
@@ -103,15 +117,22 @@ jobs:
   deployer:
     name: Construire, puis publier les actifs
     runs-on: ubuntu-latest
+    # Une seule condition, écrite par la négative : **tout** déclencheur publie,
+    # sauf `workflow_run`, qui doit prouver deux choses.
+    #
     # `workflow_run` se déclenche que la CI ait **réussi ou échoué** — `on:` n'a
     # pas de filtre sur la conclusion, il s'écrit ici.
     #
-    # Le `event == 'push'` n'est pas de la ceinture-bretelles : `branches:
+    # Et le `event == 'push'` n'est pas de la ceinture-bretelles : `branches:
     # [main]` filtre sur la branche *source*. Une pull request venue d'un fork
     # dont la branche s'appelle `main` la satisferait — et déploierait le code
     # du fork. Seul un push sur notre `main` déclenche une publication.
+    #
+    # Écrite par la négative, la garde n'oublie aucun déclencheur ajouté plus
+    # tard : `repository_dispatch`, `workflow_call` et `workflow_dispatch`
+    # passent sans qu'on ait eu à penser à les nommer.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      github.event_name != 'workflow_run' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push')
     steps:
