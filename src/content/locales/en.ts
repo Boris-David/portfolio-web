@@ -35,7 +35,7 @@ export const en: SiteContent = {
       { target: "contact", label: "Contact" },
     ],
     cvLabel: "Résumé",
-    cvAriaLabel: "Download the résumé as a PDF (English)",
+    cvAriaLabel: "Open the résumé as a PDF (English), new tab",
     themeToggleLabel: "Switch theme",
     skipToContent: "Skip to content",
     otherLocaleCode: "FR",
