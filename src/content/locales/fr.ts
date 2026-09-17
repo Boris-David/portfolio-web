@@ -63,7 +63,7 @@ export const fr: SiteContent = {
   proof: [
     { value: "33", counts: true, label: "applications de transport en production embarquent mon travail" },
     { value: "6", unit: "ans", counts: true, label: "d'ingénierie iOS, depuis octobre 2020" },
-    { prefix: "~", value: "1", unit: "M", label: "d'utilisateurs sur Mail Orange" },
+    { prefix: "~", value: "5", unit: "M", label: "d'utilisateurs des applications auxquelles j'ai contribué" },
     { prefix: "> ", value: "99,8", unit: "%", label: "de sessions sans crash sur KCalories" },
   ],
 
