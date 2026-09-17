@@ -28,7 +28,13 @@ on:
     # attendu, c'est le délai **maximal** avant qu'une propagation manquée soit
     # détectée et réparée.
     - cron: "17 */3 * * *"
+
   workflow_dispatch:
+    inputs:
+      forcer:
+        description: "Republier même si les empreintes concordent"
+        type: boolean
+        default: false
 
 concurrency:
   # Jamais deux en même temps, et on ne coupe pas une republication en cours.
@@ -52,6 +58,8 @@ jobs:
     steps:
       - name: Relever les empreintes en ligne
         id: comparaison
+        env:
+          FORCER: ${{ inputs.forcer }}
         run: |
           set -euo pipefail
 
@@ -59,8 +67,14 @@ jobs:
           attendue="$(curl -fsS "$API_URL/v1/portfolio?lang=fr" \
             | python3 -c 'import json,sys; print(json.load(sys.stdin)["meta"]["contentVersion"])')"
 
-          perime=false
+          # Un chemin de réparation qu'on ne peut pas exercer est un chemin de
+          # réparation qu'on n'a pas : il ne se déclenche que le jour où tout va
+          # mal, et c'est ce jour-là qu'on découvre qu'il ne marche pas. Cette
+          # entrée le rend exerçable à la demande — et sert accessoirement de
+          # « republier de force », utile après une purge d'actifs.
+          perime="${FORCER:-false}"
           detail=""
+          [ "$perime" = "true" ] && detail=" (republication forcée)"
           for page in "/" "/en"; do
             html="$(curl -fsS "$SITE_URL$page")"
             # `grep -o` sur la balise plutôt qu'un analyseur : la page est un
@@ -86,7 +100,7 @@ jobs:
           echo "detail=$detail" >> "$GITHUB_OUTPUT"
 
           if [ "$perime" = "true" ]; then
-            echo "::warning::Contenu périmé en ligne :$detail — attendu $attendue. Republication."
+            echo "::warning::Republication demandée :$detail — attendu $attendue."
           else
             echo "Le site en ligne porte le contenu courant."
           fi
