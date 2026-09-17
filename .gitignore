@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# cloudflare — état local de wrangler, régénéré à chaque `wrangler dev`
+/.wrangler/
+
 # tests et audits
 /test-results/
 /playwright-report/
