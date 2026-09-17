@@ -1,0 +1,142 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * FICHIER GÉNÉRÉ — ne pas modifier à la main.
+ *
+ * Source   : design/tokens.json
+ * Produit  : npm run tokens
+ * Vérifié  : npm run tokens:check  (la CI échoue si ce fichier diverge)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --paper: #FAF8F3;
+  --paper-2: #F1EDE3;
+  --paper-3: #E7E1D6;
+  --line: #E0D9CC;
+  --line-2: #C9C1B1;
+  --ink: #1A1712;
+  --ink-2: #3E3930;
+  --ink-3: #5B5546;
+  --accent: #2743D6;
+  --accent-d: #1C2F9C;
+  --accent-w: #CBD3FF;
+  --on-accent: #FFFFFF;
+  --ok: #1E7F4F;
+  --shadow: 0 1px 2px rgba(26,23,18,0.05), 0 14px 34px -18px rgba(26,23,18,0.22);
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 72px;
+  --s9: 104px;
+
+  --r-sm: 7px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  --e-out: cubic-bezier(.22,1,.36,1);
+  --e-soft: cubic-bezier(.16,1,.3,1);
+  --e-io: cubic-bezier(.65,.02,.28,1);
+  --e-back: cubic-bezier(.34,1.42,.64,1);
+
+  --t-caption: 13px;
+  --t-subhead: 15px;
+  --t-body: 17px;
+  --t-title3: 21px;
+  --t-title1: 28px;
+  --t-large: 34px;
+
+  --f-display: var(--font-loaded-display, "Fraunces"), Georgia, serif;
+  --f-text: var(--font-loaded-text, "Instrument Sans"), Helvetica Neue, system-ui, sans-serif;
+  --f-mono: var(--font-loaded-mono, ui-monospace), SFMono-Regular, monospace;
+
+  --touch-target: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14120F;
+    --paper-2: #1C1915;
+    --paper-3: #262119;
+    --line: #2E2921;
+    --line-2: #3E3930;
+    --ink: #F3EFE7;
+    --ink-2: #D2CBBC;
+    --ink-3: #9A9384;
+    --accent: #93A5FF;
+    --accent-d: #B6C1FF;
+    --accent-w: #1E2650;
+    --on-accent: #0E1330;
+    --ok: #4FBE86;
+    --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 14px 34px -18px rgba(0,0,0,0.85);
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #14120F;
+  --paper-2: #1C1915;
+  --paper-3: #262119;
+  --line: #2E2921;
+  --line-2: #3E3930;
+  --ink: #F3EFE7;
+  --ink-2: #D2CBBC;
+  --ink-3: #9A9384;
+  --accent: #93A5FF;
+  --accent-d: #B6C1FF;
+  --accent-w: #1E2650;
+  --on-accent: #0E1330;
+  --ok: #4FBE86;
+  --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 14px 34px -18px rgba(0,0,0,0.85);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-d: var(--accent-d);
+  --color-accent-w: var(--accent-w);
+  --color-on-accent: var(--on-accent);
+  --color-ok: var(--ok);
+
+  --spacing-s1: var(--s1);
+  --spacing-s2: var(--s2);
+  --spacing-s3: var(--s3);
+  --spacing-s4: var(--s4);
+  --spacing-s5: var(--s5);
+  --spacing-s6: var(--s6);
+  --spacing-s7: var(--s7);
+  --spacing-s8: var(--s8);
+  --spacing-s9: var(--s9);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-pill: var(--r-pill);
+
+  --ease-out: var(--e-out);
+  --ease-soft: var(--e-soft);
+  --ease-io: var(--e-io);
+  --ease-back: var(--e-back);
+
+  --text-caption: var(--t-caption);
+  --text-subhead: var(--t-subhead);
+  --text-body: var(--t-body);
+  --text-title3: var(--t-title3);
+  --text-title1: var(--t-title1);
+  --text-large: var(--t-large);
+
+  --font-display: var(--f-display);
+  --font-text: var(--f-text);
+  --font-mono: var(--f-mono);
+
+  --shadow-token: var(--shadow);
+}
