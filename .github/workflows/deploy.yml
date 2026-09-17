@@ -1,0 +1,158 @@
+name: Déploiement Cloudflare Workers
+
+# ⚠️ PRÉPARÉ, PAS BRANCHÉ.
+#
+# Aucun jeton n'existe encore pour ce dépôt. Ce workflow ne se déclenche qu'à la
+# main et s'arrête proprement tant que la configuration manque — il ne peut pas
+# rendre la CI rouge.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# CE QU'IL FAUT POSER SUR LE DÉPÔT portfolio-web, UNE FOIS
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# 1. Settings → Secrets and variables → Actions :
+#
+#      Secret    CLOUDFLARE_API_TOKEN    le jeton d'API
+#      Variable  CLOUDFLARE_ACCOUNT_ID   l'identifiant de compte (Workers → Overview)
+#
+#    Rien d'autre. Le nom du Worker, le répertoire d'actifs et le domaine sont
+#    déclarés dans `wrangler.jsonc`, versionné.
+#
+# 2. Le jeton peut être CELUI DÉJÀ CRÉÉ POUR portfolio-api — même compte, même
+#    zone, mêmes portées. S'il faut en créer un : tableau de bord → My Profile →
+#    API Tokens → Create Token → Edit Cloudflare Workers, restreint à :
+#
+#      Account · Workers Scripts        : Edit
+#      Account · Account Settings       : Read
+#      Zone    · Workers Routes         : Edit   (zone amissan.dev)
+#      Zone    · Zone                   : Read   (zone amissan.dev)
+#
+#    Les deux portées de zone ne servent qu'au domaine personnalisé ; sans
+#    elles, le déploiement réussit mais `amissan.dev` n'est pas créé.
+#
+# 3. Le domaine `amissan.dev` : **rien à cliquer**. La zone est déjà sur le
+#    compte via Cloudflare Registrar, et `wrangler deploy` crée l'enregistrement
+#    DNS et le domaine personnalisé depuis `routes` dans `wrangler.jsonc`.
+#
+# 4. `www.amissan.dev` → `amissan.dev` : UNE SEULE CHOSE RESTE À FAIRE À LA MAIN,
+#    et voici pourquoi elle ne peut pas vivre dans ce dépôt.
+#
+#    Une redirection d'hôte ne s'exprime ni dans `wrangler.jsonc` ni dans
+#    `_headers`/`_redirects`, dont les motifs portent sur le chemin et jamais sur
+#    le nom d'hôte. Elle pourrait s'écrire dans un Worker — mais un Worker ne
+#    s'exécute que sur les requêtes qui ne correspondent à AUCUN actif, et `/`
+#    correspond toujours. Il faudrait donc `run_worker_first`, c'est-à-dire un
+#    Worker sur le chemin chaud de chaque page vue : on perdrait la gratuité des
+#    actifs statiques, qui est la raison même du choix de Cloudflare.
+#
+#    La forme native et gratuite est une règle de redirection de zone, qui
+#    s'exécute au bord AVANT les Workers et ne consomme aucune invocation :
+#
+#      a. DNS → amissan.dev → Add record → CNAME `www` vers `amissan.dev`,
+#         proxifié (nuage orange).
+#      b. Rules → Redirect Rules → Create rule :
+#           Si    hostname égale `www.amissan.dev`
+#           Alors redirection dynamique vers
+#                 concat("https://amissan.dev", http.request.uri.path)
+#                 code 301, préserver la chaîne de requête.
+#
+#    Le lien canonique de chaque page pointe déjà sur l'apex : même sans cette
+#    règle, aucun moteur n'indexerait deux fois le site.
+#
+# Aucune clé privée, aucun fichier de service : le jeton est le seul secret, et
+# il vit dans les secrets du dépôt — jamais dans le dépôt, qui est public.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  WRANGLER_SEND_METRICS: "false"
+
+jobs:
+  deployer:
+    name: Construire, puis publier les actifs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier que la configuration existe
+        id: configuration
+        env:
+          JETON: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          COMPTE: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$JETON" ] || [ -z "$COMPTE" ]; then
+            echo "::notice::Déploiement non configuré — voir l'en-tête de ce workflow."
+            echo "prete=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prete=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.configuration.outputs.prete == 'true'
+
+      - uses: actions/setup-node@v5
+        if: steps.configuration.outputs.prete == 'true'
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Installer les dépendances
+        if: steps.configuration.outputs.prete == 'true'
+        run: npm ci
+
+      # Un déploiement ne peut pas partir avec un CSS de design qui aurait dérivé
+      # de `design/tokens.json`. La garde est la même qu'en CI, rejouée ici parce
+      # qu'un déploiement manuel ne passe pas forcément par une pull request.
+      - name: Le design dérive bien des tokens
+        if: steps.configuration.outputs.prete == 'true'
+        run: npm run tokens:check
+
+      - name: Construire l'export statique
+        if: steps.configuration.outputs.prete == 'true'
+        run: npm run build
+
+      # Garde de cohérence : `out/` doit porter les deux langues, la page 404 et
+      # les en-têtes. Publier un export tronqué mettrait un site cassé en ligne,
+      # et `wrangler deploy` ne s'en plaindrait pas — il publierait ce qu'on lui
+      # donne.
+      - name: Vérifier l'export avant publication
+        if: steps.configuration.outputs.prete == 'true'
+        run: |
+          manquants=""
+          for fichier in out/index.html out/en.html out/404.html out/_headers out/icon.svg; do
+            [ -f "$fichier" ] || manquants="$manquants $fichier"
+          done
+          if [ -n "$manquants" ]; then
+            echo "::error::Export incomplet, publication refusée :$manquants"
+            exit 1
+          fi
+          echo "Export complet : $(find out -type f | wc -l) fichiers."
+
+      - name: Publier les actifs statiques
+        if: steps.configuration.outputs.prete == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: npm run deploy
+
+      # Le déploiement peut réussir et le site être cassé : mauvais domaine,
+      # actifs absents, en-têtes perdus. On le vérifie depuis l'extérieur.
+      - name: Vérifier le site en ligne
+        if: steps.configuration.outputs.prete == 'true'
+        run: |
+          set -euo pipefail
+          for chemin in / /en; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 3 \
+              --retry-all-errors "https://amissan.dev$chemin")
+            [ "$code" = "200" ] || { echo "::error::$chemin répond $code"; exit 1; }
+          done
+          curl -sI https://amissan.dev/ | grep -qi '^content-security-policy' \
+            || { echo "::error::en-têtes de sécurité absents — _headers non pris en compte"; exit 1; }
+          echo "Site en ligne, en-têtes servis."

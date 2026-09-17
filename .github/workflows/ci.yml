@@ -21,6 +21,9 @@ permissions:
 
 env:
   NODE_VERSION: "22"
+  # Les tests et le budget servent le site avec `wrangler dev`, le vrai magasin
+  # d'actifs. Pas de télémétrie depuis la CI, et pas d'invite interactive.
+  WRANGLER_SEND_METRICS: "false"
 
 jobs:
   qualite:
@@ -78,8 +81,9 @@ jobs:
       - name: Installer Chromium
         run: npx playwright install --with-deps chromium
 
-      # `playwright.config.ts` construit et sert la version de production :
-      # les tests voient ce que verra un visiteur, pas un serveur de dev.
+      # `playwright.config.ts` construit l'export et le sert avec `wrangler dev`,
+      # c'est-à-dire le magasin d'actifs de production, `_headers` compris : les
+      # tests voient ce que verra un visiteur, en-têtes de sécurité inclus.
       - name: Tests de bout en bout et audit d'accessibilité
         run: npm run test:e2e
 
@@ -110,6 +114,8 @@ jobs:
       # L'ajouter au package.json ferait entrer une dizaine de vulnérabilités
       # transitives dans l'audit d'un dépôt que des recruteurs vont lire.
       # La version est épinglée ici, ce qui suffit à la reproductibilité.
+      # Servi par `wrangler dev` d'après `lighthouserc.json` : on mesure la
+      # couche qui servira réellement, pas un serveur de substitution.
       - name: Budget Lighthouse (échoue sous 100)
         run: npx --yes @lhci/cli@0.15.x autorun --config=lighthouserc.json
 
