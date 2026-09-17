@@ -151,6 +151,28 @@ describe("les règles éditoriales tenues par une garde", () => {
     expect(text).not.toMatch(/initiated the per-vendor/i);
   });
 
+  /**
+   * Le chiffre de portée décrit **l'ensemble** des applications auxquelles il a
+   * contribué. La version précédente — « ~1 M d'utilisateurs sur Mail Orange » —
+   * attribuait à un seul produit un chiffre de portefeuille ; retirée par
+   * l'auteur le 2026-09-16.
+   *
+   * Le « ~ » et la mention de portée ne sont pas cosmétiques : sans eux, la
+   * tuile invite à l'oral une question dont la réponse n'est pas encore adossée
+   * à une source citable.
+   */
+  it.each(locales)("borne le chiffre de portée à l'ensemble des applications (%s)", (locale, content) => {
+    const reach = content.proof.find((tile) => tile.unit === "M");
+    if (!reach) throw new Error("la tuile de portée a disparu");
+
+    expect(reach.prefix).toBe("~");
+    expect(reach.label).toMatch(
+      locale === "fr" ? /applications auxquelles j'ai contribué/ : /apps I have contributed to/,
+    );
+    // Aucune tuile n'adosse un compte d'utilisateurs à un produit nommé.
+    content.proof.forEach((tile) => expect(tile.label).not.toMatch(/Mail Orange/i));
+  });
+
   it.each(locales)("ne décrit jamais le mécanisme de l'anti-fraude (%s)", (_, content) => {
     const text = allText(content).toLowerCase();
     // La bibliothèque se décrit par ce qu'elle fait, jamais par comment.

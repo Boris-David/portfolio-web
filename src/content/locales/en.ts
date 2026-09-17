@@ -66,7 +66,7 @@ export const en: SiteContent = {
   proof: [
     { value: "33", counts: true, label: "transport apps in production ship my work" },
     { value: "6", unit: "yrs", counts: true, label: "of iOS engineering, since October 2020" },
-    { prefix: "~", value: "1", unit: "M", label: "users on Mail Orange" },
+    { prefix: "~", value: "5", unit: "M", label: "users of the apps I have contributed to" },
     { prefix: "> ", value: "99.8", unit: "%", label: "crash-free sessions on KCalories" },
   ],
 
