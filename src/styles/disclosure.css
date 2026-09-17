@@ -1,0 +1,152 @@
+/**
+ * Les cartes dépliantes — chantiers d'étude de cas et expériences.
+ *
+ * Le socle est un `<details>` natif, et ce choix porte tout le reste :
+ *
+ *   - **sans JavaScript**, la carte s'ouvre et se ferme quand même. Rien de ce
+ *     fichier ne cache de contenu par défaut : la hauteur n'est contrainte que
+ *     par une valeur en ligne posée par le script ;
+ *   - **au clavier**, Entrée et Espace fonctionnent sans qu'on écrive une ligne,
+ *     et le rôle `group`/`button` est donné par le navigateur. Une `<div>` avec
+ *     `onClick` aurait demandé de réimplémenter tout ça — mal ;
+ *   - **la recherche** et `Ctrl+F` voient le contenu replié, parce qu'il est
+ *     dans le DOM.
+ *
+ * L'animation de hauteur elle-même est pilotée par Motion, pas par une
+ * transition CSS : une transition ne sait pas repartir de la vitesse courante
+ * quand on referme une carte en cours d'ouverture, et ce saut est exactement ce
+ * qui fait qu'un dépliage « fait cheap ».
+ */
+
+.disclosure__summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s5) var(--s6);
+  min-height: var(--touch-target);
+  transition: background 0.35s var(--e-io);
+}
+
+.disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclosure__summary::marker {
+  content: "";
+}
+
+.disclosure__summary:hover {
+  background: var(--paper-3);
+}
+
+.disclosure[data-open="true"] > .disclosure__summary {
+  background: var(--paper-3);
+}
+
+/**
+ * Le conteneur animé. `overflow: hidden` en permanence, mais **aucune hauteur
+ * imposée ici** : tant que le script n'en pose pas une, le contenu s'affiche en
+ * entier. C'est ce qui garde la page utilisable sans JavaScript.
+ */
+.disclosure__wrap {
+  overflow: hidden;
+}
+
+.disclosure__numero {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: var(--accent-w);
+  border-radius: var(--r-sm);
+  padding: 5px 9px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  transition:
+    transform 0.5s var(--e-back),
+    background 0.3s var(--e-out);
+}
+
+.disclosure[data-open="true"] .disclosure__numero {
+  transform: scale(1.09);
+}
+
+.disclosure__heading {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.disclosure__heading b {
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.012em;
+  line-height: 1.25;
+}
+
+.disclosure__heading em {
+  font-style: normal;
+  font-size: 13.5px;
+  color: var(--ink-3);
+  line-height: 1.35;
+}
+
+/**
+ * Le chevron dépasse légèrement en fin de rotation (`--e-back`) : un demi-tour
+ * parfaitement linéaire se lit comme mécanique, ce petit dépassement le rend
+ * vivant sans le rendre bavard.
+ */
+.disclosure__chevron {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-left: auto;
+  stroke: var(--ink-3);
+  fill: none;
+  stroke-width: 2;
+  transition:
+    transform 0.55s var(--e-back),
+    stroke 0.3s var(--e-out);
+}
+
+.disclosure[data-open="true"] .disclosure__chevron {
+  transform: rotate(180deg);
+  stroke: var(--accent);
+}
+
+/* Les chantiers s'empilent en liste séparée par des filets, sans cadre propre. */
+.workstreams .disclosure {
+  border-bottom: 1px solid var(--line);
+}
+
+.workstreams .disclosure:last-child {
+  border-bottom: 0;
+}
+
+/* L'expérience, elle, est une carte : son résumé s'aligne sur la ligne de base. */
+.job > .disclosure__summary {
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+}
+
+.job .disclosure__chevron {
+  width: 17px;
+  height: 17px;
+  align-self: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disclosure__summary,
+  .disclosure__numero,
+  .disclosure__chevron {
+    transition: none;
+  }
+
+  .disclosure[data-open="true"] .disclosure__numero {
+    transform: none;
+  }
+}

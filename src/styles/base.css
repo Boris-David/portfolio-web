@@ -1,0 +1,119 @@
+/**
+ * Socle : réinitialisation minimale, typographie de base, focus.
+ *
+ * Pas de feuille d'impression, et c'est une décision, pas un oubli — ADR 0004 :
+ * le CV est un PDF produit par l'API, servi au web comme à l'app iOS. Une
+ * feuille d'impression ici recréerait un second CV qui divergerait du premier.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* La barre de navigation est collante : une ancre doit s'arrêter sous elle. */
+  scroll-padding-top: 86px;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-text);
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  color: var(--ink-3);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/**
+ * Un seul style de focus, visible sur tous les fonds, et jamais retiré.
+ * `:focus-visible` plutôt que `:focus` : le contour apparaît au clavier sans
+ * encadrer un bouton qu'on vient de cliquer à la souris.
+ */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.92em;
+}
+
+/**
+ * Le lien d'évitement : premier élément focusable de la page, hors de l'écran
+ * jusqu'à ce qu'il reçoive le focus. Sans lui, un utilisateur au clavier
+ * traverse toute la navigation à chaque page.
+ */
+.skip-link {
+  position: absolute;
+  left: var(--s4);
+  top: var(--s4);
+  z-index: 60;
+  transform: translateY(calc(-100% - var(--s8)));
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 11px 18px;
+  border-radius: var(--r-md);
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform 0.25s var(--e-out);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  text-decoration: none;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: var(--s4);
+}
+
+section {
+  padding-block: var(--s9);
+}

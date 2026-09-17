@@ -1,0 +1,116 @@
+/**
+ * Les primitives d'animation.
+ *
+ * Une règle tient tout ce fichier : **l'état initial caché n'existe que si le
+ * script tourne.** D'où le garde `html.js`, posé par un script inline avant le
+ * premier rendu. Sans JavaScript, aucune de ces règles ne s'applique et la page
+ * est intégralement lisible — ce qui est la seule façon honnête d'animer une
+ * apparition au défilement.
+ *
+ * Deuxième règle : `prefers-reduced-motion` ne réduit pas les animations, il les
+ * supprime. Une animation « discrète » reste une animation pour quelqu'un que le
+ * mouvement rend malade.
+ */
+
+/* ── Révélation au défilement ──────────────────────────────────────────────── */
+
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px) scale(0.994);
+  filter: blur(5px);
+}
+
+html.js [data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+  transition:
+    opacity 0.9s var(--e-soft),
+    transform 0.9s var(--e-soft),
+    filter 0.7s var(--e-soft);
+}
+
+/* ── Cascade : chaque enfant entre décalé de son voisin ────────────────────── */
+
+html.js [data-stagger] > * {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+html.js [data-stagger="in"] > * {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.68s var(--e-soft),
+    transform 0.68s var(--e-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal],
+  html.js [data-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* ── Micro-interactions ────────────────────────────────────────────────────── */
+
+.lift {
+  transition:
+    transform 0.2s var(--e-out),
+    border-color 0.2s var(--e-out),
+    box-shadow 0.2s var(--e-out),
+    background-color 0.2s var(--e-out);
+}
+
+.lift:hover {
+  transform: translateY(-1px);
+}
+
+/**
+ * Le retour tactile : un objet qu'on presse doit reculer. 0.97 est assez pour
+ * se sentir, assez peu pour ne pas sauter.
+ */
+.press:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .press {
+    transition: none;
+  }
+
+  .lift:hover,
+  .press:active {
+    transform: none;
+  }
+}
+
+/**
+ * La pastille de disponibilité. Elle pulse parce qu'elle dit « maintenant » —
+ * c'est la seule animation permanente de la page, et elle disparaît dès que le
+ * mouvement est refusé.
+ */
+.pulse-dot {
+  animation: pulse-ring 2.6s infinite;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent);
+}
+
+@keyframes pulse-ring {
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
