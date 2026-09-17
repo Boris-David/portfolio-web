@@ -1,10 +1,9 @@
-import { describe, expect, it } from "vitest";
-import { en } from "@/content/locales/en";
-import { fr } from "@/content/locales/fr";
+import { beforeAll, describe, expect, it } from "vitest";
 import { getProductionApps, getSiteContent, getTicketingApps } from "@/content/source";
 import { parseRichText } from "@/content/rich-text";
 import { LOCALES } from "@/lib/site";
-import type { SiteContent } from "@/content/types";
+import type { Locale, SiteContent } from "@/content/types";
+import { withApiFixtures } from "../support/api-fixture";
 
 /**
  * Ces tests gardent le **contenu**, pas le code.
@@ -12,12 +11,41 @@ import type { SiteContent } from "@/content/types";
  * Ils existent parce que les faits publiés sont vérifiés et arbitrés : un
  * chiffre qui dérive de sa source, ou une traduction qui manque, ne doit pas se
  * découvrir en entretien.
+ *
+ * Le contenu vient désormais de l'API (ADR 0002). Ces gardes n'ont donc pas
+ * disparu avec les fichiers de locale — elles ont **gagné en portée** : elles ne
+ * vérifient plus ce que quelqu'un a tapé ici, elles vérifient ce que la source
+ * publie réellement, après adaptation, tel que le visiteur le lira.
  */
 
-const locales: ReadonlyArray<[string, SiteContent]> = [
-  ["fr", fr],
-  ["en", en],
-];
+withApiFixtures();
+
+/**
+ * Le contenu adapté des deux langues, résolu une fois pour toutes les
+ * assertions synchrones qui suivent.
+ */
+let fr: SiteContent;
+let en: SiteContent;
+let locales: ReadonlyArray<[Locale, SiteContent]>;
+
+beforeAll(async () => {
+  [fr, en] = await Promise.all([getSiteContent("fr"), getSiteContent("en")]);
+  locales = [
+    ["fr", fr],
+    ["en", en],
+  ];
+});
+
+/**
+ * `it.each` est évalué au **chargement** du module, donc avant tout `beforeAll` :
+ * les cas ne peuvent donc pas recevoir le contenu, seulement un code de langue.
+ * Ils le résolvent ici, au moment où le test s'exécute.
+ */
+function bySource(locale: Locale): SiteContent {
+  const content = locale === "fr" ? fr : en;
+  if (content === undefined) throw new Error("contenu non résolu — beforeAll n'a pas tourné");
+  return content;
+}
 
 describe("la grille d'applications et les chiffres annoncés", () => {
   it("publie exactement les 33 applications de billettique de la source", async () => {
@@ -31,27 +59,46 @@ describe("la grille d'applications et les chiffres annoncés", () => {
   });
 
   /**
-   * Le chiffre « 33 » est écrit dans trois phrases éditoriales. Si la source de
-   * contenu gagne ou perd un réseau, ces phrases mentent. Ce test est la seule
-   * chose qui l'empêche.
+   * Le « 33 » est écrit dans des phrases éditoriales. Si la source gagne ou perd
+   * un réseau, ces phrases mentent — et c'est ce test qui l'empêche.
+   *
+   * Il ne vérifie plus les **quatre** emplacements d'autrefois. L'auteur a
+   * tranché le 2026-09-16 : le chiffre reste vrai, c'est sa répétition qui a été
+   * refusée — *« ce 33 là cité à plusieurs endroits, je ne suis pas sûr que ça
+   * intéresse fortement les recruteurs »*. La source ne le cite donc plus qu'une
+   * fois, là où la grille le démontre, et l'a retiré de la tuile de chiffres
+   * comme du titre de l'étude de cas.
+   *
+   * Ce n'est pas un assouplissement : le test vérifie maintenant les **deux**
+   * moitiés de l'arbitrage — qu'il est juste là où il est écrit, et qu'il n'est
+   * pas revenu là d'où il a été retiré.
    */
-  it.each(locales)("annonce dans le contenu %s le nombre réel d'applications", async (_, content) => {
-    const apps = await getTicketingApps(content.locale);
-    const count = String(apps.length);
+  it.each(LOCALES)("annonce dans le contenu %s le nombre réel d'applications", async (locale) => {
+    const content = bySource(locale);
+    const count = String((await getTicketingApps(locale)).length);
 
+    // Là où il installe l'échelle : le titre de la section que la grille prouve.
     expect(content.appsHead.title).toContain(count);
+    // Et la description de référencement, seul endroit lu hors de la page.
     expect(content.meta.description).toContain(count);
-    expect(content.proof[0].value).toBe(count);
+  });
 
+  /** L'autre moitié de l'arbitrage : le chiffre ne revient pas là d'où il a été retiré. */
+  it.each(LOCALES)("ne remet pas le compte de réseaux en tuile ni en titre (%s)", async (locale) => {
+    const content = bySource(locale);
+    const count = String((await getTicketingApps(locale)).length);
+
+    content.proof.forEach((tile) => expect(tile.value).not.toBe(count));
     const ticketingCase = content.cases.find((study) => study.kind === "workstreams");
-    expect(ticketingCase?.title).toContain(count);
+    expect(ticketingCase?.title).not.toContain(count);
   });
 
   /**
    * La pile d'icônes de l'en-tête affiche 5 applications et annonce « +28 ».
    * 5 + 28 doit faire 33, sinon l'en-tête compte faux.
    */
-  it.each(locales)("fait tomber juste la pile d'icônes du contenu %s", async (_, content) => {
+  it.each(LOCALES)("fait tomber juste la pile d'icônes du contenu %s", async (locale) => {
+    const content = bySource(locale);
     const apps = await getTicketingApps(content.locale);
     const study = content.cases.find((item) => item.kind === "workstreams");
     if (study?.kind !== "workstreams") throw new Error("étude de cas billettique absente");
@@ -81,7 +128,11 @@ describe("la parité des deux langues", () => {
     expect(LOCALES).toEqual(["fr", "en"]);
   });
 
-  it.each(locales)("charge le contenu %s par sa langue", async (code, content) => {
+  it.each(LOCALES)("charge le contenu %s par sa langue", async (code) => {
+    const content = bySource(code);
+    // `toBe` et non `toEqual` : le contenu adapté est mémoïsé par langue, donc
+    // deux appels doivent rendre **le même objet**. Une égalité structurelle
+    // laisserait passer une mémoïsation cassée.
     await expect(getSiteContent(content.locale)).resolves.toBe(content);
     expect(content.locale).toBe(code);
   });
@@ -130,7 +181,8 @@ describe("la parité des deux langues", () => {
 describe("les règles éditoriales tenues par une garde", () => {
   const allText = (content: SiteContent) => JSON.stringify(content);
 
-  it.each(locales)("ne publie aucun autre canal de contact que l'e-mail (%s)", (_, content) => {
+  it.each(LOCALES)("ne publie aucun autre canal de contact que l'e-mail (%s)", (locale) => {
+    const content = bySource(locale);
     expect(content.contact.email).toBe("amissan.ag@outlook.fr");
     // Aucun numéro de téléphone, sous aucune forme.
     expect(allText(content)).not.toMatch(/\+33[\s.\-]?\d|0\d([\s.\-]?\d{2}){4}/);
@@ -140,7 +192,8 @@ describe("les règles éditoriales tenues par une garde", () => {
    * Arbitrages explicites de `.claude/rules/contenu-editorial.md`, chacun
    * refusé nommément par l'auteur. Les réintroduire se paie en entretien.
    */
-  it.each(locales)("ne réintroduit aucune formulation refusée (%s)", (_, content) => {
+  it.each(LOCALES)("ne réintroduit aucune formulation refusée (%s)", (locale) => {
+    const content = bySource(locale);
     const text = allText(content);
     expect(text).not.toMatch(/41\s?%/);
     expect(text).not.toMatch(/12 ans d'historique|12 years of history/i);
@@ -161,7 +214,8 @@ describe("les règles éditoriales tenues par une garde", () => {
    * tuile invite à l'oral une question dont la réponse n'est pas encore adossée
    * à une source citable.
    */
-  it.each(locales)("borne le chiffre de portée à l'ensemble des applications (%s)", (locale, content) => {
+  it.each(LOCALES)("borne le chiffre de portée à l'ensemble des applications (%s)", (locale) => {
+    const content = bySource(locale);
     const reach = content.proof.find((tile) => tile.unit === "M");
     if (!reach) throw new Error("la tuile de portée a disparu");
 
@@ -173,25 +227,29 @@ describe("les règles éditoriales tenues par une garde", () => {
     content.proof.forEach((tile) => expect(tile.label).not.toMatch(/Mail Orange/i));
   });
 
-  it.each(locales)("ne décrit jamais le mécanisme de l'anti-fraude (%s)", (_, content) => {
+  it.each(LOCALES)("ne décrit jamais le mécanisme de l'anti-fraude (%s)", (locale) => {
+    const content = bySource(locale);
     const text = allText(content).toLowerCase();
     // La bibliothèque se décrit par ce qu'elle fait, jamais par comment.
     expect(text).not.toMatch(/uiscreen|iscaptured|screencapture|detectcapture/);
   });
 
-  it.each(locales)("n'expose aucun identifiant de réseau interne (%s)", (_, content) => {
+  it.each(LOCALES)("n'expose aucun identifiant de réseau interne (%s)", (locale) => {
+    const content = bySource(locale);
     const study = content.cases.find((item) => item.kind === "workstreams");
     if (study?.kind !== "workstreams") throw new Error("étude de cas billettique absente");
     // Les icônes sont nommées par slug public, jamais « n57 », « n104 »…
     study.iconStack.forEach((slug) => expect(slug).not.toMatch(/^n\d+$/));
   });
 
-  it.each(locales)("n'emploie pas de balisage non supporté (%s)", (_, content) => {
+  it.each(LOCALES)("n'emploie pas de balisage non supporté (%s)", (locale) => {
+    const content = bySource(locale);
     const text = allText(content);
     expect(text).not.toMatch(/<\/?(b|i|em|strong|code|span|div|a)\b/i);
   });
 
-  it.each(locales)("referme chaque emphase ouverte (%s)", (_, content) => {
+  it.each(LOCALES)("referme chaque emphase ouverte (%s)", (locale) => {
+    const content = bySource(locale);
     const markupFields = [
       ...content.hero.lede,
       content.appsHead.intro ?? "",

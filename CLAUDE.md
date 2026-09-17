@@ -41,12 +41,23 @@ animation est une **couche par-dessus** un document déjà complet :
 ADR 0004. **Ne jamais ajouter de `@media print`**, sous aucun prétexte : deux
 gabarits, ce sont deux CV qui divergent. Un test de bout en bout le vérifie.
 
-### 4. Un dépôt public ne reçoit aucun secret
+### 4. Aucun fait n'est écrit dans ce dépôt
+
+ADR 0002. Chiffres, dates, phrases, URL de profils : tout vient de
+`portfolio-api`, récupéré **au build**. Réintroduire un fichier de contenu local
+recréerait la seconde source de vérité qu'on vient de supprimer — le « 33 »
+vivait à quatre endroits ici contre un seul côté API.
+
+Ce qui reste : le **chrome**, dans `src/content/chrome/`. Le critère est écrit
+dans `.claude/rules/contenu-et-i18n.md` — *est du contenu ce qui resterait vrai
+si le site n'existait pas.*
+
+### 5. Un dépôt public ne reçoit aucun secret
 
 Le site est statique et ne s'authentifie nulle part : il n'a besoin d'aucun
 secret, donc il n'en accueille aucun. `npm run check:secrets`.
 
-### 5. Le site reste entièrement pré-rendu
+### 6. Le site reste entièrement pré-rendu
 
 `output: "export"` n'est pas un réglage de confort : c'est ce qui rend
 l'hébergement gratuit, parce que les actifs statiques de Cloudflare sont hors
@@ -58,8 +69,9 @@ présente vraiment, ça se décide, ça ne se glisse pas.
 ## Avant d'annoncer que c'est fait
 
 ```bash
-npm run verify     # tokens, lint, types, tests unitaires, secrets
-npm run test:e2e   # bout en bout + accessibilité, servis par wrangler dev
+npm run verify        # tokens, lint, types, tests unitaires, secrets
+npm run test:e2e      # bout en bout + accessibilité, servis par wrangler dev
+npm run test:contract # la forme servie par l'API réelle — quand on touche au contenu
 ```
 
 `npm run preview` sert `out/` exactement comme Cloudflare le servira — en-têtes,
@@ -75,8 +87,10 @@ dernière commande. Un test qui échoue se dit, avec sa sortie.
 
 | Quoi | Où |
 |---|---|
-| Contenu éditorial, les deux langues | `src/content/locales/` |
+| Contenu éditorial | **`portfolio-api`** — aucun fait n'est écrit ici |
 | Frontière vers la source de contenu | `src/content/source.ts` — les pages n'ouvrent jamais un fichier |
+| Adaptation domaine → présentation | `src/content/api/` |
+| Libellés d'interface, les deux langues | `src/content/chrome/` |
 | Objets du design system | `src/styles/components.css` |
 | Effets d'amélioration progressive | `src/lib/effects/` |
 | Routes par langue | `src/app/(fr)/` et `src/app/(en)/` |

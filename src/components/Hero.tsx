@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Icon } from "@/components/Icon";
 import { RichText } from "@/components/RichText";
-import { EMAIL } from "@/content/links";
 import type { Hero as HeroContent } from "@/content/types";
 
 /**
@@ -12,7 +11,14 @@ import type { Hero as HeroContent } from "@/content/types";
  * centaines de millisecondes : exactement ce qu'un recruteur qui scanne ne
  * pardonne pas. Les apparitions commencent sous la ligne de flottaison.
  */
-export function Hero({ hero }: { readonly hero: HeroContent }) {
+export function Hero({
+  hero,
+  email,
+}: {
+  readonly hero: HeroContent;
+  /** Le seul canal de contact publié, servi par la source de contenu. */
+  readonly email: string;
+}) {
   return (
     <header className="hero wrap">
       <div className="hero__grid">
@@ -41,7 +47,7 @@ export function Hero({ hero }: { readonly hero: HeroContent }) {
           </ul>
 
           <div className="cta-row">
-            <a className="btn btn--primary lift press" href={`mailto:${EMAIL}`}>
+            <a className="btn btn--primary lift press" href={`mailto:${email}`}>
               <Icon name="mail" />
               <span>{hero.primaryCta}</span>
             </a>
@@ -53,7 +59,7 @@ export function Hero({ hero }: { readonly hero: HeroContent }) {
 
         <div className="shot">
           <Image
-            src="/shots/01-journal.jpg"
+            src={`/shots/${hero.shotFile}`}
             alt={hero.shotAlt}
             width={415}
             height={900}

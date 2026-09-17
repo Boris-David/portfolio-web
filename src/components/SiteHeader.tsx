@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { GITHUB_URL, LINKEDIN_URL } from "@/content/links";
-import type { Chrome, Locale } from "@/content/types";
+import type { Chrome, Locale, ProfileLink } from "@/content/types";
 import { cvUrl, otherLocale, pathForLocale } from "@/lib/site";
 
 /**
@@ -27,14 +26,20 @@ import { cvUrl, otherLocale, pathForLocale } from "@/lib/site";
 export function SiteHeader({
   chrome,
   locale,
+  brand,
+  links,
 }: {
   readonly chrome: Chrome;
   readonly locale: Locale;
+  /** Le nom affiché — un fait, donc servi par la source, jamais écrit ici. */
+  readonly brand: string;
+  /** Les profils publics, la même liste que la section Contact. */
+  readonly links: readonly ProfileLink[];
 }) {
   return (
     <nav className="nav" aria-label={chrome.navLabel}>
       <div className="nav__inner">
-        <span className="nav__brand">Amissan Amoussou-G.</span>
+        <span className="nav__brand">{brand}</span>
 
         <div className="nav__links">
           {chrome.navLinks.map((link) => (
@@ -59,12 +64,16 @@ export function SiteHeader({
           <ThemeToggle label={chrome.themeToggleLabel} />
 
           {/* Raccourcis retirés sous 640 px : la section Contact les porte en entier. */}
-          <a className="icon-btn nav__social lift press" href={GITHUB_URL} aria-label="GitHub">
-            <Icon name="github" />
-          </a>
-          <a className="icon-btn nav__social lift press" href={LINKEDIN_URL} aria-label="LinkedIn">
-            <Icon name="linkedin" />
-          </a>
+          {links.map((link) => (
+            <a
+              key={link.id}
+              className="icon-btn nav__social lift press"
+              href={link.href}
+              aria-label={link.label}
+            >
+              <Icon name={link.id} />
+            </a>
+          ))}
 
           <a
             className="btn btn--sm lift press"

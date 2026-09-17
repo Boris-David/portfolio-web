@@ -1,0 +1,152 @@
+name: Fraîcheur du contenu
+
+# Le site est un export statique : son contenu est figé au moment de la
+# construction. C'est ce qui le rend gratuit et rapide — et c'est aussi ce qui
+# le rend capable de **mentir en silence**. Une modification publiée dans
+# `portfolio-api` ne change rien à une page déjà construite : tout répond 200,
+# tout s'affiche, et le visiteur lit du contenu périmé sans qu'aucun indicateur
+# ne bouge.
+#
+# Ce workflow est le témoin exigé par l'ADR 0006, et le chemin **tiré** de la
+# propagation décrite par l'ADR 0007 :
+#
+#   1. il compare l'empreinte publiée par chaque page — `<meta name="content-version">` —
+#      à celle que sert l'API ;
+#   2. si elles divergent, il **republie** ;
+#   3. puis il **revérifie**, parce qu'une réparation qu'on ne contrôle pas
+#      remplace une panne muette par une autre.
+#
+# Il n'a besoin d'aucun secret partagé entre dépôts : c'est le web qui va lire
+# l'API, jamais l'API qui pousse. Le chemin **poussé** — `repository_dispatch`
+# depuis `portfolio-api` — n'est qu'une accélération, et ce témoin reste vrai
+# même s'il n'est pas branché.
+
+on:
+  schedule:
+    # Toutes les trois heures. Le contenu change rarement, et le chemin poussé
+    # couvre le cas pressé : cette cadence n'est pas le délai de propagation
+    # attendu, c'est le délai **maximal** avant qu'une propagation manquée soit
+    # détectée et réparée.
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  # Jamais deux en même temps, et on ne coupe pas une republication en cours.
+  group: fraicheur
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SITE_URL: https://amissan.dev
+  API_URL: https://api.amissan.dev
+
+jobs:
+  comparer:
+    name: Comparer les empreintes
+    runs-on: ubuntu-latest
+    outputs:
+      perime: ${{ steps.comparaison.outputs.perime }}
+      detail: ${{ steps.comparaison.outputs.detail }}
+    steps:
+      - name: Relever les empreintes en ligne
+        id: comparaison
+        run: |
+          set -euo pipefail
+
+          # L'empreinte servie par la source.
+          attendue="$(curl -fsS "$API_URL/v1/portfolio?lang=fr" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["meta"]["contentVersion"])')"
+
+          perime=false
+          detail=""
+          for page in "/" "/en"; do
+            html="$(curl -fsS "$SITE_URL$page")"
+            # `grep -o` sur la balise plutôt qu'un analyseur : la page est un
+            # export statique, la balise est écrite par Next, et une dépendance
+            # de plus pour lire un attribut ne se justifie pas.
+            publiee="$(printf '%s' "$html" \
+              | grep -o '<meta name="content-version" content="[^"]*"' \
+              | head -1 | sed 's/.*content="//; s/"$//')"
+
+            if [ -z "$publiee" ]; then
+              echo "::error::$page ne publie aucune empreinte de contenu — le témoin lui-même est cassé."
+              exit 1
+            fi
+            if [ "$publiee" != "$attendue" ]; then
+              perime=true
+              detail="$detail $page($publiee)"
+            fi
+            echo "  $page → $publiee"
+          done
+
+          echo "  API  → $attendue"
+          echo "perime=$perime" >> "$GITHUB_OUTPUT"
+          echo "detail=$detail" >> "$GITHUB_OUTPUT"
+
+          if [ "$perime" = "true" ]; then
+            echo "::warning::Contenu périmé en ligne :$detail — attendu $attendue. Republication."
+          else
+            echo "Le site en ligne porte le contenu courant."
+          fi
+
+  # La fixture des tests unitaires est une **capture datée** de l'API. Elle rend
+  # la suite déterministe et hors ligne — et, si elle dérive sans qu'on
+  # l'apprenne, elle redevient la seconde source de vérité qu'on vient de
+  # supprimer : les tests continueraient de passer sur une forme qui n'existe
+  # plus.
+  #
+  # Ce contrôle vit ici, et pas dans la CI des pull requests : il tape l'API en
+  # production, et une suite qui dépend d'un service extérieur devient rouge
+  # pour des raisons qui ne regardent pas ce dépôt.
+  contrat:
+    name: La fixture décrit encore ce que l'API sert
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:contract
+
+  republier:
+    name: Republier le site
+    needs: comparer
+    if: needs.comparer.outputs.perime == 'true'
+    # Le déploiement n'est pas redécrit ici : on appelle celui qui existe. Deux
+    # descriptions d'un même déploiement finissent toujours par diverger, et
+    # c'est celle qu'on utilise le moins souvent qui casse.
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
+  verifier:
+    name: Vérifier que la republication a pris
+    needs: [comparer, republier]
+    if: needs.comparer.outputs.perime == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Les empreintes concordent désormais
+        run: |
+          set -euo pipefail
+
+          attendue="$(curl -fsS "$API_URL/v1/portfolio?lang=fr" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["meta"]["contentVersion"])')"
+
+          ecarts=""
+          for page in "/" "/en"; do
+            publiee="$(curl -fsS "$SITE_URL$page" \
+              | grep -o '<meta name="content-version" content="[^"]*"' \
+              | head -1 | sed 's/.*content="//; s/"$//')"
+            [ "$publiee" = "$attendue" ] || ecarts="$ecarts $page($publiee)"
+          done
+
+          if [ -n "$ecarts" ]; then
+            echo "::error::Republication sans effet :$ecarts — attendu $attendue."
+            echo "Le contenu périmé est toujours servi. La chaîne de propagation est cassée,"
+            echo "pas seulement en retard — il ne suffit pas de relancer."
+            exit 1
+          fi
+          echo "Contenu à jour sur les deux langues : $attendue."

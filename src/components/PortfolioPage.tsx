@@ -28,10 +28,15 @@ export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
         {content.chrome.skipToContent}
       </a>
 
-      <SiteHeader chrome={content.chrome} locale={locale} />
+      <SiteHeader
+        chrome={content.chrome}
+        locale={locale}
+        brand={content.hero.name}
+        links={content.contact.links}
+      />
 
       <main id="contenu">
-        <Hero hero={content.hero} />
+        <Hero hero={content.hero} email={content.contact.email} />
         <ProofBar points={content.proof} />
         <CaseStudies head={content.casesHead} cases={content.cases} />
         <AppsSection head={content.appsHead} note={content.appsNote} apps={apps} />

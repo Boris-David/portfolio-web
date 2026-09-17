@@ -15,23 +15,33 @@ export type Markup = string;
 
 export type Locale = "fr" | "en";
 
-/** Les icônes du jeu embarqué — un nom hors de cette liste ne compile pas. */
-export type IconName =
-  | "github"
-  | "linkedin"
-  | "mail"
-  | "appstore"
-  | "document"
-  | "external"
-  | "pin"
-  | "home"
-  | "globe"
-  | "chevron"
-  | "layers"
-  | "flow"
-  | "gear"
-  | "sun"
-  | "moon";
+/**
+ * Les icônes du jeu embarqué — un nom hors de cette liste ne compile pas.
+ *
+ * Écrites comme un tableau plutôt que comme une union : le contenu vient
+ * désormais de l'API, et un identifiant reçu doit pouvoir être **vérifié à
+ * l'exécution** avant de servir de nom d'icône. Un type seul ne vérifie rien
+ * face à une entrée réseau.
+ */
+export const ICON_NAMES = [
+  "github",
+  "linkedin",
+  "mail",
+  "appstore",
+  "document",
+  "external",
+  "pin",
+  "home",
+  "globe",
+  "chevron",
+  "layers",
+  "flow",
+  "gear",
+  "sun",
+  "moon",
+] as const;
+
+export type IconName = (typeof ICON_NAMES)[number];
 
 export interface NavLink {
   /** L'ancre de la section, sans `#`. */
@@ -54,6 +64,8 @@ export interface Hero {
   readonly secondaryCta: string;
   readonly shotAlt: string;
   readonly shotTag: string;
+  /** Le fichier de la capture, dans `public/shots/`. Nommé d'après le média. */
+  readonly shotFile: string;
 }
 
 export interface ProofPoint {
@@ -178,11 +190,21 @@ export interface Background {
   readonly skills: readonly SkillGroup[];
 }
 
+/** Un profil public, servi par la source de contenu — jamais écrit deux fois. */
+export interface ProfileLink {
+  /** L'identifiant sert aussi de nom d'icône : il est validé, jamais supposé. */
+  readonly id: IconName;
+  readonly label: string;
+  readonly href: string;
+}
+
 export interface Contact {
   readonly title: string;
   readonly body: Markup;
   readonly email: string;
   readonly mailCta: string;
+  /** GitHub, LinkedIn — l'en-tête et le pied de page lisent la même liste. */
+  readonly links: readonly ProfileLink[];
 }
 
 export interface Chrome {
