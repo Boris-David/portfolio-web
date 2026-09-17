@@ -117,7 +117,7 @@ test.describe("les liens sortants", () => {
   test("pointent le CV vers l'API, jamais vers une impression du site", async ({ page }) => {
     await page.goto("/");
     const cv = page.getByTestId("cv-link");
-    await expect(cv).toHaveAttribute("href", /\/v1\/cv\/fr\.pdf$/);
+    await expect(cv).toHaveAttribute("href", /\/v1\/cv\/amissan\.ag-cv-fr\.pdf$/);
     // Pas de `download` : l'attribut est inerte sur une origine différente, et
     // l'API sert le PDF en `inline`. Le lien ouvre, il ne télécharge pas.
     await expect(cv).not.toHaveAttribute("download", /.*/);
@@ -141,7 +141,10 @@ test.describe("les liens sortants", () => {
 
   test("traduisent le lien du CV avec la page", async ({ page }) => {
     await page.goto("/en");
-    await expect(page.getByTestId("cv-link")).toHaveAttribute("href", /\/v1\/cv\/en\.pdf$/);
+    await expect(page.getByTestId("cv-link")).toHaveAttribute(
+      "href",
+      /\/v1\/cv\/amissan\.ag-cv-en\.pdf$/,
+    );
   });
 
   test("marquent rel=noopener sur chaque lien ouvert dans un nouvel onglet", async ({ page }) => {
