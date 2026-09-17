@@ -111,7 +111,7 @@ test.describe("le contrat du CV avec l'API", () => {
     test(`sert un PDF réel pour ${lang}`, async ({ page, request }) => {
       await page.goto(path);
       const href = await page.getByTestId("cv-link").getAttribute("href");
-      expect(href).toBe(`https://api.amissan.dev/v1/cv/${lang}.pdf`);
+      expect(href).toBe(`https://api.amissan.dev/v1/cv/amissan.ag-cv-${lang}.pdf`);
 
       const response = await request.get(href as string);
       expect(response.status()).toBe(200);
@@ -127,6 +127,16 @@ test.describe("le contrat du CV avec l'API", () => {
         headers: { "if-none-match": etag },
       });
       expect(revalidated.status()).toBe(304);
+
+      // Le nom sous lequel le fichier arrive chez le recruteur. Les deux voies
+      // comptent : `Content-Disposition` pour un navigateur de bureau, et le
+      // dernier segment de l'URL pour Safari sur iOS, qui ignore l'en-tête.
+      expect(response.headers()["content-disposition"]).toContain(
+        `filename="amissan.ag-cv-${lang}.pdf"`,
+      );
+      expect(new URL(href as string).pathname.split("/").pop()).toBe(
+        `amissan.ag-cv-${lang}.pdf`,
+      );
     });
   }
 });

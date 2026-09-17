@@ -59,5 +59,8 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://ap
 );
 
 export function cvUrl(locale: Locale): string {
-  return `${API_BASE_URL}/v1/cv/${locale}.pdf`;
+  // Le dernier segment de l'URL EST le nom du fichier : Safari sur iOS
+  // ignore `Content-Disposition` et nomme le partage d'après lui. Servi
+  // sur `/v1/cv/fr.pdf`, il s'appelait « fr ».
+  return `${API_BASE_URL}/v1/cv/amissan.ag-cv-${locale}.pdf`;
 }
