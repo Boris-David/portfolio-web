@@ -118,7 +118,11 @@ test.describe("les liens sortants", () => {
     await page.goto("/");
     const cv = page.getByTestId("cv-link");
     await expect(cv).toHaveAttribute("href", /\/v1\/cv\/fr\.pdf$/);
-    await expect(cv).toHaveAttribute("download", "");
+    // Pas de `download` : l'attribut est inerte sur une origine différente, et
+    // l'API sert le PDF en `inline`. Le lien ouvre, il ne télécharge pas.
+    await expect(cv).not.toHaveAttribute("download", /.*/);
+    await expect(cv).toHaveAttribute("target", "_blank");
+    await expect(cv).toHaveAttribute("rel", /noopener/);
 
     // ADR 0004 : le site n'a plus de feuille d'impression, et ne doit pas en avoir.
     const printRules = await page.evaluate(() =>

@@ -46,12 +46,24 @@ gabarits, ce sont deux CV qui divergent. Un test de bout en bout le vérifie.
 Le site est statique et ne s'authentifie nulle part : il n'a besoin d'aucun
 secret, donc il n'en accueille aucun. `npm run check:secrets`.
 
+### 5. Le site reste entièrement pré-rendu
+
+`output: "export"` n'est pas un réglage de confort : c'est ce qui rend
+l'hébergement gratuit, parce que les actifs statiques de Cloudflare sont hors
+quota. **Introduire une fonctionnalité serveur** — middleware, server action,
+route handler, revalidation, `cookies()`, `headers()` — casse la construction et
+remettrait un Worker sur le chemin chaud de chaque page vue. Si le besoin se
+présente vraiment, ça se décide, ça ne se glisse pas.
+
 ## Avant d'annoncer que c'est fait
 
 ```bash
 npm run verify     # tokens, lint, types, tests unitaires, secrets
-npm run test:e2e   # bout en bout + accessibilité, sur la construction de prod
+npm run test:e2e   # bout en bout + accessibilité, servis par wrangler dev
 ```
+
+`npm run preview` sert `out/` exactement comme Cloudflare le servira — en-têtes,
+résolution d'URL et page 404 comprises.
 
 Vérifier la **sortie**, jamais le code de retour d'un tube — il rend celui de la
 dernière commande. Un test qui échoue se dit, avec sa sortie.
@@ -68,6 +80,8 @@ dernière commande. Un test qui échoue se dit, avec sa sortie.
 | Objets du design system | `src/styles/components.css` |
 | Effets d'amélioration progressive | `src/lib/effects/` |
 | Routes par langue | `src/app/(fr)/` et `src/app/(en)/` |
+| En-têtes de sécurité | `public/_headers` — lu par Cloudflare, pas servi |
+| Hébergement | `wrangler.jsonc` et `.github/workflows/deploy.yml` |
 
 ## Ce qui se discute avant d'être fait
 

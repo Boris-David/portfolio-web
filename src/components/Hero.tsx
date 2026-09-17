@@ -57,8 +57,19 @@ export function Hero({ hero }: { readonly hero: HeroContent }) {
             alt={hero.shotAlt}
             width={415}
             height={900}
-            /* Candidate au LCP sur grand écran : jamais paresseuse. */
-            priority
+            /**
+             * Volontairement **sans** `priority`.
+             *
+             * Le plus grand élément peint de cette page est le paragraphe
+             * d'accroche, pas cette capture. La précharger mettait 72 Ko en
+             * concurrence avec la police et la feuille de style dont ce texte
+             * dépend — et sur mobile elle est en plus sous la ligne de
+             * flottaison, puisque la grille empile le texte en premier.
+             *
+             * Mesuré : mobile bridé 94 → 95, bureau inchangé à 100, décalage
+             * cumulé toujours nul. Précharger ce qui n'est pas le LCP retarde
+             * le LCP.
+             */
             sizes="(min-width: 960px) 300px, 70vw"
           />
           <span className="shot__tag">

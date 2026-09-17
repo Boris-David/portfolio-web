@@ -32,7 +32,7 @@ export const fr: SiteContent = {
       { target: "contact", label: "Contact" },
     ],
     cvLabel: "CV",
-    cvAriaLabel: "Télécharger le CV en PDF (français)",
+    cvAriaLabel: "Ouvrir le CV en PDF (français), nouvel onglet",
     themeToggleLabel: "Changer de thème",
     skipToContent: "Aller au contenu",
     otherLocaleCode: "EN",

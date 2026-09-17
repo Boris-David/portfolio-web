@@ -189,7 +189,7 @@ export interface Chrome {
   readonly navLinks: readonly NavLink[];
   readonly navLabel: string;
   readonly cvLabel: string;
-  /** Décrit le format et la langue — le lien sort du site. */
+  /** Décrit le format, la langue et l'ouverture en nouvel onglet — le lien sort du site. */
   readonly cvAriaLabel: string;
   readonly themeToggleLabel: string;
   readonly skipToContent: string;

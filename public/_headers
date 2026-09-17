@@ -1,0 +1,37 @@
+# En-têtes servis par Cloudflare Workers Static Assets.
+#
+# Ce fichier remplace les `headers` de `vercel.json`, supprimé avec Vercel. Il
+# est copié dans `out/` par l'export, et Cloudflare le lit comme configuration
+# au lieu de le servir comme un fichier.
+#
+# Il est versionné et relu en revue, ce qu'une configuration posée dans un
+# tableau de bord ne serait jamais.
+
+/*
+  # Le site ne charge aucun script tiers, n'affiche aucune entrée utilisateur et
+  # ne fait aucune requête sortante — sauf le lien vers le CV de l'API.
+  #
+  # `'unsafe-inline'` sur les scripts est un choix documenté, pas un oubli : Next
+  # place ses propres scripts inline pour la charge utile RSC, et les interdire
+  # exigerait un nonce, donc un rendu à la requête, donc un Worker sur le chemin
+  # chaud. On paierait la génération statique pour fermer une surface vide.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+# Les actifs de Next portent une empreinte dans leur nom : leur contenu ne peut
+# pas changer sans que l'URL change. Ils sont donc immuables pour un an.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Les images sont versionnées avec le dépôt et changent avec un déploiement.
+# Une journée de cache navigateur, puis revalidation.
+/icons/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/shots/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

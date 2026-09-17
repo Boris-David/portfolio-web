@@ -2,8 +2,9 @@
 
 Le site portfolio d'**Amissan Boris-David Amoussou-Guenou**, ingénieur iOS senior.
 
-Bilingue français / anglais, entièrement rendu côté serveur, **100 / 100 / 100 / 100**
-à Lighthouse sur les deux routes.
+Bilingue français / anglais, **entièrement pré-rendu**, **100 / 100 / 100 / 100**
+à Lighthouse sur les deux routes. Hébergé sur **Cloudflare Workers Static
+Assets**, sur `amissan.dev`.
 
 Le site n'est pas seulement la vitrine du travail : il en **est** une pièce. Tout
 ce qu'il affiche — architecture, accessibilité, tests, CI — est lisible dans ce
@@ -33,6 +34,8 @@ npm run dev        # http://localhost:3000  (français) et /en (anglais)
 | `npm run test:e2e` | bout en bout + accessibilité (Playwright — construit et sert la prod) |
 | `npm run lighthouse` | budget Lighthouse, échoue sous 100 |
 | `npm run tokens` | régénère le CSS de design et la favicone depuis `design/tokens.json` |
+| `npm run preview` | sert `out/` avec `wrangler dev` — exactement ce que servira Cloudflare |
+| `npm run deploy` | publie sur Cloudflare (demande un jeton) |
 
 Aucune variable d'environnement n'est nécessaire pour démarrer : les valeurs par
 défaut sont utilisables. Voir [`.env.example`](.env.example) pour les surcharger.
@@ -111,16 +114,21 @@ d'injection le jour où le texte viendra du réseau.
 ### Le CV vient de l'API, et le site n'en fabrique pas
 
 ADR 0004 : un seul moteur de rendu produit **un seul fichier**, servi au web comme
-à l'app iOS. Le bouton pointe vers `GET {API}/v1/cv/{fr|en}.pdf`.
+à l'app iOS. Le bouton pointe vers `https://api.amissan.dev/v1/cv/{fr|en}.pdf`,
+vérifié contre l'API **en production** : les deux PDF répondent 200, commencent
+bien par `%PDF-`, et revalident en 304 sur `If-None-Match`.
 
 **Le site n'a pas de feuille d'impression, et ne doit pas en avoir** — un test de
 bout en bout vérifie qu'aucune règle `@media print` n'existe. En garder une, c'est
 garder deux CV qui se ressembleraient au début, puis plus du tout.
 
-> ⚠️ **Dépendance inter-dépôts.** L'attribut `download` est ignoré par les
-> navigateurs sur un lien **cross-origin** : c'est l'API qui doit envoyer
-> `Content-Disposition: attachment`, sinon le PDF s'ouvre dans l'onglet au lieu
-> d'être téléchargé. L'origine se règle par `NEXT_PUBLIC_API_BASE_URL`.
+Le lien **ouvre** le PDF dans un nouvel onglet et ne porte pas `download`. Deux
+faits l'imposent, constatés plutôt que supposés : l'API sert le PDF en
+`Content-Disposition: inline`, et l'attribut `download` est de toute façon
+**ignoré par les navigateurs sur un lien d'origine différente**. `amissan.dev` et
+`api.amissan.dev` sont du même site mais pas de la même origine. Le garder aurait
+été promettre un téléchargement que rien ne déclenche ; l'`aria-label` dit donc
+« ouvrir », et précise le nouvel onglet.
 
 ---
 
@@ -129,17 +137,20 @@ garder deux CV qui se ressembleraient au début, puis plus du tout.
 | | Résultat | Tenu par |
 |---|---|---|
 | Lighthouse bureau, `/` et `/en` | **100 / 100 / 100 / 100** | `lighthouserc.json`, la CI échoue sous 100 |
-| Lighthouse mobile bridé | 95–96 / 100 / 100 / 100 | mesuré, non bloquant |
-| CLS · TBT | **0** · **0 ms** | budget Lighthouse |
+| Lighthouse mobile bridé | 95 / 100 / 100 / 100 | mesuré sur 3 exécutions, non bloquant |
+| CLS · TBT · LCP bureau | **0** · **0 ms** · 0,6 s | budget Lighthouse |
 | Accessibilité | **0 violation** axe WCAG 2.1 AA | 2 langues × 2 thèmes × cartes dépliées |
+| En-têtes de sécurité | CSP, HSTS, COOP, nosniff… | test de bout en bout sur `wrangler dev` |
 | Cibles tactiles | ≥ 44 px partout | test de bout en bout |
 | Responsive | aucun défilement horizontal à 400 px | testé **dans les deux langues** |
 | Sans JavaScript | page entière et cartes utilisables | test de bout en bout |
 
-74 tests unitaires, 101 tests de bout en bout sur deux fenêtres d'affichage.
+74 tests unitaires, 115 tests de bout en bout sur deux fenêtres d'affichage.
 
-Les tests de bout en bout tournent sur la **construction de production** : un
-`next dev` testerait un artefact qui n'est jamais livré.
+Les tests de bout en bout et le budget Lighthouse tournent sur l'export servi par
+**`wrangler dev`** — le magasin d'actifs de production, avec son `_headers`, sa
+résolution d'URL et sa page 404. Une régression d'en-tête casse donc un test, au
+lieu de se découvrir au scan de sécurité d'un recruteur.
 
 ### Ce que les tests gardent, au-delà du code
 
@@ -162,22 +173,89 @@ Dépôt public, site statique, aucun secret : le site ne s'authentifie nulle par
   `npx` avec une version épinglée plutôt qu'installé : l'ajouter aux dépendances
   ferait entrer une dizaine de vulnérabilités transitives dans l'audit d'un dépôt
   que des recruteurs vont lire ;
-- en-têtes de sécurité dans [`vercel.json`](vercel.json).
+- en-têtes de sécurité dans [`public/_headers`](public/_headers), **vérifiés par
+  un test** : CSP, HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`,
+  `Permissions-Policy`, COOP et CORP.
+
+`connect-src` vaut `'self'` et rien de plus : le contenu est consommé au build
+(ADR 0002) et le CV est une navigation, pas une requête. Autoriser l'origine de
+l'API ouvrirait une porte que personne n'emprunte.
 
 > `script-src` autorise `'unsafe-inline'`. C'est un choix documenté, pas un
 > oubli : Next injecte ses propres scripts inline pour la charge utile RSC, et
-> les interdire demanderait un *nonce*, donc un middleware, donc un rendu
-> dynamique — on perdrait la génération statique et la performance. Le site
-> n'affiche aucune entrée utilisateur et ne charge aucun script tiers : la
-> surface que `'unsafe-inline'` laisse ouverte est vide.
+> les interdire demanderait un *nonce*, donc un rendu à la requête, donc un
+> Worker sur le chemin chaud. Le site n'affiche aucune entrée utilisateur et ne
+> charge aucun script tiers : la surface que `'unsafe-inline'` laisse ouverte est
+> vide.
 
 ---
 
-## Déploiement
+## Hébergement — Cloudflare Workers Static Assets
 
-Vercel est **préparé mais non branché** : `vercel.json` porte la configuration et
-les en-têtes, la CI ne déploie pas. Brancher le dépôt à un projet Vercel suffit.
+### Pourquoi l'export statique, et pas `@opennextjs/cloudflare`
 
-Le build de production exécute `npm run tokens:check` avant `next build` : un
-déploiement ne peut pas partir avec un CSS de design qui aurait dérivé de ses
-tokens.
+Le choix s'est fait **sur pièce**, en regardant ce que le site utilise
+réellement : ni middleware, ni server action, ni route handler, ni revalidation,
+ni `cookies()`/`headers()`. Toutes les routes étaient déjà pré-rendues avant la
+migration. `next build` avec `output: "export"` ne retire donc rien — il constate.
+
+| | `output: "export"` | `@opennextjs/cloudflare` |
+|---|---|---|
+| Ce que ça sert | des fichiers | le serveur Next dans un Worker |
+| Coût par requête | **aucun** — les actifs statiques sont gratuits, illimités, et **hors** du quota de 100 000 requêtes/jour | une invocation de Worker par requête |
+| Optimisation d'images | absente | absente aussi — `sharp` ne tourne pas sur workerd |
+| Fonctionnalités serveur préservées | aucune | toutes — dont **zéro** n'est utilisée ici |
+| Pièces mobiles | le répertoire `out/` | un adaptateur, un bundle serveur, un cache |
+
+Le second aurait ajouté un adaptateur et une invocation par page vue pour faire
+tourner des fonctionnalités que ce site n'a pas. Le premier gagne sans contrepartie.
+
+### L'optimisation d'images, remplacée par des sources déjà bien dimensionnées
+
+L'optimiseur de Next est un service à la requête ; il n'existe pas dans un export.
+Plutôt que d'ajouter un pipeline de dérivés, on sert les sources telles quelles —
+elles sont **déjà taillées pour leur usage** : les icônes font 132 px pour un
+affichage à 44, les captures 415 px de large pour un affichage à 300 au plus.
+L'optimiseur ne faisait donc presque que convertir le format.
+
+Vérifié plutôt que supposé, sur trois exécutions à chaque fois : le bureau reste
+à **100** (LCP 0,6 s, CLS 0), le mobile bridé à **95** — soit exactement le
+niveau d'avant la migration. Une image lourde ajoutée un jour se verrait : le
+budget Lighthouse casse la construction au-delà de 1,8 Mo.
+
+Au passage, la capture d'accroche a **perdu son `priority`** : le plus grand
+élément peint de cette page est le paragraphe d'accroche, pas l'image. La
+précharger mettait 72 Ko en concurrence avec la police dont ce texte dépend.
+Mobile 94 → 95, bureau inchangé.
+
+### Le domaine
+
+`amissan.dev` est déclaré dans [`wrangler.jsonc`](wrangler.jsonc) en domaine
+personnalisé. La zone étant déjà sur le compte via Cloudflare Registrar,
+`wrangler deploy` crée l'enregistrement DNS lui-même — rien à cliquer.
+
+**`www.amissan.dev` est la seule chose qui reste manuelle**, et c'est un
+arbitrage, pas un oubli : une redirection d'hôte ne s'exprime ni dans
+`wrangler.jsonc` ni dans `_headers`, dont les motifs portent sur le chemin. Elle
+pourrait s'écrire dans un Worker — mais un Worker ne s'exécute que sur les
+requêtes qui ne correspondent à aucun actif, et `/` en correspond toujours un. Il
+faudrait donc `run_worker_first`, c'est-à-dire un Worker sur le chemin chaud de
+chaque page vue : on perdrait la gratuité des actifs, qui est la raison même du
+choix de Cloudflare. La forme native et gratuite est une règle de redirection de
+zone ; la marche à suivre est en tête de
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+En attendant, le lien canonique de chaque page pointe déjà sur l'apex : aucun
+moteur n'indexerait le site deux fois.
+
+### Déployer
+
+Le workflow est **préparé, pas branché** : il ne se déclenche qu'à la main et
+s'arrête proprement tant que la configuration manque. Ce qu'il faut poser une
+fois sur le dépôt — un secret `CLOUDFLARE_API_TOKEN`, une variable
+`CLOUDFLARE_ACCOUNT_ID` — est listé en tête du fichier. Le jeton peut être celui
+déjà créé pour `portfolio-api` : même compte, même zone, mêmes portées.
+
+Le déploiement rejoue `tokens:check`, refuse un export incomplet, puis **vérifie
+le site en ligne** — les deux langues en 200 et les en-têtes réellement servis.
+Un `wrangler deploy` réussi ne prouve pas qu'un site fonctionne.

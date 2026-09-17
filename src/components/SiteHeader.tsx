@@ -14,9 +14,15 @@ import { cvUrl, otherLocale, pathForLocale } from "@/lib/site";
  * bouton qui réécrirait le DOM. Une bascule en JavaScript n'a pas d'URL à
  * partager, rien à indexer par langue, et casse le bouton « précédent ».
  *
- * **Le CV** sort du site : c'est le PDF produit par l'API (ADR 0004). Il porte
- * donc `download`, et son `aria-label` annonce le format et la langue — un lien
- * qui déclenche un téléchargement doit le dire avant le clic.
+ * **Le CV** sort du site : c'est le PDF produit par l'API (ADR 0004).
+ *
+ * Il s'ouvre dans un nouvel onglet, et ne porte **pas** `download`. Deux faits
+ * l'imposent, vérifiés sur l'API en production plutôt que supposés : elle sert
+ * le PDF en `Content-Disposition: inline`, et l'attribut `download` est de toute
+ * façon **ignoré par les navigateurs sur un lien d'origine différente**.
+ * `amissan.dev` et `api.amissan.dev` sont du même site mais pas de la même
+ * origine : l'attribut n'aurait rien fait. Le garder aurait été promettre un
+ * téléchargement que rien ne déclenche — l'`aria-label` dit donc « ouvrir ».
  */
 export function SiteHeader({
   chrome,
@@ -64,7 +70,8 @@ export function SiteHeader({
             className="btn btn--sm lift press"
             href={cvUrl(locale)}
             aria-label={chrome.cvAriaLabel}
-            download
+            target="_blank"
+            rel="noopener noreferrer"
             data-testid="cv-link"
           >
             <Icon name="document" />

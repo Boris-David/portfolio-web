@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "portfolio-web",
+
+  // Les API de la plateforme sont figées à cette date : une mise à jour de
+  // workerd ne peut pas changer le comportement sans qu'on l'ait décidé en
+  // avançant cette ligne. Même date que `portfolio-api`, volontairement.
+  "compatibility_date": "2026-09-17",
+
+  // PAS de `main`. Il n'y a aucun script de Worker, et c'est le cœur du choix :
+  // le site est intégralement pré-rendu, donc chaque requête est servie par le
+  // magasin d'actifs statiques — gratuit, illimité, et **hors du quota de
+  // 100 000 requêtes par jour**. Ajouter un Worker sur le chemin chaud
+  // transformerait chaque page vue en invocation facturable, pour ne rendre
+  // exactement rien de plus.
+
+  "assets": {
+    // Produit par `next build` avec `output: "export"`.
+    "directory": "./out",
+
+    // `/en` sert `en.html`, `/` sert `index.html`. C'est exactement la forme
+    // que produit l'export de Next — aucune réécriture à prévoir.
+    "html_handling": "auto-trailing-slash",
+
+    // La page 404 de Next, avec sa mise en page et ses deux langues.
+    "not_found_handling": "404-page",
+  },
+
+  // `amissan.dev` est enregistré chez Cloudflare Registrar, donc la zone est
+  // déjà sur le compte : `wrangler deploy` crée l'enregistrement DNS et le
+  // domaine personnalisé lui-même. Rien à cliquer.
+  //
+  // `www.amissan.dev` n'est PAS ici, et c'est délibéré — voir l'en-tête de
+  // `.github/workflows/deploy.yml` : une redirection d'hôte ne peut pas se
+  // faire depuis ce fichier sans remettre un Worker sur le chemin chaud.
+  "routes": [{ "pattern": "amissan.dev", "custom_domain": true }],
+
+  "observability": { "enabled": true },
+}
