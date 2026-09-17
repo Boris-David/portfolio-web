@@ -1,0 +1,87 @@
+import { prefersReducedMotion } from "./reduced-motion";
+
+/**
+ * Les chiffres de preuve se comptent quand ils arrivent à l'écran.
+ *
+ * Le mouvement dit une quantité : voir « 33 » monter depuis zéro fait sentir
+ * trente-trois applications, là où le nombre posé ne fait que l'affirmer.
+ *
+ * Deux garanties tiennent cet effet :
+ *
+ *   - **la valeur finale est celle rendue par le serveur.** On la relit dans le
+ *     DOM et on la réécrit telle quelle à la fin, au lieu de la reformater. Un
+ *     compteur qui reformate finit par afficher « 99.8 » sur une page française ;
+ *   - **sans JavaScript, le chiffre est déjà là.** L'animation ne fait que
+ *     remplacer temporairement un texte déjà correct.
+ */
+
+const DURATION_MS = 900;
+
+/** Décélération cubique : rapide au départ, longue à l'arrivée. */
+const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
+
+interface CounterTarget {
+  readonly element: HTMLElement;
+  readonly finalText: string;
+  readonly target: number;
+  readonly decimals: number;
+}
+
+function read(element: HTMLElement): CounterTarget | null {
+  const raw = element.dataset.count;
+  if (raw === undefined) return null;
+  const target = Number(raw);
+  if (!Number.isFinite(target)) return null;
+  return {
+    element,
+    finalText: element.textContent ?? raw,
+    target,
+    decimals: (raw.split(".")[1] ?? "").length,
+  };
+}
+
+function animate(counter: CounterTarget, locale: string) {
+  const format = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: counter.decimals,
+    maximumFractionDigits: counter.decimals,
+  });
+  const start = performance.now();
+
+  const step = (now: number) => {
+    const progress = Math.min((now - start) / DURATION_MS, 1);
+    if (progress >= 1) {
+      // Le texte du serveur reprend la main : aucune divergence de formatage.
+      counter.element.textContent = counter.finalText;
+      return;
+    }
+    counter.element.textContent = format.format(counter.target * easeOutCubic(progress));
+    requestAnimationFrame(step);
+  };
+
+  requestAnimationFrame(step);
+}
+
+export function setupCounters({ root = document }: { root?: ParentNode } = {}): () => void {
+  const counters = Array.from(root.querySelectorAll<HTMLElement>("[data-count]"))
+    .map(read)
+    .filter((counter): counter is CounterTarget => counter !== null);
+
+  if (counters.length === 0) return () => {};
+  if (typeof IntersectionObserver === "undefined" || prefersReducedMotion()) return () => {};
+
+  const locale = document.documentElement.lang || "fr";
+  const observer = new IntersectionObserver(
+    (entries, self) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const counter = counters.find((candidate) => candidate.element === entry.target);
+        if (counter) animate(counter, locale);
+        self.unobserve(entry.target);
+      }
+    },
+    { threshold: 0.6 },
+  );
+
+  counters.forEach((counter) => observer.observe(counter.element));
+  return () => observer.disconnect();
+}
