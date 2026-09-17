@@ -1,0 +1,121 @@
+name: CI
+
+# Une règle tient tout ce fichier : ce qui est annoncé comme une exigence doit
+# casser la construction quand il n'est pas tenu. Un score Lighthouse « visé »
+# qu'aucune garde ne vérifie n'est pas une exigence, c'est une intention.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # Une nouvelle poussée annule la précédente : inutile de payer deux fois.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Aucun secret n'est nécessaire : le dépôt est public et la CI ne déploie rien.
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  qualite:
+    name: Lint · types · design · tests unitaires
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      # Le CSS de design doit dériver de design/tokens.json. Une valeur écrite à
+      # la main dans le fichier généré, ou un token changé sans régénération,
+      # échoue ici — pas trois semaines plus tard sur un écran.
+      - name: Le design dérive bien des tokens
+        run: npm run tokens:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typage
+        run: npm run typecheck
+
+      - name: Tests unitaires
+        run: npm run test
+
+      # Dépôt public : aucune valeur de secret ne doit jamais entrer dans
+      # l'historique. Le hook de pre-commit garde le poste de travail, ce job
+      # garde ce qui arrive malgré tout sur la branche.
+      - name: Aucun secret dans l'arbre
+        run: npm run check:secrets
+
+      # Seules les dépendances de production sont bloquantes : l'outillage de
+      # développement ne s'exécute jamais chez un visiteur.
+      - name: Audit des dépendances de production
+        run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    name: Bout en bout · accessibilité
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Installer Chromium
+        run: npx playwright install --with-deps chromium
+
+      # `playwright.config.ts` construit et sert la version de production :
+      # les tests voient ce que verra un visiteur, pas un serveur de dev.
+      - name: Tests de bout en bout et audit d'accessibilité
+        run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: rapport-playwright
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Budget Lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Construire
+        run: npm run build
+
+      # Lighthouse CI n'est pas une dépendance du projet : c'est un outil de CI.
+      # L'ajouter au package.json ferait entrer une dizaine de vulnérabilités
+      # transitives dans l'audit d'un dépôt que des recruteurs vont lire.
+      # La version est épinglée ici, ce qui suffit à la reproductibilité.
+      - name: Budget Lighthouse (échoue sous 100)
+        run: npx --yes @lhci/cli@0.15.x autorun --config=lighthouserc.json
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: rapports-lighthouse
+          path: .lighthouseci/reports/
+          retention-days: 7
