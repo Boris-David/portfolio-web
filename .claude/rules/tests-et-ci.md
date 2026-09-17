@@ -19,6 +19,7 @@ paths:
 | Unitaire | Vitest + jsdom | logique pure, contrat de contenu, générateur de tokens, comportement du dépliage **sans moteur d'animation** |
 | Bout en bout | Playwright, Chromium | ce qui demande un vrai navigateur : animations, contraste calculé, mise en page, sans-JavaScript, clavier natif |
 | Budget | Lighthouse CI | performance, accessibilité, bonnes pratiques, SEO — **échoue sous 100** |
+| Déploiement | Playwright, via `wrangler dev` | en-têtes de sécurité, résolution d'URL, page 404 |
 
 Le critère de placement : **si le test passerait aussi bien en simulant
 l'environnement, il n'a rien prouvé.** L'activation d'un `<summary>` par Entrée
@@ -26,9 +27,15 @@ est un comportement du navigateur ; la tester dans jsdom testerait jsdom.
 
 ## Les tests de bout en bout tournent sur la production
 
-`playwright.config.ts` lance `npm run build` puis `next start`. Un `next dev`
-testerait un artefact qui n'est jamais livré — autre HTML, autres images, autre
-JavaScript.
+`playwright.config.ts` lance `npm run build` puis **`wrangler dev`** : l'export
+statique servi par le magasin d'actifs de Cloudflare, celui-là même qui servira
+en production. Les tests voient donc le vrai `_headers`, la vraie résolution
+d'URL (`/en` → `en.html`) et la vraie page 404.
+
+Un `next dev` testerait un artefact jamais livré ; un serveur statique improvisé
+testerait un serveur qu'on a écrit pour le test. Les deux ont été essayés, et
+c'est un serveur improvisé qui a produit un faux « tout est vert » en servant une
+construction périmée.
 
 Deux fenêtres d'affichage : bureau, et **400 px** — la contrainte la plus serrée
 du projet.
@@ -53,6 +60,21 @@ qu'aucune formulation explicitement refusée par l'auteur ne revient.
 
 Ce ne sont pas des tests « en trop » : un chiffre faux sur un portfolio se
 découvre en entretien, au pire moment.
+
+## Mesurer, ne pas supposer
+
+Deux mesures ont déjà démenti une intuition raisonnable sur ce dépôt :
+`experimental.inlineCss` qui **dégradait** le LCP, et le `priority` sur la
+capture d'accroche qui **retardait** le LCP au lieu de l'avancer. Les deux sont
+consignées là où elles s'appliquent.
+
+La règle qui en découle : une décision de performance s'accompagne de son chiffre
+et du nombre d'exécutions. Une mesure unique sur mobile bridé ne vaut rien — la
+variance dépasse l'effet qu'on cherche.
+
+⚠️ Et on vérifie **quel serveur** on mesure : un `next start` oublié sur un port
+a déjà fait passer une mesure pour bonne alors qu'elle portait sur la
+construction précédente.
 
 ## Mesurer une page en mouvement
 
