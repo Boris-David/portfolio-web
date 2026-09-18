@@ -1,11 +1,26 @@
 import type { Chrome } from "@/content/types";
 
-/** Le pied de page porte la forme longue du nom — la seule occurrence avec le CV. */
-export function SiteFooter({ chrome }: { readonly chrome: Chrome }) {
+/**
+ * The footer carries the long form of the name -- the only place it appears
+ * besides the resume.
+ *
+ * It is read from the content and not written here: a name is a fact, and a
+ * fact typed into a component is a second source of truth that stops agreeing
+ * with the first without anybody noticing.
+ */
+export function SiteFooter({
+  fullName,
+  chrome,
+}: {
+  readonly fullName: string;
+  readonly chrome: Chrome;
+}) {
   return (
     <footer className="wrap">
       <div className="site-footer">
-        <span>Amissan Boris-David Amoussou-Guenou — {chrome.footerRole}</span>
+        <span>
+          {fullName} — {chrome.footerRole}
+        </span>
         <span>{chrome.footerLocation}</span>
       </div>
     </footer>

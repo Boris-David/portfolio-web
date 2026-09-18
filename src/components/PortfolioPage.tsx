@@ -12,12 +12,12 @@ import { getSiteContent, getTicketingApps } from "@/content/source";
 import type { Locale } from "@/content/types";
 
 /**
- * La page, pour une langue.
+ * The page, for one language.
  *
- * Les deux routes (`/` et `/en`) rendent ce composant. Rien ici ne connaît le
- * routage : la langue arrive en paramètre, le contenu vient de la source, et
- * c'est tout. Le jour où le contenu viendra de l'API, seul `@/content/source`
- * change.
+ * Both routes (`/` and `/en`) render this component. Nothing here knows about
+ * routing: the locale arrives as a prop, the content comes from the source, and
+ * that is all. The day the content comes from the API, only `@/content/source`
+ * changes.
  */
 export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
   const [content, apps] = await Promise.all([getSiteContent(locale), getTicketingApps(locale)]);
@@ -45,9 +45,9 @@ export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
         <ContactSection contact={content.contact} />
       </main>
 
-      <SiteFooter chrome={content.chrome} />
+      <SiteFooter fullName={content.fullName} chrome={content.chrome} />
 
-      {/* La couche d'amélioration progressive, montée une seule fois. */}
+      {/* The progressive enhancement layer, mounted exactly once. */}
       <PageEffects />
     </>
   );

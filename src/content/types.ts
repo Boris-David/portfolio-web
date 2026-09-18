@@ -1,27 +1,27 @@
 /**
- * Le modèle de contenu du portfolio.
+ * The portfolio's content model.
  *
- * Il est écrit une fois et implémenté par chaque langue. C'est ce qui rend une
- * traduction manquante **impossible** plutôt qu'improbable : la maquette portait
- * un dictionnaire anglais indexé par clé, où un oubli passait inaperçu et
- * laissait du français à l'écran. Ici, un champ absent de `en.ts` ne compile pas.
+ * It is written once and implemented by every locale. That is what makes a
+ * missing translation **impossible** rather than unlikely: the mockup carried an
+ * English dictionary indexed by key, where an omission went unnoticed and left
+ * French on screen. Here, a field missing from `en.ts` does not compile.
  *
- * Toutes les chaînes marquées `Markup` acceptent le balisage minimal de
- * `rich-text.ts` (`**gras**`, `` `code` ``) ; les autres sont du texte brut.
+ * Every string typed `Markup` accepts the minimal markup from `rich-text.ts`
+ * (`**bold**`, `` `code` ``); the others are plain text.
  */
 
-/** Texte pouvant porter `**gras**` et `` `code` ``. */
+/** Text that may carry `**bold**` and `` `code` ``. */
 export type Markup = string;
 
 export type Locale = "fr" | "en";
 
 /**
- * Les icônes du jeu embarqué — un nom hors de cette liste ne compile pas.
+ * The icons in the bundled set — a name outside this list does not compile.
  *
- * Écrites comme un tableau plutôt que comme une union : le contenu vient
- * désormais de l'API, et un identifiant reçu doit pouvoir être **vérifié à
- * l'exécution** avant de servir de nom d'icône. Un type seul ne vérifie rien
- * face à une entrée réseau.
+ * Written as an array rather than as a union: the content now comes from the
+ * API, and an identifier received over the wire has to be **checkable at
+ * runtime** before it can serve as an icon name. A type on its own checks
+ * nothing against a network input.
  */
 export const ICON_NAMES = [
   "github",
@@ -44,7 +44,7 @@ export const ICON_NAMES = [
 export type IconName = (typeof ICON_NAMES)[number];
 
 export interface NavLink {
-  /** L'ancre de la section, sans `#`. */
+  /** The section anchor, without the `#`. */
   readonly target: string;
   readonly label: string;
 }
@@ -64,22 +64,23 @@ export interface Hero {
   readonly secondaryCta: string;
   readonly shotAlt: string;
   readonly shotTag: string;
-  /** Le fichier de la capture, dans `public/shots/`. Nommé d'après le média. */
+  /** The screenshot file, in `public/shots/`. Named after the media item. */
   readonly shotFile: string;
 }
 
 export interface ProofPoint {
-  /** La partie qui se compte, animée à l'arrivée à l'écran. */
+  /** The part that counts up, animated when it comes into view. */
   readonly value: string;
-  /** Le suffixe accentué : « ans », « M », « % ». Absent quand il n'y en a pas. */
+  /** The accented suffix: "years", "M", "%". Absent when there is none. */
   readonly unit?: string;
-  /** Le préfixe non compté : « ~ », « > ». */
+  /** The prefix that is not counted: "~", ">". */
   readonly prefix?: string;
   readonly label: string;
   /**
-   * Le chiffre se compte à l'arrivée à l'écran. C'est une décision éditoriale,
-   * pas une déduction de la forme du nombre : « ~1 M » pourrait se compter, on
-   * choisit que non parce que l'approximation rend le décompte absurde.
+   * The figure counts up when it comes into view. This is an editorial
+   * decision, not something deduced from the shape of the number: "~1 M" could
+   * count up, and we choose that it does not because the approximation makes
+   * counting absurd.
    */
   readonly counts?: boolean;
 }
@@ -90,14 +91,14 @@ export interface SectionHead {
   readonly intro?: Markup;
 }
 
-/** Les intitulés des trois colonnes d'une étude de cas. */
+/** The headings of a case study's three columns. */
 export interface PdrLabels {
   readonly problem: string;
   readonly decision: string;
   readonly result: string;
 }
 
-/** Un chantier dépliable d'une étude de cas. */
+/** An expandable workstream within a case study. */
 export interface Workstream {
   readonly id: string;
   readonly title: Markup;
@@ -105,7 +106,7 @@ export interface Workstream {
   readonly problem: readonly Markup[];
   readonly decision: readonly Markup[];
   readonly result: readonly Markup[];
-  /** Puces techniques affichées sous le résultat. */
+  /** Technical chips shown underneath the result. */
   readonly chips?: readonly string[];
 }
 
@@ -115,14 +116,14 @@ export interface Screenshot {
   readonly caption: string;
 }
 
-/** L'étude de cas « billettique » : une intro puis des chantiers dépliables. */
+/** The "ticketing" case study: an intro, then expandable workstreams. */
 export interface WorkstreamCase {
   readonly kind: "workstreams";
   readonly id: string;
   readonly title: string;
   readonly subtitle: string;
   readonly intro: Markup;
-  /** Les slugs des applications dont l'icône compose la pile d'en-tête. */
+  /** The slugs of the apps whose icons make up the header stack. */
   readonly iconStack: readonly string[];
   readonly iconStackMore: string;
   readonly labels: PdrLabels;
@@ -130,7 +131,7 @@ export interface WorkstreamCase {
   readonly tags: readonly string[];
 }
 
-/** L'étude de cas « KCalories » : trois colonnes et une galerie. */
+/** The "KCalories" case study: three columns and a gallery. */
 export interface ColumnsCase {
   readonly kind: "columns";
   readonly id: string;
@@ -162,7 +163,7 @@ export interface Job {
   readonly roles?: readonly string[];
   readonly bullets: readonly Markup[];
   readonly stack: string;
-  /** Une seule expérience est dépliée au chargement : la plus récente. */
+  /** Exactly one experience is expanded on load: the most recent one. */
   readonly openByDefault?: boolean;
 }
 
@@ -190,9 +191,9 @@ export interface Background {
   readonly skills: readonly SkillGroup[];
 }
 
-/** Un profil public, servi par la source de contenu — jamais écrit deux fois. */
+/** A public profile, served by the content source — never written twice. */
 export interface ProfileLink {
-  /** L'identifiant sert aussi de nom d'icône : il est validé, jamais supposé. */
+  /** The id doubles as the icon name: it is validated, never assumed. */
   readonly id: IconName;
   readonly label: string;
   readonly href: string;
@@ -203,7 +204,7 @@ export interface Contact {
   readonly body: Markup;
   readonly email: string;
   readonly mailCta: string;
-  /** GitHub, LinkedIn — l'en-tête et le pied de page lisent la même liste. */
+  /** GitHub, LinkedIn — the header and the footer read the same list. */
   readonly links: readonly ProfileLink[];
 }
 
@@ -211,11 +212,11 @@ export interface Chrome {
   readonly navLinks: readonly NavLink[];
   readonly navLabel: string;
   readonly cvLabel: string;
-  /** Décrit le format, la langue et l'ouverture en nouvel onglet — le lien sort du site. */
+  /** States the format, the language and that it opens in a new tab — the link leaves the site. */
   readonly cvAriaLabel: string;
   readonly themeToggleLabel: string;
   readonly skipToContent: string;
-  /** Le code de l'AUTRE langue, affiché dans le bouton : « EN » sur la page FR. */
+  /** The code of the OTHER language, shown in the button: "EN" on the FR page. */
   readonly otherLocaleCode: string;
   readonly otherLocaleLabel: string;
   readonly footerRole: string;
@@ -232,6 +233,15 @@ export interface SiteContent {
   readonly locale: Locale;
   readonly meta: Metadata;
   readonly chrome: Chrome;
+  /**
+   * The long form of the name, used in the footer and nowhere else.
+   *
+   * It is a **fact**, so it comes from the source like every other one. It used
+   * to be typed into `SiteFooter`, which made this repository the second place
+   * that knew how the author spells their own name -- and the one that would
+   * quietly stop agreeing with the resume.
+   */
+  readonly fullName: string;
   readonly hero: Hero;
   readonly proof: readonly ProofPoint[];
   readonly casesHead: SectionHead;
@@ -244,7 +254,7 @@ export interface SiteContent {
   readonly contact: Contact;
 }
 
-/** Une application en production, telle que publiée par la source de contenu. */
+/** An app in production, as published by the content source. */
 export interface ProductionApp {
   readonly slug: string;
   readonly name: string;
