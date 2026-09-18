@@ -101,6 +101,35 @@ test.describe("la résolution d'URL du magasin d'actifs", () => {
  *
  *   E2E_API=1 npm run test:e2e -- --grep "contrat du CV"
  */
+/**
+ * Le fichier d'association des liens universels.
+ *
+ * iOS ne dit **rien** quand il est mal servi : le lien s'ouvre simplement dans
+ * Safari au lieu de l'application, et on cherche le problème dans l'application.
+ * Les trois exigences se vérifient donc ici, sur le serveur qui servira en
+ * production.
+ */
+test.describe("les liens universels", () => {
+  const PATH = "/.well-known/apple-app-site-association";
+
+  test("est servi en JSON, sans redirection", async ({ request }) => {
+    const response = await request.get(PATH, { maxRedirects: 0 });
+
+    expect(response.status(), "iOS refuse toute redirection sur ce fichier").toBe(200);
+    expect(response.headers()["content-type"]).toContain("application/json");
+  });
+
+  test("déclare l'application avec son identifiant d'équipe", async ({ request }) => {
+    const association = await (await request.get(PATH)).json();
+    const details = association.applinks.details;
+
+    expect(details).toHaveLength(1);
+    // `IDÉQUIPE.identifiant` — une erreur ici casse l'association en silence.
+    expect(details[0].appIDs).toEqual(["R55L6Z8K6R.dev.amissan.portfolio"]);
+    expect(details[0].components.length).toBeGreaterThan(0);
+  });
+});
+
 test.describe("le contrat du CV avec l'API", () => {
   test.skip(!process.env.E2E_API, "Lancer avec E2E_API=1 pour taper l'API réelle.");
 
