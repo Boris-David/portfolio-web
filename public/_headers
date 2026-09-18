@@ -35,3 +35,19 @@
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /shots/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# ── Liens universels ────────────────────────────────────────────────────────
+#
+# Le fichier d'association que lit iOS. Trois exigences de la plateforme, et
+# chacune se paie par un lien qui s'ouvre dans Safari au lieu de l'application —
+# sans le moindre message d'erreur :
+#
+#   1. servi en `application/json`, alors qu'il n'a **pas** d'extension `.json` ;
+#   2. servi en HTTPS, sans aucune redirection ;
+#   3. non signé — ce qui était exigé avant iOS 9 et ne l'est plus.
+#
+# Il ne se met pas en cache longtemps : iOS le relit au fil des installations, et
+# une association corrigée doit pouvoir se propager sans attendre un an.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: public, max-age=3600
