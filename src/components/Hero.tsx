@@ -4,19 +4,19 @@ import { RichText } from "@/components/RichText";
 import type { Hero as HeroContent } from "@/content/types";
 
 /**
- * L'en-tête éditorial.
+ * The editorial header.
  *
- * Rien n'y est animé à l'arrivée — et c'est une décision. Une apparition en
- * fondu sur le premier écran retarde la première information de quelques
- * centaines de millisecondes : exactement ce qu'un recruteur qui scanne ne
- * pardonne pas. Les apparitions commencent sous la ligne de flottaison.
+ * Nothing in it animates on arrival — and that is a decision. A fade-in on the
+ * first screen delays the first piece of information by a few hundred
+ * milliseconds: exactly what a recruiter who is scanning does not forgive. The
+ * reveals start below the fold.
  */
 export function Hero({
   hero,
   email,
 }: {
   readonly hero: HeroContent;
-  /** Le seul canal de contact publié, servi par la source de contenu. */
+  /** The only published contact channel, served by the content source. */
   readonly email: string;
 }) {
   return (
@@ -64,17 +64,17 @@ export function Hero({
             width={415}
             height={900}
             /**
-             * Volontairement **sans** `priority`.
+             * Deliberately **without** `priority`.
              *
-             * Le plus grand élément peint de cette page est le paragraphe
-             * d'accroche, pas cette capture. La précharger mettait 72 Ko en
-             * concurrence avec la police et la feuille de style dont ce texte
-             * dépend — et sur mobile elle est en plus sous la ligne de
-             * flottaison, puisque la grille empile le texte en premier.
+             * The largest contentful paint on this page is the lede paragraph,
+             * not this screenshot. Preloading it put 72 KB in competition with
+             * the font and the stylesheet that text depends on — and on mobile
+             * it is below the fold as well, since the grid stacks the text
+             * first.
              *
-             * Mesuré : mobile bridé 94 → 95, bureau inchangé à 100, décalage
-             * cumulé toujours nul. Précharger ce qui n'est pas le LCP retarde
-             * le LCP.
+             * Measured: throttled mobile 94 → 95, desktop unchanged at 100,
+             * cumulative layout shift still zero. Preloading what is not the LCP
+             * delays the LCP.
              */
             sizes="(min-width: 960px) 300px, 70vw"
           />

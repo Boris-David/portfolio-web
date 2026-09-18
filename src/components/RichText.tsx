@@ -2,11 +2,11 @@ import { parseRichText, type RichNode } from "@/content/rich-text";
 import type { Markup } from "@/content/types";
 
 /**
- * Rend le balisage éditorial minimal en éléments React.
+ * Renders the minimal editorial markup as React elements.
  *
- * Aucun `dangerouslySetInnerHTML` : le rendu ne produit jamais que du texte,
- * `<strong>` et `<code>`. Même si le contenu venait un jour de l'API — et il
- * viendra — il ne pourrait pas injecter de balise.
+ * No `dangerouslySetInnerHTML`: rendering never produces anything but text,
+ * `<strong>` and `<code>`. Even if the content were one day to come from the
+ * API — and it will — it could not inject a tag.
  */
 
 function renderNode(node: RichNode, index: number) {
@@ -24,7 +24,7 @@ export function RichText({ value }: { readonly value: Markup }) {
   return <>{parseRichText(value).map(renderNode)}</>;
 }
 
-/** Un paragraphe de contenu éditorial. */
+/** A paragraph of editorial content. */
 export function RichParagraph({
   value,
   className,

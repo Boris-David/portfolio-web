@@ -14,13 +14,13 @@ import type {
 const ICON_SIZE = 46;
 
 /**
- * Les études de cas : problème, décision, résultat.
+ * The case studies: problem, decision, result.
  *
- * Deux formes coexistent parce que les deux projets ne se racontent pas
- * pareil — la billettique est une suite de chantiers indépendants, KCalories
- * est un produit unique. Une carte générique aurait aplati la différence ; une
- * union discriminée la rend explicite, et le compilateur refuse qu'on rende un
- * cas avec le mauvais gabarit.
+ * Two shapes coexist because the two projects are not told the same way —
+ * ticketing is a run of independent workstreams, KCalories is a single product.
+ * A generic card would have flattened the difference; a discriminated union
+ * makes it explicit, and the compiler refuses to let a case be rendered with the
+ * wrong template.
  */
 export function CaseStudies({
   head,
@@ -43,7 +43,7 @@ export function CaseStudies({
   );
 }
 
-/** Une colonne du triptyque. `data-cascade` la désigne à l'animation d'entrée. */
+/** One column of the triptych. `data-cascade` marks it for the entry animation. */
 function PdrColumn({
   label,
   paragraphs,
@@ -94,7 +94,7 @@ function WorkstreamCaseCard({ study }: { readonly study: WorkstreamCase }) {
   return (
     <article className="case" data-reveal="">
       <div className="case__top">
-        {/* Décorative : ces icônes répètent ce que dit le titre juste à côté. */}
+        {/* Decorative: these icons repeat what the title right next to them says. */}
         <div className="icon-stack" aria-hidden="true">
           {study.iconStack.map((slug) => (
             <Image

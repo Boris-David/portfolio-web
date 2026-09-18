@@ -1,27 +1,27 @@
 /**
- * Les objets du design system.
+ * The design system objects.
  *
- * Pourquoi des classes plutôt que des utilitaires Tailwind partout : ces objets
- * portent chacun huit à quinze propriétés, dont des `font-variation-settings`,
- * des `clamp()` et des `letter-spacing` négatifs. Écrits en valeurs arbitraires
- * (`[font-variation-settings:'opsz'_144]`), ils rendraient chaque composant
- * illisible et le design impossible à faire évoluer d'un seul endroit.
+ * Why classes rather than Tailwind utilities everywhere: each of these objects
+ * carries eight to fifteen properties, among them `font-variation-settings`,
+ * `clamp()` and negative `letter-spacing`. Written as arbitrary values
+ * (`[font-variation-settings:'opsz'_144]`), they would make every component
+ * unreadable and the design impossible to evolve from a single place.
  *
- * La règle de partage est dans `.claude/rules/design-system.md` : ce qui se
- * répète et porte une intention de design vit ici ; la mise en page ponctuelle
- * d'un composant reste en utilitaires dans le JSX.
+ * The dividing rule is in `.claude/rules/design-system.md`: whatever repeats and
+ * carries a design intent lives here; one-off layout for a component stays as
+ * utilities in the JSX.
  *
- * Aucune couleur, aucun espacement, aucun rayon et aucune courbe n'est écrit en
- * dur : tout passe par les variables générées depuis `design/tokens.json`.
+ * No colour, no spacing, no radius and no easing curve is hard-coded:
+ * everything goes through the variables generated from `design/tokens.json`.
  */
 
-/* ── Boutons ───────────────────────────────────────────────────────────────── */
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
 
 .btn {
   display: inline-flex;
   align-items: center;
   gap: var(--s2);
-  /* La cible tactile minimale vient des tokens d'accessibilité, pas d'un choix. */
+  /* The minimum touch target comes from the a11y tokens, not from a preference. */
   min-height: var(--touch-target);
   padding: 11px 18px;
   border-radius: 11px;
@@ -58,10 +58,9 @@
 }
 
 /**
- * La variante compacte allège le texte et le rembourrage, **pas la cible** :
- * elle garde les 44 px du token d'accessibilité. Un bouton de 38 px de haut est
- * un bouton qu'on rate au pouce, et « compact » n'a jamais voulu dire
- * « inatteignable ».
+ * The compact variant lightens the text and the padding, **not the target**: it
+ * keeps the 44 px from the accessibility token. A button 38 px tall is a button
+ * you miss with your thumb, and "compact" has never meant "unreachable".
  */
 .btn--sm {
   min-height: var(--touch-target);
@@ -93,9 +92,9 @@
 }
 
 /**
- * Les deux icônes de thème sont rendues par le serveur ; seule la pertinente
- * s'affiche. Le CSS suit exactement la logique de `tokens.generated.css` : le
- * choix explicite (`data-theme`) prime sur la préférence système.
+ * Both theme icons are rendered by the server; only the relevant one shows. The
+ * CSS follows exactly the logic of `tokens.generated.css`: the explicit choice
+ * (`data-theme`) wins over the system preference.
  */
 .only-dark {
   display: none;
@@ -173,10 +172,10 @@
 }
 
 /**
- * Le lien fait 44 px de haut — la cible tactile du design system — tandis que
- * le soulignement reste collé au texte. D'où les deux boîtes : le lien porte la
- * zone atteignable, le `<span>` intérieur porte le trait. Étirer le lien tout
- * seul aurait décollé le soulignement du mot de sept pixels.
+ * The link is 44 px tall — the design system's touch target — while the
+ * underline stays tight to the text. Hence the two boxes: the link carries the
+ * reachable area, the inner `<span>` carries the rule. Stretching the link on
+ * its own would have pushed the underline seven pixels off the word.
  */
 .nav__link {
   color: var(--ink-3);
@@ -186,7 +185,7 @@
   align-items: center;
   justify-content: center;
   min-height: var(--touch-target);
-  /* En anglais, « Apps » et « Depth » sont plus étroits que la cible minimale. */
+  /* In English, "Apps" and "Depth" are narrower than the minimum target. */
   min-width: var(--touch-target);
 }
 
@@ -196,8 +195,8 @@
 }
 
 /**
- * Le soulignement se déplie depuis la gauche plutôt que d'apparaître : le
- * mouvement dit « celle-ci », là où une opacité ne dit rien.
+ * The underline unfurls from the left rather than appearing: the movement says
+ * "this one", where an opacity says nothing.
  */
 .nav__link > span::after {
   content: "";
@@ -242,14 +241,14 @@
 }
 
 /**
- * Sous 640 px, la barre ne peut pas porter cinq contrôles sans déborder — et
- * un débordement horizontal sur mobile est rédhibitoire.
+ * Below 640 px, the bar cannot carry five controls without overflowing — and a
+ * horizontal overflow on mobile is a deal-breaker.
  *
- * On retire les deux raccourcis vers les profils, jamais la langue, le thème ni
- * le CV. Ce n'est pas une information perdue : GitHub et LinkedIn sont des
- * boutons pleins dans la section Contact, que tout le monde atteint en fin de
- * lecture. Rétrécir les contrôles aurait cassé les 44 px ; les faire passer à la
- * ligne aurait doublé la hauteur d'une barre collante.
+ * We drop the two profile shortcuts, never the language, the theme or the
+ * résumé. This is not information lost: GitHub and LinkedIn are full buttons in
+ * the Contact section, which everybody reaches at the end of the read. Shrinking
+ * the controls would have broken the 44 px; wrapping them onto a second line
+ * would have doubled the height of a sticky bar.
  */
 @media (max-width: 639px) {
   .nav__social {
@@ -257,15 +256,15 @@
   }
 
   /**
-   * Le bouton CV passe en icône seule.
+   * The résumé button becomes icon-only.
    *
-   * Ce n'est pas du confort : en anglais l'intitulé est « Résumé », assez large
-   * pour faire déborder la barre à 400 px là où « CV » passait. Une mise en page
-   * qui ne tient que dans une langue n'est pas une mise en page — le contenu
-   * bilingue doit pouvoir grandir sans casser la barre.
+   * This is not about comfort: in English the label is "Résumé", wide enough to
+   * overflow the bar at 400 px where "CV" fitted. A layout that only holds in
+   * one language is not a layout — bilingual content must be able to grow
+   * without breaking the bar.
    *
-   * Le nom accessible est porté par `aria-label` : il reste complet, et annonce
-   * le format et la langue du fichier.
+   * The accessible name is carried by `aria-label`: it stays complete, and
+   * states the file's format and language.
    */
   .nav__actions .btn--sm .btn__label {
     display: none;
@@ -332,7 +331,7 @@
   font-family: var(--f-display);
   font-variation-settings: "opsz" 144;
   font-weight: 600;
-  /* Fluide : le titre doit tenir à 400 px sans casser ni déborder. */
+  /* Fluid: the title has to fit at 400 px without breaking or overflowing. */
   font-size: clamp(42px, 7vw, 72px);
   line-height: 1;
   letter-spacing: -0.035em;
@@ -424,7 +423,7 @@
   fill: currentColor;
 }
 
-/* ── Bandeau de preuves ────────────────────────────────────────────────────── */
+/* ── Proof bar ─────────────────────────────────────────────────────────────── */
 
 .proof {
   border-block: 1px solid var(--line);
@@ -460,7 +459,7 @@
   line-height: 1;
   letter-spacing: -0.025em;
   color: var(--ink);
-  /* Chiffres à chasse fixe : le compteur ne doit pas faire trembler la ligne. */
+  /* Tabular figures: the counter must not make the line wobble. */
   font-variant-numeric: tabular-nums;
 }
 
@@ -476,7 +475,7 @@
   margin-top: var(--s2);
 }
 
-/* ── En-têtes de section ───────────────────────────────────────────────────── */
+/* ── Section headings ──────────────────────────────────────────────────────── */
 
 .sec-head {
   margin-bottom: var(--s7);
@@ -511,7 +510,7 @@
   font-weight: 600;
 }
 
-/* ── Études de cas ─────────────────────────────────────────────────────────── */
+/* ── Case studies ──────────────────────────────────────────────────────────── */
 
 .case {
   border: 1px solid var(--line);
@@ -588,8 +587,8 @@
 }
 
 /**
- * La pile d'icônes : l'en-tête ne représente plus une seule application, il en
- * représente trente-trois. Les icônes se chevauchent pour le dire sans légende.
+ * The icon stack: the header no longer stands for a single app, it stands for
+ * thirty-three. The icons overlap to say so without a caption.
  */
 .icon-stack {
   display: flex;
@@ -624,7 +623,7 @@
   place-items: center;
 }
 
-/* ── Problème / Décision / Résultat ────────────────────────────────────────── */
+/* ── Problem / Decision / Result ───────────────────────────────────────────── */
 
 .pdr {
   display: grid;
@@ -704,7 +703,7 @@
   background: var(--accent);
 }
 
-/* ── Galerie de captures ───────────────────────────────────────────────────── */
+/* ── Screenshot gallery ────────────────────────────────────────────────────── */
 
 .gallery {
   display: grid;
@@ -748,7 +747,7 @@
   }
 }
 
-/* ── Grille d'applications ─────────────────────────────────────────────────── */
+/* ── App grid ──────────────────────────────────────────────────────────────── */
 
 .apps {
   display: grid;
@@ -815,7 +814,7 @@
   max-width: 76ch;
 }
 
-/* ── Profondeur technique ──────────────────────────────────────────────────── */
+/* ── Technical depth ───────────────────────────────────────────────────────── */
 
 .depth {
   display: grid;
@@ -889,7 +888,7 @@
   }
 }
 
-/* ── Parcours ──────────────────────────────────────────────────────────────── */
+/* ── Background ────────────────────────────────────────────────────────────── */
 
 .job {
   border: 1px solid var(--line);
@@ -994,7 +993,7 @@
   line-height: 1.9;
 }
 
-/* ── Formation, certifications, compétences ────────────────────────────────── */
+/* ── Education, certifications, skills ─────────────────────────────────────── */
 
 .split {
   display: grid;
@@ -1062,7 +1061,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  /* Zone tactile : le lien tient sur une ligne de 13 px, la cible fait 44. */
+  /* Touch area: the link sits on a 13 px line, the target is 44. */
   min-height: var(--touch-target);
   justify-self: start;
 }
@@ -1120,7 +1119,7 @@
   color: var(--ink-2);
 }
 
-/* ── Contact et pied de page ───────────────────────────────────────────────── */
+/* ── Contact and footer ────────────────────────────────────────────────────── */
 
 .contact {
   border: 1px solid var(--line);
@@ -1153,7 +1152,7 @@
   font-size: clamp(20px, 2.8vw, 28px);
   letter-spacing: -0.015em;
   color: var(--accent);
-  /* L'adresse doit pouvoir se couper : sinon elle déborde sous 400 px. */
+  /* The address has to be able to break: otherwise it overflows below 400 px. */
   overflow-wrap: anywhere;
   display: inline-flex;
   align-items: center;
@@ -1171,7 +1170,7 @@
   align-items: center;
 }
 
-/* ── Page 404 ──────────────────────────────────────────────────────────────── */
+/* ── 404 page ──────────────────────────────────────────────────────────────── */
 
 .not-found {
   min-height: 70vh;

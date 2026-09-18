@@ -1,47 +1,48 @@
 import type { Chrome, IconName, Metadata } from "@/content/types";
 
 /**
- * Ce qui reste au site quand le contenu part à l'API.
+ * What is left to the site once the content moves to the API.
  *
- * La ligne de partage n'est pas « ce que l'API sert aujourd'hui » — ce serait
- * laisser l'outil décider de l'architecture. Elle est :
+ * The dividing line is not "whatever the API happens to serve today" — that
+ * would be letting the tool decide the architecture. It is:
  *
- *   **est du contenu ce qui resterait vrai si le site n'existait pas.**
+ *   **content is whatever would still be true if the site did not exist.**
  *
- * Un fait sur le parcours, un chiffre, une phrase du dossier : vrai avec ou
- * sans site, donc à l'API, qui le sert aussi bien au CV en PDF qu'à l'app iOS.
- * « Aller au contenu », « Changer de thème », le choix d'une icône ou l'ordre
- * des ancres : ça n'existe que parce qu'il y a une page web. Ça reste ici.
+ * A fact about the career, a figure, a sentence from the record: true with or
+ * without a site, so it belongs to the API, which serves it just as well to the
+ * PDF résumé as to the iOS app. "Skip to content", "Switch theme", the choice of
+ * an icon or the order of the anchors: those only exist because there is a web
+ * page. They stay here.
  *
- * Le test : ces libellés-là n'auraient aucun sens dans un PDF ni dans une app
- * native. Les faire transiter par l'API les rendrait visibles depuis des
- * clients qui n'en ont pas l'usage, et obligerait à les versionner comme du
- * contenu alors qu'ils changent au rythme du design.
+ * The test: those labels would make no sense in a PDF or in a native app.
+ * Routing them through the API would expose them to clients that have no use
+ * for them, and force us to version them as content when they change at the pace
+ * of the design.
  */
 export interface SiteChrome {
   readonly meta: Metadata;
   readonly chrome: Chrome;
-  /** Les deux appels à l'action de l'accroche — des gestes, pas des faits. */
+  /** The hero's two calls to action — gestures, not facts. */
   readonly heroCtas: { readonly primary: string; readonly secondary: string };
-  /** Les intitulés des trois blocs du parcours qui ne portent aucun fait. */
+  /** The headings of the three background blocks that carry no fact. */
   readonly backgroundTitles: {
     readonly education: string;
     readonly certifications: string;
     readonly openProjects: string;
   };
-  /** Le libellé du lien de vérification d'une certification. */
+  /** The label of a certification's verification link. */
   readonly verifyCertificate: string;
-  /** Le libellé du lien vers le code source d'un projet ouvert. */
+  /** The label of the link to an open project's source code. */
   readonly sourceCode: string;
-  /** Le bouton d'écriture d'un courriel — un geste, pas une adresse. */
+  /** The write-an-email button — a gesture, not an address. */
   readonly mailCta: string;
 }
 
 /**
- * Les choix d'icônes, identiques dans les deux langues — une icône n'a pas de
- * langue. Chaque clé est un identifiant **servi par l'API**, ce qui rend le
- * lien vérifiable : un sujet ajouté côté contenu sans icône ici casse la
- * construction plutôt que d'afficher un trou.
+ * The icon choices, identical in both languages — an icon has no language. Each
+ * key is an identifier **served by the API**, which makes the link checkable: a
+ * topic added on the content side without an icon here breaks the build instead
+ * of showing a hole.
  */
 export const EXPERTISE_ICONS: Readonly<Record<string, IconName>> = {
   concurrency: "flow",
@@ -49,14 +50,14 @@ export const EXPERTISE_ICONS: Readonly<Record<string, IconName>> = {
   delivery: "gear",
 };
 
-/** Les trois lignes d'identité de l'accroche, dans l'ordre, avec leur icône. */
+/** The hero's three identity lines, in order, with their icon. */
 export const IDENTITY_ICONS = ["pin", "home", "globe"] as const satisfies readonly IconName[];
 
 /**
- * Les cinq applications dont l'icône compose la pile de l'étude de cas.
+ * The five apps whose icons make up the case study's stack.
  *
- * C'est un choix éditorial de vitrine — les réseaux les plus reconnaissables —
- * et non un ordre que l'API pourrait connaître. Le compte affiché à côté
- * (« +28 ») se calcule, lui, sur le nombre réel d'applications.
+ * This is an editorial showcase choice — the most recognisable networks — and
+ * not an order the API could know about. The count shown next to it ("+28") is
+ * computed, from the real number of apps.
  */
 export const ICON_STACK = ["tcl", "oura", "at-bus", "tere-tahiti", "twisto"] as const;

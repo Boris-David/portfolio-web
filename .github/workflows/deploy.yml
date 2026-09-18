@@ -1,105 +1,107 @@
-name: Déploiement Cloudflare Workers
+name: Cloudflare Workers deployment
 
-# Branché. Toute CI verte sur `main` publie le site.
+# Wired up. Any green CI on `main` publishes the site.
 #
-# La configuration ci-dessous est posée sur le dépôt et n'est à relire que pour
-# la reproduire ailleurs, ou si une rotation de jeton casse le déploiement.
+# The configuration below is already set on the repository and only needs
+# rereading to reproduce it elsewhere, or if a token rotation breaks the
+# deployment.
 #
 # ─────────────────────────────────────────────────────────────────────────────
-# CE QU'IL FAUT POSER SUR LE DÉPÔT portfolio-web, UNE FOIS
+# WHAT TO SET ON THE portfolio-web REPOSITORY, ONCE
 # ─────────────────────────────────────────────────────────────────────────────
 #
-# 1. Settings → Secrets and variables → Actions :
+# 1. Settings → Secrets and variables → Actions:
 #
-#      Secret    CLOUDFLARE_API_TOKEN    le jeton d'API
-#      Variable  CLOUDFLARE_ACCOUNT_ID   l'identifiant de compte (Workers → Overview)
+#      Secret    CLOUDFLARE_API_TOKEN    the API token
+#      Variable  CLOUDFLARE_ACCOUNT_ID   the account id (Workers → Overview)
 #
-#    Rien d'autre. Le nom du Worker, le répertoire d'actifs et le domaine sont
-#    déclarés dans `wrangler.jsonc`, versionné.
+#    Nothing else. The Worker name, the assets directory and the domain are
+#    declared in `wrangler.jsonc`, which is tracked.
 #
-# 2. Le jeton peut être CELUI DÉJÀ CRÉÉ POUR portfolio-api — même compte, même
-#    zone, mêmes portées. S'il faut en créer un : tableau de bord → My Profile →
-#    API Tokens → Create Token → Edit Cloudflare Workers, restreint à :
+# 2. The token can be THE ONE ALREADY CREATED FOR portfolio-api — same account,
+#    same zone, same scopes. If one has to be created: dashboard → My Profile →
+#    API Tokens → Create Token → Edit Cloudflare Workers, restricted to:
 #
 #      Account · Workers Scripts        : Edit
 #      Account · Account Settings       : Read
 #      Zone    · Workers Routes         : Edit   (zone amissan.dev)
 #      Zone    · Zone                   : Read   (zone amissan.dev)
 #
-#    Les deux portées de zone ne servent qu'au domaine personnalisé ; sans
-#    elles, le déploiement réussit mais `amissan.dev` n'est pas créé.
+#    The two zone scopes serve only the custom domain; without them the
+#    deployment succeeds but `amissan.dev` is not created.
 #
-# 3. Le domaine `amissan.dev` : **rien à cliquer**. La zone est déjà sur le
-#    compte via Cloudflare Registrar, et `wrangler deploy` crée l'enregistrement
-#    DNS et le domaine personnalisé depuis `routes` dans `wrangler.jsonc`.
+# 3. The `amissan.dev` domain: **nothing to click**. The zone is already on the
+#    account through Cloudflare Registrar, and `wrangler deploy` creates the DNS
+#    record and the custom domain from `routes` in `wrangler.jsonc`.
 #
-# 4. `www.amissan.dev` → `amissan.dev` : UNE SEULE CHOSE RESTE À FAIRE À LA MAIN,
-#    et voici pourquoi elle ne peut pas vivre dans ce dépôt.
+# 4. `www.amissan.dev` → `amissan.dev`: ONE SINGLE THING IS LEFT TO DO BY HAND,
+#    and here is why it cannot live in this repository.
 #
-#    Une redirection d'hôte ne s'exprime ni dans `wrangler.jsonc` ni dans
-#    `_headers`/`_redirects`, dont les motifs portent sur le chemin et jamais sur
-#    le nom d'hôte. Elle pourrait s'écrire dans un Worker — mais un Worker ne
-#    s'exécute que sur les requêtes qui ne correspondent à AUCUN actif, et `/`
-#    correspond toujours. Il faudrait donc `run_worker_first`, c'est-à-dire un
-#    Worker sur le chemin chaud de chaque page vue : on perdrait la gratuité des
-#    actifs statiques, qui est la raison même du choix de Cloudflare.
+#    A host redirect can be expressed neither in `wrangler.jsonc` nor in
+#    `_headers`/`_redirects`, whose patterns match on the path and never on the
+#    host name. It could be written in a Worker — but a Worker only runs on
+#    requests that match NO asset, and `/` always matches. That would require
+#    `run_worker_first`, that is to say a Worker on the hot path of every page
+#    view: we would lose the free static assets, which are the very reason
+#    Cloudflare was chosen.
 #
-#    La forme native et gratuite est une règle de redirection de zone, qui
-#    s'exécute au bord AVANT les Workers et ne consomme aucune invocation :
+#    The native, free form is a zone redirect rule, which runs at the edge
+#    BEFORE the Workers and consumes no invocation:
 #
-#      a. DNS → amissan.dev → Add record → CNAME `www` vers `amissan.dev`,
-#         proxifié (nuage orange).
-#      b. Rules → Redirect Rules → Create rule :
-#           Si    hostname égale `www.amissan.dev`
-#           Alors redirection dynamique vers
+#      a. DNS → amissan.dev → Add record → CNAME `www` to `amissan.dev`,
+#         proxied (orange cloud).
+#      b. Rules → Redirect Rules → Create rule:
+#           If    hostname equals `www.amissan.dev`
+#           Then  dynamic redirect to
 #                 concat("https://amissan.dev", http.request.uri.path)
-#                 code 301, préserver la chaîne de requête.
+#                 status 301, preserve the query string.
 #
-#    Le lien canonique de chaque page pointe déjà sur l'apex : même sans cette
-#    règle, aucun moteur n'indexerait deux fois le site.
+#    Every page's canonical link already points at the apex: even without this
+#    rule, no search engine would index the site twice.
 #
-# Aucune clé privée, aucun fichier de service : le jeton est le seul secret, et
-# il vit dans les secrets du dépôt — jamais dans le dépôt, qui est public.
+# No private key, no service file: the token is the only secret, and it lives in
+# the repository secrets — never in the repository, which is public.
 
 on:
-  # Le déploiement suit la CI, il ne court pas à côté d'elle. `workflow_run` se
-  # déclenche à la **fin** de la CI : rien ne part en ligne sans que les tests,
-  # l'audit d'accessibilité et le budget Lighthouse soient passés sur le commit
-  # exact qu'on publie.
+  # The deployment follows CI, it does not race alongside it. `workflow_run`
+  # fires at the **end** of CI: nothing goes live without the tests, the
+  # accessibility audit and the Lighthouse budget having passed on the exact
+  # commit being published.
   #
-  # Les deux autres montages ont été écartés :
+  # The two other arrangements were ruled out:
   #
-  #   `on: push` — partirait **en parallèle** de la CI. Le déploiement gagnerait
-  #   la course une fois sur deux et publierait un commit dont les tests
-  #   échouent ensuite. Une garde qui s'exécute après la publication ne garde
-  #   rien.
+  #   `on: push` — would start **in parallel** with CI. The deployment would win
+  #   the race every other time and publish a commit whose tests then fail. A
+  #   guard that runs after publication guards nothing.
   #
-  #   un job `deployer` dans `ci.yml` avec `needs:` — correct sur le fond, mais
-  #   il ferait entrer le jeton Cloudflare dans le workflow qui s'exécute sur
-  #   **chaque pull request**. `ci.yml` déclare « aucun secret n'est
-  #   nécessaire » : c'est une propriété vérifiable, elle vaut plus que
-  #   l'économie d'un fichier.
+  #   a `deploy` job in `ci.yml` with `needs:` — correct in principle, but it
+  #   would bring the Cloudflare token into the workflow that runs on **every
+  #   pull request**. `ci.yml` states "no secret is needed": that is a verifiable
+  #   property, and it is worth more than saving one file.
   workflow_run:
     workflows: [CI]
     types: [completed]
     branches: [main]
 
-  # Le contenu a changé dans `portfolio-api`. Le site est un export statique :
-  # il ne « rafraîchit » rien, il se **reconstruit**. C'est le chemin rapide de
-  # la propagation entre dépôts — quelques secondes après le déploiement de
-  # l'API. Voir l'ADR 0007.
+  # The content changed in `portfolio-api`. The site is a static export: it does
+  # not "refresh" anything, it **rebuilds**. This is the fast path of the
+  # cross-repository propagation — a few seconds after the API deploys. See
+  # ADR 0007.
+  #
+  # ⚠️ The event type is a contract with `portfolio-api`, which sends it.
+  # Renaming it here alone silently breaks the propagation.
   repository_dispatch:
     types: [contenu-mis-a-jour]
 
-  # Appelable par le témoin de fraîcheur, qui republie quand il constate que le
-  # site en ligne a été construit sur un contenu périmé. Un workflow réutilisable
-  # évite d'avoir deux descriptions du déploiement — et n'exige aucun jeton, là
-  # où `gh workflow run` avec le `GITHUB_TOKEN` ne déclencherait rien : GitHub
-  # refuse qu'un workflow s'enchaîne sur lui-même par ce jeton.
+  # Callable by the freshness witness, which republishes when it finds the live
+  # site was built on stale content. A reusable workflow avoids having two
+  # descriptions of the deployment — and requires no token, where
+  # `gh workflow run` with the `GITHUB_TOKEN` would trigger nothing: GitHub
+  # refuses to let a workflow chain onto itself through that token.
   workflow_call:
 
-  # Reste déclenchable à la main : republier sans nouveau commit — rotation de
-  # jeton, purge d'actifs, retour arrière.
+  # Still triggerable by hand: republish with no new commit — token rotation,
+  # asset purge, rollback.
   workflow_dispatch:
 
 concurrency:
@@ -114,51 +116,51 @@ env:
   WRANGLER_SEND_METRICS: "false"
 
 jobs:
-  deployer:
-    name: Construire, puis publier les actifs
+  deploy:
+    name: Build, then publish the assets
     runs-on: ubuntu-latest
-    # Une seule condition, écrite par la négative : **tout** déclencheur publie,
-    # sauf `workflow_run`, qui doit prouver deux choses.
+    # A single condition, written in the negative: **every** trigger publishes,
+    # except `workflow_run`, which has to prove two things.
     #
-    # `workflow_run` se déclenche que la CI ait **réussi ou échoué** — `on:` n'a
-    # pas de filtre sur la conclusion, il s'écrit ici.
+    # `workflow_run` fires whether CI **succeeded or failed** — `on:` offers no
+    # filtering on the conclusion, so it is written here.
     #
-    # Et le `event == 'push'` n'est pas de la ceinture-bretelles : `branches:
-    # [main]` filtre sur la branche *source*. Une pull request venue d'un fork
-    # dont la branche s'appelle `main` la satisferait — et déploierait le code
-    # du fork. Seul un push sur notre `main` déclenche une publication.
+    # And `event == 'push'` is not belt and braces: `branches: [main]` filters on
+    # the *source* branch. A pull request from a fork whose branch is called
+    # `main` would satisfy it — and would deploy the fork's code. Only a push to
+    # our `main` triggers a publication.
     #
-    # Écrite par la négative, la garde n'oublie aucun déclencheur ajouté plus
-    # tard : `repository_dispatch`, `workflow_call` et `workflow_dispatch`
-    # passent sans qu'on ait eu à penser à les nommer.
+    # Written in the negative, the guard forgets no trigger added later:
+    # `repository_dispatch`, `workflow_call` and `workflow_dispatch` pass
+    # without anyone having had to name them.
     if: >-
       github.event_name != 'workflow_run' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.event == 'push')
     steps:
-      # Ce contrôle passait l'étape en silence quand le jeton manquait, parce
-      # qu'aucun jeton n'existait encore. Il échoue depuis que le déploiement
-      # est automatique : un déploiement qui « réussit » sans rien publier
-      # laisse croire qu'un correctif mergé est en ligne. Le cas s'est produit
-      # le 2026-09-17 — le renommage du PDF du CV est resté trois quarts d'heure
-      # invisible derrière une CI verte.
-      - name: Vérifier que la configuration existe
+      # This check used to skip the step silently when the token was missing,
+      # because no token existed yet. It fails now that the deployment is
+      # automatic: a deployment that "succeeds" without publishing anything
+      # makes a merged fix look live. It happened on 2026-09-17 — the renaming
+      # of the résumé PDF stayed invisible for three quarters of an hour behind
+      # a green CI.
+      - name: Check that the configuration exists
         env:
-          JETON: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          COMPTE: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          manquants=""
-          [ -n "$JETON" ] || manquants="$manquants CLOUDFLARE_API_TOKEN (secret)"
-          [ -n "$COMPTE" ] || manquants="$manquants CLOUDFLARE_ACCOUNT_ID (variable)"
-          if [ -n "$manquants" ]; then
-            echo "::error::Déploiement non configuré, manquant :$manquants — voir l'en-tête de ce workflow."
+          missing=""
+          [ -n "$TOKEN" ] || missing="$missing CLOUDFLARE_API_TOKEN (secret)"
+          [ -n "$ACCOUNT" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID (variable)"
+          if [ -n "$missing" ]; then
+            echo "::error::Deployment not configured, missing:$missing — see the header of this workflow."
             exit 1
           fi
 
-      # `workflow_run` exécute le fichier de workflow de la branche par défaut,
-      # mais ne positionne pas le dépôt pour autant : sans `ref`, on publierait
-      # la tête de `main` au moment du déploiement, pas le commit que la CI a
-      # validé. Deux merges rapprochés suffisent à les rendre différents.
+      # `workflow_run` runs the workflow file from the default branch, but it
+      # does not position the repository for us: without `ref`, we would publish
+      # the tip of `main` at deployment time, not the commit CI validated. Two
+      # merges close together are enough to make them different.
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
@@ -168,50 +170,51 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Installer les dépendances
+      - name: Install the dependencies
         run: npm ci
 
-      # Un déploiement ne peut pas partir avec un CSS de design qui aurait dérivé
-      # de `design/tokens.json`. La garde est la même qu'en CI, rejouée ici parce
-      # qu'un déploiement manuel ne passe pas forcément par une pull request.
-      - name: Le design dérive bien des tokens
+      # A deployment cannot go out with design CSS that has drifted from
+      # `design/tokens.json`. The guard is the same as in CI, replayed here
+      # because a manual deployment does not necessarily go through a pull
+      # request.
+      - name: The design does derive from the tokens
         run: npm run tokens:check
 
-      - name: Construire l'export statique
+      - name: Build the static export
         run: npm run build
 
-      # Garde de cohérence : `out/` doit porter les deux langues, la page 404 et
-      # les en-têtes. Publier un export tronqué mettrait un site cassé en ligne,
-      # et `wrangler deploy` ne s'en plaindrait pas — il publierait ce qu'on lui
-      # donne.
-      - name: Vérifier l'export avant publication
+      # Consistency guard: `out/` has to carry both languages, the 404 page and
+      # the headers. Publishing a truncated export would put a broken site
+      # online, and `wrangler deploy` would not complain — it publishes what it
+      # is handed.
+      - name: Check the export before publishing
         run: |
-          manquants=""
-          for fichier in out/index.html out/en.html out/404.html out/_headers out/icon.svg; do
-            [ -f "$fichier" ] || manquants="$manquants $fichier"
+          missing=""
+          for file in out/index.html out/en.html out/404.html out/_headers out/icon.svg; do
+            [ -f "$file" ] || missing="$missing $file"
           done
-          if [ -n "$manquants" ]; then
-            echo "::error::Export incomplet, publication refusée :$manquants"
+          if [ -n "$missing" ]; then
+            echo "::error::Incomplete export, publication refused:$missing"
             exit 1
           fi
-          echo "Export complet : $(find out -type f | wc -l) fichiers."
+          echo "Export complete: $(find out -type f | wc -l) files."
 
-      - name: Publier les actifs statiques
+      - name: Publish the static assets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: npm run deploy
 
-      # Le déploiement peut réussir et le site être cassé : mauvais domaine,
-      # actifs absents, en-têtes perdus. On le vérifie depuis l'extérieur.
-      - name: Vérifier le site en ligne
+      # The deployment can succeed and the site be broken: wrong domain, missing
+      # assets, lost headers. We check it from the outside.
+      - name: Check the live site
         run: |
           set -euo pipefail
-          for chemin in / /en; do
+          for path in / /en; do
             code=$(curl -s -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 3 \
-              --retry-all-errors "https://amissan.dev$chemin")
-            [ "$code" = "200" ] || { echo "::error::$chemin répond $code"; exit 1; }
+              --retry-all-errors "https://amissan.dev$path")
+            [ "$code" = "200" ] || { echo "::error::$path answers $code"; exit 1; }
           done
           curl -sI https://amissan.dev/ | grep -qi '^content-security-policy' \
-            || { echo "::error::en-têtes de sécurité absents — _headers non pris en compte"; exit 1; }
-          echo "Site en ligne, en-têtes servis."
+            || { echo "::error::security headers missing — _headers not picked up"; exit 1; }
+          echo "Site live, headers served."

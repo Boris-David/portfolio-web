@@ -29,23 +29,22 @@ import { readMarkup } from "@/content/api/markup";
 import { formatLong, formatRange, formatYearSpan, parseYearMonth } from "@/content/api/dates";
 
 /**
- * Le modèle de domaine de l'API, ramené au modèle de présentation du site.
+ * The API's domain model, brought back to the site's presentation model.
  *
- * Les deux modèles diffèrent, et c'est **voulu**. L'API décrit des faits :
- * `experience[]` avec `start: "2023-05"` et `end: null`. Le site affiche une
- * carte dépliante titrée « mai 2023 → aujourd'hui ». Faire porter l'un des deux
- * par l'autre reviendrait à choisir :
+ * The two models differ, and that is **deliberate**. The API describes facts:
+ * `experience[]` with `start: "2023-05"` and `end: null`. The site displays an
+ * expandable card headed "mai 2023 → aujourd'hui". Making either one carry the
+ * other would mean choosing:
  *
- *   - soit une API qui sait comment un site web s'affiche — et qui devrait
- *     alors savoir aussi comment un CV en PDF et une app iOS s'affichent ;
- *   - soit un site qui reçoit des chaînes déjà mises en forme — et qui ne peut
- *     plus rien en faire d'autre.
+ *   - either an API that knows how a website displays things — and which would
+ *     then have to know how a PDF résumé and an iOS app display things too;
+ *   - or a site that receives already-formatted strings — and can no longer do
+ *     anything else with them.
  *
- * Ce fichier est donc la couche qui traduit, et c'est le bon endroit pour la
- * mettre : côté client, là où la présentation est décidée. C'est aussi lui qui
- * **dérive** ce que l'API n'a aucune raison de connaître — la numérotation des
- * sections, le compte « +28 » de la pile d'icônes, le nom de fichier d'une
- * capture.
+ * This file is therefore the translating layer, and this is the right place to
+ * put it: on the client side, where presentation is decided. It is also what
+ * **derives** what the API has no reason to know about — the section numbering,
+ * the "+28" count on the icon stack, a screenshot's filename.
  */
 
 export interface PortfolioPayload {
@@ -54,17 +53,17 @@ export interface PortfolioPayload {
   readonly data: Field;
 }
 
-/** Découpe l'enveloppe `{ meta, data }` et vérifie qu'elle répond bien sur la bonne langue. */
+/** Unwraps the `{ meta, data }` envelope and checks it did answer in the right language. */
 export function readPayload(body: unknown, requested: Locale): PortfolioPayload {
   const root = Field.root(body, "portfolio");
   const locale = root.child("meta").child("locale").oneOf(["fr", "en"] as const);
 
-  // Une réponse dans une autre langue que celle demandée est une erreur, pas un
-  // repli : publier la page anglaise avec du contenu français est précisément
-  // le genre de panne qu'on ne voit qu'une fois en ligne.
+  // A response in a language other than the one requested is an error, not a
+  // fallback: publishing the English page with French content is exactly the
+  // kind of failure you only see once it is live.
   if (locale !== requested) {
     throw new Error(
-      `L'API a répondu en « ${locale} » alors que « ${requested} » était demandé.`,
+      `The API responded in “${locale}” when “${requested}” was requested.`,
     );
   }
 
@@ -86,6 +85,7 @@ export function adapt(payload: PortfolioPayload, chrome: SiteChrome): SiteConten
     locale,
     meta: chrome.meta,
     chrome: chrome.chrome,
+    fullName: profile.child("name").child("full").text(),
     hero: adaptHero(profile, chrome),
     proof: data.child("metrics").list().map(adaptMetric),
     casesHead: sections.get("case-studies") as SectionHead,
@@ -99,7 +99,7 @@ export function adapt(payload: PortfolioPayload, chrome: SiteChrome): SiteConten
   };
 }
 
-/** Les applications en production, telles que la source les publie et les ordonne. */
+/** The apps in production, as the source publishes and orders them. */
 export function adaptApps(data: Field): readonly ProductionApp[] {
   return data
     .child("apps")
@@ -119,7 +119,7 @@ export function readVerifiedAt(data: Field): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Accroche
+// Hero
 // ─────────────────────────────────────────────────────────────────────────────
 
 function adaptHero(profile: Field, chrome: SiteChrome): Hero {
@@ -148,24 +148,24 @@ function adaptHero(profile: Field, chrome: SiteChrome): Hero {
 }
 
 /**
- * Le fichier d'une capture se **déduit** de l'identifiant du média.
+ * A screenshot's file is **deduced** from the media identifier.
  *
- * Les fichiers portaient auparavant un préfixe d'ordre — `03-jeune.jpg` — qui
- * encodait un classement désormais porté par l'ordre de la liste servie par
- * l'API. Le préfixe supprimé, le nom se déduit, et il n'y a plus de table de
- * correspondance à tenir à jour. Un test vérifie que chaque média a son fichier.
+ * The files used to carry an ordering prefix — `03-jeune.jpg` — which encoded a
+ * ranking now carried by the order of the list the API serves. With the prefix
+ * gone, the name is deduced, and there is no longer a lookup table to keep up to
+ * date. A test checks that every media item has its file.
  */
 function shotFile(mediaId: string): string {
   return `${mediaId}.jpg`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Chiffres
+// Figures
 // ─────────────────────────────────────────────────────────────────────────────
 
 function adaptMetric(metric: Field): ProofPoint {
   const raw = metric.child("value").text();
-  // Le « ~ » et le « > » ne se comptent pas : ils qualifient le nombre.
+  // The "~" and the ">" are not counted: they qualify the number.
   const match = /^([~>]\s?)?(.+)$/.exec(raw) as RegExpExecArray;
   const prefix = match[1];
   const unit = metric.child("unit");
@@ -175,14 +175,14 @@ function adaptMetric(metric: Field): ProofPoint {
     ...(prefix === undefined ? {} : { prefix }),
     ...(unit.isPresent ? { unit: unit.text() } : {}),
     label: metric.child("caption").text(),
-    // `countTo` non nul est la décision éditoriale « ce nombre s'anime » ;
-    // elle est prise à la source, pas déduite de la forme du nombre.
+    // A non-null `countTo` is the editorial decision "this number animates";
+    // it is taken at the source, not deduced from the shape of the number.
     ...(metric.child("countTo").isPresent ? { counts: true } : {}),
   };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// En-têtes de section
+// Section headings
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface Sections {
@@ -191,12 +191,12 @@ interface Sections {
 }
 
 /**
- * Les en-têtes, numérotés à partir de leur **rang**.
+ * The headings, numbered from their **rank**.
  *
- * « 01 · Études de cas » : le numéro est de la présentation pure — il dit au
- * lecteur où il en est dans la page. L'API sert l'ordre ; le site en fait un
- * repère visuel. Le jour où une section s'insère, la numérotation suit sans
- * qu'on touche au contenu.
+ * "01 · Études de cas": the number is pure presentation — it tells the reader
+ * where they are in the page. The API serves the order; the site turns it into
+ * a visual landmark. The day a section is inserted, the numbering follows
+ * without anybody touching the content.
  */
 function readSections(data: Field): Sections {
   const entries = new Map<string, { head: SectionHead; note: Field }>();
@@ -217,7 +217,7 @@ function readSections(data: Field): Sections {
     const entry = entries.get(id);
     if (entry === undefined) {
       throw new Error(
-        `Section « ${id} » absente du contenu servi. Sections reçues : ` +
+        `Section “${id}” missing from the content served. Sections received: ` +
           `${[...entries.keys()].join(", ")}.`,
       );
     }
@@ -231,7 +231,7 @@ function readSections(data: Field): Sections {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Études de cas
+// Case studies
 // ─────────────────────────────────────────────────────────────────────────────
 
 const PANEL_KINDS = ["problem", "decision", "result"] as const;
@@ -251,14 +251,14 @@ type Chapter = {
 };
 
 /**
- * Le site connaît deux mises en page d'étude de cas ; l'API n'en connaît
- * qu'une, plus générale : des chapitres faits de panneaux.
+ * The site knows two case-study layouts; the API knows only one, more general:
+ * chapters made of panels.
  *
- * Le discriminant est **sémantique, pas structurel** : un chapitre qui porte un
- * titre est un chantier qu'on peut déplier et nommer ; un chapitre sans titre
- * est le corps unique d'un récit, qui se rend en trois colonnes. Compter les
- * chapitres aurait marché aujourd'hui et cassé au premier récit à deux
- * chapitres anonymes.
+ * The discriminator is **semantic, not structural**: a chapter that carries a
+ * title is a workstream that can be expanded and named; a chapter without a
+ * title is the single body of a narrative, rendered as three columns. Counting
+ * the chapters would have worked today and broken on the first narrative with
+ * two untitled chapters.
  */
 function adaptCase(study: Field, ticketingCount: number): CaseStudy {
   const chapters = study.child("chapters").list().map(readChapter);
@@ -310,9 +310,9 @@ function readChapter(chapter: Field): Chapter {
         case "paragraph":
           blocks.push(readMarkup(block.child("text")));
           break;
-        // Une liste de l'API et une suite de paragraphes se rendent de la même
-        // façon dans une colonne : la distinction est un détail d'écriture, pas
-        // une différence de sens.
+        // A list from the API and a run of paragraphs render the same way in a
+        // column: the distinction is a detail of how it was written, not a
+        // difference in meaning.
         case "list":
           for (const item of block.child("items").list()) blocks.push(readMarkup(item));
           break;
@@ -340,12 +340,12 @@ function readChapter(chapter: Field): Chapter {
 function panel(chapter: Chapter, kind: PanelKind): Panel {
   const found = chapter.panels.get(kind);
   if (found === undefined) {
-    throw new Error(`Panneau « ${kind} » absent du chapitre « ${chapter.slug} ».`);
+    throw new Error(`Panel “${kind}” missing from chapter “${chapter.slug}”.`);
   }
   return found;
 }
 
-/** Les trois intitulés de colonnes viennent des panneaux eux-mêmes. */
+/** The three column headings come from the panels themselves. */
 function readLabels(chapter: Chapter): PdrLabels {
   return {
     problem: panel(chapter, "problem").heading,
@@ -376,7 +376,7 @@ function toScreenshot(media: Field): Screenshot {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Profondeur technique
+// Technical depth
 // ─────────────────────────────────────────────────────────────────────────────
 
 function adaptExpertise(item: Field): DepthItem {
@@ -384,8 +384,8 @@ function adaptExpertise(item: Field): DepthItem {
   const icon = EXPERTISE_ICONS[id];
   if (icon === undefined) {
     throw new Error(
-      `Aucune icône déclarée pour le sujet « ${id} ». ` +
-        "Ajouter l'entrée dans EXPERTISE_ICONS — un sujet sans icône laisserait un trou.",
+      `No icon declared for topic “${id}”. ` +
+        "Add the entry to EXPERTISE_ICONS — a topic without an icon would leave a hole.",
     );
   }
   return {
@@ -396,7 +396,7 @@ function adaptExpertise(item: Field): DepthItem {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Parcours
+// Background
 // ─────────────────────────────────────────────────────────────────────────────
 
 function adaptBackground(
@@ -428,14 +428,14 @@ function adaptBackground(
 
 function adaptJob(job: Field, locale: Locale, isMostRecent: boolean): Job {
   const end = job.child("end");
-  // Une seule expérience porte des rôles annexes ; les autres servent une liste
-  // vide, qui est une absence légitime et non une donnée manquante.
+  // Only one experience carries secondary roles; the others serve an empty
+  // list, which is a legitimate absence and not a missing value.
   const roles = job.child("roles").list({ allowEmpty: true });
 
   return {
     id: job.child("slug").text(),
     title: job.child("role").text(),
-    // « organisation · lieu » : une seule ligne à l'écran, deux faits à la source.
+    // "organisation · location": a single line on screen, two facts at the source.
     company: `${job.child("organisation").text()} · ${job.child("location").text()}`,
     dates: formatRange(
       parseYearMonth(job.child("start").text(), job.child("start").path),
@@ -445,8 +445,8 @@ function adaptJob(job: Field, locale: Locale, isMostRecent: boolean): Job {
     ...(roles.length > 0 ? { roles: roles.map((role) => role.text()) } : {}),
     bullets: job.child("highlights").list().map(readMarkup),
     stack: job.child("stack").list().map((item) => item.text()).join(" · "),
-    // Une seule expérience est dépliée au chargement : la plus récente. Le rang
-    // le dit déjà, l'API n'a pas à porter un drapeau d'affichage.
+    // Exactly one experience is expanded on load: the most recent one. Its rank
+    // already says so; the API has no business carrying a display flag.
     ...(isMostRecent ? { openByDefault: true } : {}),
   };
 }
@@ -481,7 +481,7 @@ function adaptOpenProject(project: Field, chrome: SiteChrome): TimelineRow {
   return {
     what: project.child("name").text(),
     where: readMarkup(project.child("description")),
-    // L'API sert une URL nue ; « Code source » est un libellé, donc du chrome.
+    // The API serves a bare URL; "Source code" is a label, so it is chrome.
     ...(sourceUrl.isPresent
       ? { link: { href: sourceUrl.text(), label: chrome.sourceCode } }
       : {}),
@@ -505,9 +505,9 @@ function adaptContact(contact: Field, chrome: SiteChrome): Contact {
     body: contact.child("body").text(),
     email: contact.child("email").text(),
     mailCta: chrome.mailCta,
-    // L'identifiant du lien sert de nom d'icône. Le contraindre au jeu embarqué
-    // fait qu'un profil ajouté à la source sans icône casse la construction,
-    // au lieu d'afficher un bouton vide.
+    // The link's id doubles as the icon name. Constraining it to the bundled set
+    // means a profile added at the source without an icon breaks the build,
+    // instead of showing an empty button.
     links: contact.child("links").list().map<ProfileLink>((link) => ({
       id: link.child("id").oneOf(ICON_NAMES),
       label: link.child("label").text(),

@@ -1,9 +1,10 @@
 /**
- * Socle : réinitialisation minimale, typographie de base, focus.
+ * Foundations: minimal reset, base typography, focus.
  *
- * Pas de feuille d'impression, et c'est une décision, pas un oubli — ADR 0004 :
- * le CV est un PDF produit par l'API, servi au web comme à l'app iOS. Une
- * feuille d'impression ici recréerait un second CV qui divergerait du premier.
+ * No print stylesheet, and that is a decision, not an oversight — ADR 0004: the
+ * résumé is a PDF produced by the API, served to the web and to the iOS app
+ * alike. A print stylesheet here would recreate a second résumé that would drift
+ * from the first.
  */
 
 *,
@@ -14,7 +15,7 @@
 
 html {
   scroll-behavior: smooth;
-  /* La barre de navigation est collante : une ancre doit s'arrêter sous elle. */
+  /* The navigation bar is sticky: an anchor has to come to rest below it. */
   scroll-padding-top: 86px;
   -webkit-text-size-adjust: 100%;
 }
@@ -54,6 +55,25 @@ p {
   color: var(--ink-3);
 }
 
+/**
+ * Lists carry no marker and no indent by default.
+ *
+ * Every list on this site is a layout device — a row of metadata, a set of
+ * chips, a stack of links — and not one of them is an enumeration a reader is
+ * meant to count. The markup stays a list because that is what it *is* to a
+ * screen reader; the bullet and the indent are presentation, and they go.
+ *
+ * This used to come from Tailwind's Preflight. Removing that dependency is what
+ * exposed it: the hero's metadata row sat 40px to the right of everything else,
+ * and nothing in this repository asked for it.
+ */
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
@@ -65,9 +85,9 @@ a:hover {
 }
 
 /**
- * Un seul style de focus, visible sur tous les fonds, et jamais retiré.
- * `:focus-visible` plutôt que `:focus` : le contour apparaît au clavier sans
- * encadrer un bouton qu'on vient de cliquer à la souris.
+ * A single focus style, visible on every background, and never removed.
+ * `:focus-visible` rather than `:focus`: the outline appears for the keyboard
+ * without framing a button that was just clicked with the mouse.
  */
 a:focus-visible,
 button:focus-visible,
@@ -84,9 +104,9 @@ code {
 }
 
 /**
- * Le lien d'évitement : premier élément focusable de la page, hors de l'écran
- * jusqu'à ce qu'il reçoive le focus. Sans lui, un utilisateur au clavier
- * traverse toute la navigation à chaque page.
+ * The skip link: the first focusable element on the page, off screen until it
+ * receives focus. Without it, a keyboard user walks through the whole navigation
+ * on every page.
  */
 .skip-link {
   position: absolute;

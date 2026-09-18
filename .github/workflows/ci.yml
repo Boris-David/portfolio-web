@@ -1,8 +1,8 @@
 name: CI
 
-# Une règle tient tout ce fichier : ce qui est annoncé comme une exigence doit
-# casser la construction quand il n'est pas tenu. Un score Lighthouse « visé »
-# qu'aucune garde ne vérifie n'est pas une exigence, c'est une intention.
+# One rule holds this whole file together: whatever is announced as a
+# requirement must break the build when it is not met. A Lighthouse score we
+# "aim for" that no guard checks is not a requirement, it is an intention.
 
 on:
   push:
@@ -11,23 +11,23 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Une nouvelle poussée annule la précédente : inutile de payer deux fois.
+  # A new push cancels the previous one: no point paying twice.
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Aucun secret n'est nécessaire : le dépôt est public et la CI ne déploie rien.
+# No secret is needed: the repository is public and CI deploys nothing.
 permissions:
   contents: read
 
 env:
   NODE_VERSION: "22"
-  # Les tests et le budget servent le site avec `wrangler dev`, le vrai magasin
-  # d'actifs. Pas de télémétrie depuis la CI, et pas d'invite interactive.
+  # The tests and the budget serve the site with `wrangler dev`, the real asset
+  # store. No telemetry from CI, and no interactive prompt.
   WRANGLER_SEND_METRICS: "false"
 
 jobs:
-  qualite:
-    name: Lint · types · design · tests unitaires
+  quality:
+    name: Lint · types · design · unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -39,34 +39,34 @@ jobs:
 
       - run: npm ci
 
-      # Le CSS de design doit dériver de design/tokens.json. Une valeur écrite à
-      # la main dans le fichier généré, ou un token changé sans régénération,
-      # échoue ici — pas trois semaines plus tard sur un écran.
-      - name: Le design dérive bien des tokens
+      # The design CSS must derive from design/tokens.json. A value written by
+      # hand into the generated file, or a token changed without regeneration,
+      # fails here — not three weeks later on a screen.
+      - name: The design does derive from the tokens
         run: npm run tokens:check
 
       - name: Lint
         run: npm run lint
 
-      - name: Typage
+      - name: Types
         run: npm run typecheck
 
-      - name: Tests unitaires
+      - name: Unit tests
         run: npm run test
 
-      # Dépôt public : aucune valeur de secret ne doit jamais entrer dans
-      # l'historique. Le hook de pre-commit garde le poste de travail, ce job
-      # garde ce qui arrive malgré tout sur la branche.
-      - name: Aucun secret dans l'arbre
+      # Public repository: no secret value must ever get into the history. The
+      # pre-commit hook guards the workstation, this job guards what reaches the
+      # branch anyway.
+      - name: No secret in the tree
         run: npm run check:secrets
 
-      # Seules les dépendances de production sont bloquantes : l'outillage de
-      # développement ne s'exécute jamais chez un visiteur.
-      - name: Audit des dépendances de production
+      # Only production dependencies are blocking: development tooling never
+      # runs on a visitor's machine.
+      - name: Audit of production dependencies
         run: npm audit --omit=dev --audit-level=high
 
   e2e:
-    name: Bout en bout · accessibilité
+    name: End-to-end · accessibility
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -78,24 +78,25 @@ jobs:
 
       - run: npm ci
 
-      - name: Installer Chromium
+      - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      # `playwright.config.ts` construit l'export et le sert avec `wrangler dev`,
-      # c'est-à-dire le magasin d'actifs de production, `_headers` compris : les
-      # tests voient ce que verra un visiteur, en-têtes de sécurité inclus.
-      - name: Tests de bout en bout et audit d'accessibilité
+      # `playwright.config.ts` builds the export and serves it with
+      # `wrangler dev`, that is to say the production asset store, `_headers`
+      # included: the tests see what a visitor will see, security headers and
+      # all.
+      - name: End-to-end tests and accessibility audit
         run: npm run test:e2e
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: rapport-playwright
+          name: playwright-report
           path: playwright-report/
           retention-days: 7
 
   lighthouse:
-    name: Budget Lighthouse
+    name: Lighthouse budget
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -107,21 +108,21 @@ jobs:
 
       - run: npm ci
 
-      - name: Construire
+      - name: Build
         run: npm run build
 
-      # Lighthouse CI n'est pas une dépendance du projet : c'est un outil de CI.
-      # L'ajouter au package.json ferait entrer une dizaine de vulnérabilités
-      # transitives dans l'audit d'un dépôt que des recruteurs vont lire.
-      # La version est épinglée ici, ce qui suffit à la reproductibilité.
-      # Servi par `wrangler dev` d'après `lighthouserc.json` : on mesure la
-      # couche qui servira réellement, pas un serveur de substitution.
-      - name: Budget Lighthouse (échoue sous 100)
+      # Lighthouse CI is not a project dependency: it is a CI tool. Adding it to
+      # package.json would bring a dozen transitive vulnerabilities into the
+      # audit of a repository recruiters are going to read. The version is
+      # pinned here, which is enough for reproducibility.
+      # Served by `wrangler dev` per `lighthouserc.json`: we measure the layer
+      # that will actually serve, not a stand-in server.
+      - name: Lighthouse budget (fails below 100)
         run: npx --yes @lhci/cli@0.15.x autorun --config=lighthouserc.json
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: rapports-lighthouse
+          name: lighthouse-reports
           path: .lighthouseci/reports/
           retention-days: 7

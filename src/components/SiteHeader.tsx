@@ -5,23 +5,23 @@ import type { Chrome, Locale, ProfileLink } from "@/content/types";
 import { cvUrl, otherLocale, pathForLocale } from "@/lib/site";
 
 /**
- * La barre de navigation.
+ * The navigation bar.
  *
- * Deux liens y méritent une explication :
+ * Two of its links deserve an explanation:
  *
- * **La langue** est un vrai lien vers une vraie page (`/` ↔ `/en`), pas un
- * bouton qui réécrirait le DOM. Une bascule en JavaScript n'a pas d'URL à
- * partager, rien à indexer par langue, et casse le bouton « précédent ».
+ * **The language** is a real link to a real page (`/` ↔ `/en`), not a button
+ * that would rewrite the DOM. A JavaScript switch has no URL to share, nothing
+ * to index per language, and breaks the back button.
  *
- * **Le CV** sort du site : c'est le PDF produit par l'API (ADR 0004).
+ * **The résumé** leaves the site: it is the PDF produced by the API (ADR 0004).
  *
- * Il s'ouvre dans un nouvel onglet, et ne porte **pas** `download`. Deux faits
- * l'imposent, vérifiés sur l'API en production plutôt que supposés : elle sert
- * le PDF en `Content-Disposition: inline`, et l'attribut `download` est de toute
- * façon **ignoré par les navigateurs sur un lien d'origine différente**.
- * `amissan.dev` et `api.amissan.dev` sont du même site mais pas de la même
- * origine : l'attribut n'aurait rien fait. Le garder aurait été promettre un
- * téléchargement que rien ne déclenche — l'`aria-label` dit donc « ouvrir ».
+ * It opens in a new tab, and carries **no** `download`. Two facts force that,
+ * verified against the API in production rather than assumed: it serves the PDF
+ * with `Content-Disposition: inline`, and the `download` attribute is in any
+ * case **ignored by browsers on a cross-origin link**. `amissan.dev` and
+ * `api.amissan.dev` are the same site but not the same origin: the attribute
+ * would have done nothing. Keeping it would have promised a download that
+ * nothing triggers — so the `aria-label` says "open".
  */
 export function SiteHeader({
   chrome,
@@ -31,9 +31,9 @@ export function SiteHeader({
 }: {
   readonly chrome: Chrome;
   readonly locale: Locale;
-  /** Le nom affiché — un fait, donc servi par la source, jamais écrit ici. */
+  /** The displayed name — a fact, so served by the source, never written here. */
   readonly brand: string;
-  /** Les profils publics, la même liste que la section Contact. */
+  /** The public profiles, the same list as the Contact section. */
   readonly links: readonly ProfileLink[];
 }) {
   return (
@@ -44,7 +44,7 @@ export function SiteHeader({
         <div className="nav__links">
           {chrome.navLinks.map((link) => (
             <a key={link.target} className="nav__link" href={`#${link.target}`} data-nav-link="">
-              {/* Le <span> porte le soulignement ; le lien porte la cible de 44 px. */}
+              {/* The <span> carries the underline; the link carries the 44 px target. */}
               <span>{link.label}</span>
             </a>
           ))}
@@ -63,7 +63,7 @@ export function SiteHeader({
 
           <ThemeToggle label={chrome.themeToggleLabel} />
 
-          {/* Raccourcis retirés sous 640 px : la section Contact les porte en entier. */}
+          {/* Shortcuts dropped below 640 px: the Contact section carries them in full. */}
           {links.map((link) => (
             <a
               key={link.id}
@@ -84,7 +84,7 @@ export function SiteHeader({
             data-testid="cv-link"
           >
             <Icon name="document" />
-            {/* Masqué sous 640 px : l'intitulé anglais « Résumé » y ferait déborder la barre. */}
+            {/* Hidden below 640 px: the English label "Résumé" would overflow the bar there. */}
             <span className="btn__label">{chrome.cvLabel}</span>
           </a>
         </div>

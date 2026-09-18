@@ -2,7 +2,7 @@ import { Icon } from "@/components/Icon";
 import { RichText } from "@/components/RichText";
 import type { Contact } from "@/content/types";
 
-/** L'adresse e-mail est le seul canal de contact publié — pas de formulaire, pas de téléphone. */
+/** The email address is the only published contact channel — no form, no phone number. */
 export function ContactSection({ contact }: { readonly contact: Contact }) {
   return (
     <section className="wrap" id="contact">

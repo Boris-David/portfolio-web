@@ -3,7 +3,7 @@ import { RichText } from "@/components/RichText";
 import { SectionHead } from "@/components/SectionHead";
 import type { DepthItem, SectionHead as SectionHeadContent } from "@/content/types";
 
-/** Trois sujets creusés, plutôt que quinze technologies listées. */
+/** Three topics gone into in depth, rather than fifteen technologies listed. */
 export function DepthSection({
   head,
   items,

@@ -2,28 +2,28 @@ import { animate } from "motion/mini";
 import { readEasing } from "./design-runtime";
 
 /**
- * L'animation du dépliage — le point que l'auteur tient le plus.
+ * The disclosure animation — the point the author cares about most.
  *
- * Trois exigences, et chacune décide d'un détail de ce fichier :
+ * Three requirements, and each one settles a detail of this file:
  *
- * **1. Pas de saut de hauteur.** On n'anime jamais vers `auto` : ni les Web
- * Animations ni une transition CSS ne savent le faire. On mesure la hauteur
- * réelle du contenu, on anime en pixels, puis on rend la main à `auto` à
- * l'arrivée — sans quoi la carte resterait figée à sa hauteur mesurée et
- * couperait son contenu au premier redimensionnement.
+ * **1. No height jump.** We never animate towards `auto`: neither the Web
+ * Animations API nor a CSS transition can do it. We measure the content's real
+ * height, animate in pixels, then hand back to `auto` on arrival — without
+ * which the card would stay frozen at its measured height and cut off its
+ * content on the first resize.
  *
- * **2. Jamais de `linear`.** Les courbes viennent des tokens, lues dans le CSS
- * calculé : `--e-io` pour la hauteur (entrée-sortie, ce qu'on attend d'un
- * dépliage), `--e-soft` pour le contenu (décélération longue).
+ * **2. Never `linear`.** The curves come from the tokens, read out of the
+ * computed CSS: `--e-io` for the height (in-out, which is what you expect from
+ * a disclosure), `--e-soft` for the content (long deceleration).
  *
- * **3. Interruptible.** Refermer une carte en cours d'ouverture doit repartir de
- * la hauteur courante, pas du début. D'où l'arrêt de l'animation précédente et
- * la mesure de la hauteur **réelle** au moment de l'inversion.
+ * **3. Interruptible.** Closing a card mid-opening must start again from the
+ * current height, not from the beginning. Hence stopping the previous animation
+ * and measuring the **real** height at the moment of reversal.
  *
- * On utilise `motion/mini` — l'`animate` bâti sur les Web Animations, deux
- * kilo-octets — parce que c'est tout ce dont on a besoin. Le moteur complet de
- * Motion apporterait springs, animations de layout et gestes : de quoi alourdir
- * chaque page pour des fonctionnalités qu'aucune de ces cartes n'utilise.
+ * We use `motion/mini` — the `animate` built on the Web Animations API, two
+ * kilobytes — because that is all we need. Motion's full engine would bring
+ * springs, layout animations and gestures: enough to weigh every page down for
+ * features none of these cards use.
  */
 
 const HEIGHT_MS = 620;
@@ -33,17 +33,17 @@ const CASCADE_STEP_MS = 80;
 const CASCADE_TRAVEL_PX = 14;
 
 export interface Animation {
-  /** Résolue à la fin, qu'elle soit naturelle ou provoquée par `stop()`. */
+  /** Resolved at the end, whether natural or brought about by `stop()`. */
   readonly finished: Promise<void>;
-  /** Vrai si l'animation a été interrompue — donc si sa cible n'a pas été atteinte. */
+  /** True if the animation was interrupted — so if its target was not reached. */
   readonly wasStopped: () => boolean;
   stop(): void;
 }
 
 /**
- * jsdom n'implémente pas les Web Animations, et un très vieux navigateur non
- * plus. On ne dégrade alors pas l'expérience : on retire l'animation, et le
- * dépliage reste instantané et parfaitement fonctionnel.
+ * jsdom does not implement the Web Animations API, and neither does a very old
+ * browser. We do not degrade the experience there: we drop the animation, and
+ * the disclosure stays instant and perfectly functional.
  */
 export function canAnimate(element: Element | null): element is HTMLElement {
   return element !== null && typeof (element as HTMLElement).animate === "function";
@@ -63,7 +63,7 @@ function run(
   const controls = animate(element, keyframes, options);
   let stopped = false;
   return {
-    // `stop()` laisse la promesse de Motion en suspens : on la neutralise ici.
+    // `stop()` leaves Motion's promise pending: we neutralise it here.
     finished: controls.then(
       () => {},
       () => {},
@@ -76,7 +76,7 @@ function run(
   };
 }
 
-/** Déplie `wrap` de sa hauteur courante jusqu'à la hauteur naturelle de `body`. */
+/** Expands `wrap` from its current height to the natural height of `body`. */
 export function expandHeight(wrap: HTMLElement, body: HTMLElement): Animation {
   if (!canAnimate(wrap)) return SETTLED;
 
@@ -89,9 +89,9 @@ export function expandHeight(wrap: HTMLElement, body: HTMLElement): Animation {
 
   void animation.finished.then(() => {
     /**
-     * Uniquement si l'ouverture est allée au bout. Si une fermeture l'a
-     * interrompue, rendre la hauteur à `auto` ferait sauter la carte à sa
-     * taille pleine au milieu du repli.
+     * Only if the opening ran to completion. If a close interrupted it, handing
+     * the height back to `auto` would make the card jump to its full size in
+     * the middle of the collapse.
      */
     if (!animation.wasStopped()) wrap.style.height = "";
   });
@@ -99,7 +99,7 @@ export function expandHeight(wrap: HTMLElement, body: HTMLElement): Animation {
   return animation;
 }
 
-/** Replie `wrap` de sa hauteur courante jusqu'à zéro. */
+/** Collapses `wrap` from its current height down to zero. */
 export function collapseHeight(wrap: HTMLElement): Animation {
   if (!canAnimate(wrap)) return SETTLED;
   const from = wrap.getBoundingClientRect().height;
@@ -111,12 +111,12 @@ export function collapseHeight(wrap: HTMLElement): Animation {
 }
 
 /**
- * Le contenu entre en cascade derrière la hauteur.
+ * The content cascades in behind the height.
  *
- * Le décalage de départ laisse la carte s'ouvrir avant que le texte n'arrive :
- * si les deux partaient ensemble, on lirait un texte qui bouge encore. Le pas
- * est volontairement court — trois colonnes à 80 ms, c'est perceptible sans
- * jamais faire attendre.
+ * The starting delay lets the card open before the text arrives: if both left
+ * together, you would be reading text that is still moving. The step is
+ * deliberately short — three columns at 80 ms is perceptible without ever
+ * making anyone wait.
  */
 export function cascadeIn(items: readonly HTMLElement[]): Animation[] {
   return items.filter(canAnimate).map((item, index) =>

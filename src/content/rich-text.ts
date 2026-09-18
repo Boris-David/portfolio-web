@@ -1,23 +1,23 @@
 /**
- * Un balisage volontairement minuscule pour le contenu éditorial.
+ * A deliberately tiny markup for the editorial content.
  *
- * Le contenu a besoin de deux emphases, et de deux seulement : du **gras** pour
- * le fait qu'un recruteur doit voir en trois secondes, et du `code` pour les
- * termes techniques. Trois façons de le porter étaient possibles :
+ * The content needs two emphases, and two only: **bold** for the fact a
+ * recruiter has to see in three seconds, and `code` for technical terms. Three
+ * ways of carrying that were possible:
  *
- *   - du HTML injecté via `dangerouslySetInnerHTML` — ce que faisait la maquette.
- *     Écarté : sur un dépôt public, une surface d'injection ouverte pour deux
- *     balises est un signal qu'on ne veut pas envoyer, et elle deviendra
- *     réellement dangereuse le jour où le contenu viendra de l'API ;
- *   - un arbre de nœuds écrit à la main dans les fichiers de contenu. Sûr, mais
- *     illisible à l'écriture — et un contenu pénible à écrire finit mal écrit ;
- *   - **ce balisage**, analysé vers des nœuds typés. Le contenu reste une
- *     chaîne — donc sérialisable tel quel par l'API le jour venu — et le rendu
- *     ne produit jamais que du texte et deux éléments connus.
+ *   - HTML injected through `dangerouslySetInnerHTML` — what the mockup did.
+ *     Ruled out: on a public repository, an injection surface left open for two
+ *     tags is a signal we do not want to send, and it would become genuinely
+ *     dangerous the day the content came from the API;
+ *   - a node tree written by hand in the content files. Safe, but unreadable to
+ *     write — and content that is painful to write ends up badly written;
+ *   - **this markup**, parsed into typed nodes. The content stays a string — so
+ *     serialisable as is by the API when the day comes — and rendering never
+ *     produces anything but text and two known elements.
  *
- * Pas de nesting : `**un `code` en gras**` n'existe pas, parce qu'aucun texte du
- * portfolio n'en a besoin et qu'une grammaire qu'on n'utilise pas est une
- * grammaire qu'on maintient pour rien.
+ * No nesting: ``**some `code` in bold**`` does not exist, because no text in the
+ * portfolio needs it and a grammar we do not use is a grammar we maintain for
+ * nothing.
  */
 
 export type RichNode =
@@ -25,7 +25,7 @@ export type RichNode =
   | { readonly kind: "strong"; readonly value: string }
   | { readonly kind: "code"; readonly value: string };
 
-/** `**gras**` ou `` `code` ``, non imbriqués, le reste est du texte. */
+/** `**bold**` or `` `code` ``, not nested; everything else is text. */
 const TOKEN = /\*\*([^*]+)\*\*|`([^`]+)`/g;
 
 export function parseRichText(source: string): readonly RichNode[] {
@@ -53,8 +53,8 @@ export function parseRichText(source: string): readonly RichNode[] {
 }
 
 /**
- * Le même texte, sans balisage — pour les endroits qui n'acceptent pas de
- * balise : `alt`, `aria-label`, `<title>`, Open Graph.
+ * The same text with the markup removed — for the places that accept no tag:
+ * `alt`, `aria-label`, `<title>`, Open Graph.
  */
 export function plainText(source: string): string {
   return parseRichText(source)

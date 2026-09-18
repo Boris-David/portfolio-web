@@ -4,25 +4,25 @@ import { LayoutShell } from "@/app/layout-shell";
 import { DEFAULT_LOCALE, pathForLocale } from "@/lib/site";
 
 /**
- * La page 404, servie par Cloudflare pour toute URL inconnue
- * (`not_found_handling: "404-page"` dans `wrangler.jsonc`).
+ * The 404 page, served by Cloudflare for any unknown URL
+ * (`not_found_handling: "404-page"` in `wrangler.jsonc`).
  *
- * Elle vit à la racine de `app/` et non dans un groupe de langue : une adresse
- * inconnue n'appartient à aucune langue, et un `not-found` placé dans un groupe
- * ne répondrait que pour les routes de ce groupe — pas pour les URL qui ne
- * correspondent à rien, qui sont précisément le cas à traiter.
+ * It lives at the root of `app/` rather than in a language group: an unknown
+ * address belongs to no language, and a `not-found` placed inside a group would
+ * only answer for that group's routes — not for URLs that match nothing, which
+ * is precisely the case to handle.
  *
- * Elle porte donc son propre document. Le site a deux racines — une par langue —
- * donc aucune mise en page ne l'enveloppe : `LayoutShell` lui rend `<html>`,
- * les polices et le jeu d'icônes, exactement comme aux deux autres routes.
+ * It therefore carries its own document. The site has two roots — one per
+ * language — so no layout wraps it: `LayoutShell` gives it `<html>`, the fonts
+ * and the icon sprite, exactly as it does for the other two routes.
  *
- * Sans elle, Next livrait sa page par défaut : « This page could not be
- * found. », en anglais, sans mise en page, sur un site soigné jusqu'au chevron.
+ * Without it, Next would ship its default page: "This page could not be found.",
+ * in English, with no layout, on a site polished down to the chevron.
  */
 /**
- * Pas de `robots` ici : Next marque déjà la route « introuvable » en `noindex`.
- * Le redéclarer produisait DEUX balises `robots` dans le même document — une
- * duplication que rien ne rattrape, et que le test ci-contre a attrapée.
+ * No `robots` here: Next already marks the "not found" route as `noindex`.
+ * Redeclaring it produced TWO `robots` tags in the same document — a
+ * duplication nothing catches, and that the test alongside did catch.
  */
 export const metadata: Metadata = {
   title: "Page introuvable — Amissan Amoussou-G.",

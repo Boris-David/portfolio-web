@@ -1,17 +1,16 @@
 import type { Locale } from "@/content/types";
 
 /**
- * Les constantes de site : langues, URLs canoniques, et l'endpoint du CV.
+ * The site constants: locales, canonical URLs, and the résumé endpoint.
  *
- * Tout ce qui peut changer d'un environnement à l'autre passe par une variable
- * d'environnement avec une valeur par défaut **utilisable** : une prévisualisation
- * qui plante faute d'avoir défini trois variables est une prévisualisation qu'on
- * ne fait pas.
+ * Anything that can change from one environment to another goes through an
+ * environment variable with a **usable** default: a preview that blows up
+ * because three variables were not set is a preview nobody runs.
  */
 
 export const LOCALES = ["fr", "en"] as const satisfies readonly Locale[];
 
-/** Le français est servi à la racine : c'est la langue de l'auteur et du marché principal. */
+/** French is served at the root: it is the author's language and the primary market. */
 export const DEFAULT_LOCALE: Locale = "fr";
 
 export function isLocale(value: string): value is Locale {
@@ -19,9 +18,9 @@ export function isLocale(value: string): value is Locale {
 }
 
 /**
- * `/` pour le français, `/en` pour l'anglais — de vraies routes, rendues côté
- * serveur. Une bascule de langue en JavaScript n'aurait ni URL partageable, ni
- * `hreflang` exploitable, ni page indexable par langue.
+ * `/` for French, `/en` for English — real routes, rendered on the server. A
+ * language switch done in JavaScript would have no shareable URL, no usable
+ * `hreflang`, and no page indexable per language.
  */
 export function pathForLocale(locale: Locale): string {
   return locale === DEFAULT_LOCALE ? "/" : `/${locale}`;
@@ -31,7 +30,7 @@ export function otherLocale(locale: Locale): Locale {
   return locale === "fr" ? "en" : "fr";
 }
 
-/** L'origine publique, utilisée pour les URLs canoniques et Open Graph. */
+/** The public origin, used for the canonical and Open Graph URLs. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://amissan.dev").replace(
   /\/$/,
   "",
@@ -42,16 +41,16 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
- * Le CV vient de `portfolio-api`, jamais du site.
+ * The résumé comes from `portfolio-api`, never from the site.
  *
- * ADR 0004 : un seul moteur de rendu produit **un seul fichier**, servi en blob
- * au web comme à l'app iOS. Le site ne fait que relayer le lien — il n'a ni
- * feuille d'impression, ni gabarit de CV, et il ne doit pas en avoir : deux
- * gabarits, ce sont deux CV qui divergent.
+ * ADR 0004: a single rendering engine produces **a single file**, served as a
+ * blob to the web and to the iOS app alike. The site only relays the link — it
+ * has no print stylesheet, no résumé template, and it must not have one: two
+ * templates mean two résumés that drift apart.
  *
- * ⚠️ L'API est construite en parallèle. L'URL est câblée et configurable ; le
- * chemin assumé est documenté dans le README et dans `.env.example`. Le jour où
- * l'API tranche un autre chemin, une variable d'environnement suffit.
+ * ⚠️ The API is being built in parallel. The URL is wired up and configurable;
+ * the assumed path is documented in the README and in `.env.example`. The day
+ * the API settles on a different path, one environment variable is enough.
  */
 export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.amissan.dev").replace(
   /\/$/,
@@ -59,8 +58,8 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://ap
 );
 
 export function cvUrl(locale: Locale): string {
-  // Le dernier segment de l'URL EST le nom du fichier : Safari sur iOS
-  // ignore `Content-Disposition` et nomme le partage d'après lui. Servi
-  // sur `/v1/cv/fr.pdf`, il s'appelait « fr ».
+  // The last segment of the URL IS the filename: Safari on iOS ignores
+  // `Content-Disposition` and names the share sheet after it. Served at
+  // `/v1/cv/fr.pdf`, it was called "fr".
   return `${API_BASE_URL}/v1/cv/amissan.ag-cv-${locale}.pdf`;
 }

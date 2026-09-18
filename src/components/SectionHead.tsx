@@ -2,11 +2,11 @@ import { RichText } from "@/components/RichText";
 import type { SectionHead as SectionHeadContent } from "@/content/types";
 
 /**
- * L'en-tête d'une section : le numéro, le titre, et l'entrée en matière.
+ * A section's heading: the number, the title, and the opening lines.
  *
- * Le numéro est décoratif dans son rôle mais informatif dans son texte
- * (« 01 · Études de cas ») : il reste donc du vrai texte, lu par les lecteurs
- * d'écran, et non un pseudo-élément CSS.
+ * The number is decorative in its role but informative in its text
+ * ("01 · Études de cas"): it therefore stays real text, read out by screen
+ * readers, rather than a CSS pseudo-element.
  */
 export function SectionHead({ head }: { readonly head: SectionHeadContent }) {
   return (

@@ -1,53 +1,55 @@
 #!/usr/bin/env node
 /**
- * Refuse toute valeur de secret dans l'arbre versionné.
+ * Rejects any secret value in the tracked tree.
  *
- * Ce dépôt est **public**, et un secret poussé est irréversible : il vit dans
- * l'historique même après le commit qui le retire. La seule protection qui vaut
- * est celle qui s'exécute avant.
+ * This repository is **public**, and a pushed secret is irreversible: it lives
+ * in the history even after the commit that removes it. The only protection
+ * worth anything is the one that runs beforehand.
  *
- * Deux gardes, complémentaires et pas redondantes :
+ * Two guards, complementary and not redundant:
  *
- *   - `.githooks/pre-commit` du workspace, branché par `core.hooksPath`, refuse
- *     le commit sur le poste de travail. C'est la meilleure : rien n'est écrit ;
- *   - **ce script**, exécuté par la CI. Il existe parce que le hook du workspace
- *     n'est pas dans ce dépôt : un clone isolé de `portfolio-web` ne l'a pas, et
- *     `core.hooksPath` ne survit pas à un clone. Sans ce script, la garde
- *     disparaîtrait exactement là où le dépôt devient public.
+ *   - the workspace's `.githooks/pre-commit`, wired up through `core.hooksPath`,
+ *     rejects the commit on the workstation. That one is the best: nothing gets
+ *     written;
+ *   - **this script**, run by CI. It exists because the workspace hook is not in
+ *     this repository: a standalone clone of `portfolio-web` does not have it,
+ *     and `core.hooksPath` does not survive a clone. Without this script, the
+ *     guard would disappear at exactly the point where the repository becomes
+ *     public.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
 
-/** Des motifs de **valeurs**, pas de noms de variables. */
+/** Patterns for **values**, not for variable names. */
 const PATTERNS = [
-  { label: "clé privée", pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
-  { label: "jeton GitHub", pattern: /\bgh[pousr]_[A-Za-z0-9]{36,}/ },
-  { label: "clé Google API", pattern: /\bAIza[0-9A-Za-z_-]{35}\b/ },
-  { label: "clé de type OpenAI", pattern: /\bsk-[A-Za-z0-9]{20,}/ },
-  { label: "identifiant AWS", pattern: /\bAKIA[0-9A-Z]{16}\b/ },
-  { label: "jeton Vercel", pattern: /\bvercel_[A-Za-z0-9]{24,}/ },
-  { label: "compte de service Google", pattern: /"type"\s*:\s*"service_account"/ },
+  { label: "private key", pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
+  { label: "GitHub token", pattern: /\bgh[pousr]_[A-Za-z0-9]{36,}/ },
+  { label: "Google API key", pattern: /\bAIza[0-9A-Za-z_-]{35}\b/ },
+  { label: "OpenAI-style key", pattern: /\bsk-[A-Za-z0-9]{20,}/ },
+  { label: "AWS access key id", pattern: /\bAKIA[0-9A-Z]{16}\b/ },
+  { label: "Vercel token", pattern: /\bvercel_[A-Za-z0-9]{24,}/ },
+  { label: "Google service account", pattern: /"type"\s*:\s*"service_account"/ },
   /**
-   * Marqueur d'employeur : la règle éditoriale du portfolio interdit tout
-   * domaine d'employeur dans un dépôt public — auteur, message ou contenu.
+   * Employer marker: the portfolio's editorial rule forbids any employer domain
+   * in a public repository — author, message or content.
    */
-  { label: "domaine d'employeur", pattern: /\b(instant-system|inetum)\.com\b/ },
+  { label: "employer domain", pattern: /\b(instant-system|inetum)\.com\b/ },
 ];
 
-/** Des fichiers qui n'ont rien à faire dans un dépôt public, quel qu'en soit le contenu. */
+/** Files that have no business in a public repository, whatever they contain. */
 const FORBIDDEN_PATHS = [/^\.env$/, /^\.env\.local$/, /^\.env\..*\.local$/, /\.pem$/, /\.p12$/];
 
-/** Ce fichier définit les motifs : il les contient, par construction. */
+/** This file defines the patterns: it contains them, by construction. */
 const SELF = "scripts/check-secrets.mjs";
 
 /**
- * Les fichiers versionnés **et** ceux qui ne le sont pas encore mais que
- * `.gitignore` n'exclut pas.
+ * Tracked files **and** those not tracked yet that `.gitignore` does not
+ * exclude.
  *
- * N'inspecter que l'index aurait deux angles morts : avant le premier commit,
- * il est vide — et le script annoncerait fièrement zéro secret dans zéro
- * fichier ; et un secret déposé mais pas encore ajouté passerait, alors que
- * c'est exactement le moment où on veut l'attraper.
+ * Inspecting only the index would have two blind spots: before the first
+ * commit it is empty — and the script would proudly report zero secrets in zero
+ * files; and a secret dropped in but not yet added would slip through, which is
+ * exactly the moment we want to catch it.
  */
 const list = (...args) =>
   execFileSync("git", ["ls-files", "-z", ...args], { encoding: "utf8" }).split("\0").filter(Boolean);
@@ -55,7 +57,7 @@ const list = (...args) =>
 const tracked = [...new Set([...list(), ...list("--others", "--exclude-standard")])];
 
 if (tracked.length === 0) {
-  console.error("✖ aucun fichier à inspecter — la garde ne garde rien. Vérifier le dépôt git.");
+  console.error("✖ no file to inspect — the guard guards nothing. Check the git repository.");
   process.exit(1);
 }
 
@@ -66,7 +68,7 @@ for (const file of tracked) {
 
   for (const forbidden of FORBIDDEN_PATHS) {
     if (forbidden.test(file)) {
-      findings.push(`${file} — fichier interdit dans un dépôt public`);
+      findings.push(`${file} — file forbidden in a public repository`);
     }
   }
 
@@ -74,9 +76,9 @@ for (const file of tracked) {
   try {
     stats = statSync(file);
   } catch {
-    continue; // Fichier supprimé mais encore indexé : rien à lire.
+    continue; // File deleted but still in the index: nothing to read.
   }
-  // Les binaires (images, polices) ne portent pas de secret en clair.
+  // Binaries (images, fonts) do not carry a secret in cleartext.
   if (!stats.isFile() || stats.size > 2_000_000) continue;
   if (/\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|pdf|zip)$/i.test(file)) continue;
 
@@ -91,10 +93,10 @@ for (const file of tracked) {
 }
 
 if (findings.length > 0) {
-  console.error("✖ Valeurs interdites dans un dépôt public :");
+  console.error("✖ Values forbidden in a public repository:");
   for (const finding of findings) console.error(`  ${finding}`);
-  console.error("\n  L'historique est irréversible : retirer avant de commiter, pas après.");
+  console.error("\n  History is irreversible: remove before committing, not after.");
   process.exit(1);
 }
 
-console.log(`✓ aucun secret ni marqueur d'employeur dans ${tracked.length} fichiers versionnés.`);
+console.log(`✓ no secret and no employer marker in ${tracked.length} tracked files.`);

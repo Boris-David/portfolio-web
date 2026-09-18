@@ -7,17 +7,17 @@ import { setupReveal } from "@/lib/effects/reveal";
 import { watchReducedMotion } from "@/lib/effects/reduced-motion";
 
 /**
- * La couche d'amélioration progressive de la page, montée une seule fois.
+ * The page's progressive enhancement layer, mounted exactly once.
  *
- * C'est le seul endroit du site où du code React touche au DOM qu'il n'a pas
- * rendu, et c'est un arbitrage assumé : l'alternative — faire de chaque section
- * un composant client pour lui donner une `ref` — enverrait tout le balisage de
- * la page dans le bundle pour un fondu de 0,9 seconde. Ces effets sont
- * **décoratifs et retirables** ; les traiter comme une couche par-dessus le
- * document rendu est exactement ce qu'ils sont.
+ * This is the only place on the site where React code touches DOM it did not
+ * render, and it is a deliberate call: the alternative — making every section a
+ * client component just to give it a `ref` — would send the page's entire markup
+ * into the bundle for a 0.9-second fade. These effects are **decorative and
+ * removable**; treating them as a layer on top of the rendered document is
+ * exactly what they are.
  *
- * Aucun de ces effets ne conditionne la lecture : sans JavaScript, ou en
- * `prefers-reduced-motion`, la page est complète et immobile.
+ * None of these effects gate reading: without JavaScript, or under
+ * `prefers-reduced-motion`, the page is complete and still.
  */
 export function PageEffects() {
   useEffect(() => {
@@ -29,7 +29,7 @@ export function PageEffects() {
     };
 
     start();
-    // La préférence de mouvement peut basculer en cours de session.
+    // The motion preference can flip mid-session.
     const unwatch = watchReducedMotion(start);
 
     return () => {

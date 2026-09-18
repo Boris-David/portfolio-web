@@ -8,22 +8,21 @@ import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 /**
- * Le squelette commun aux deux racines de langue.
+ * The skeleton shared by the two language roots.
  *
- * Chaque langue a sa propre `layout.tsx` — c'est ce qui donne à chacune un
- * `<html lang>` juste, des métadonnées propres et une URL canonique distincte.
- * Elles délèguent toutes deux ici pour que la structure du document ne soit
- * écrite qu'une fois.
+ * Each language has its own `layout.tsx` — that is what gives each one a
+ * correct `<html lang>`, its own metadata and a distinct canonical URL. Both
+ * delegate here so that the document structure is written only once.
  */
 
 /**
- * Les polices sont **auto-hébergées** par `next/font` : pas de requête vers
- * Google Fonts, donc pas de connexion tierce sur le chemin critique, et pas de
- * décalage de mise en page — Next calcule une police de repli de mêmes métriques.
+ * The fonts are **self-hosted** by `next/font`: no request to Google Fonts, so
+ * no third-party connection on the critical path, and no layout shift — Next
+ * computes a fallback font with matching metrics.
  *
- * La variable injectée est celle que `tokens.generated.css` attend : la chaîne
- * de polices reste décrite par les tokens, ce chargeur ne fait qu'y brancher la
- * famille réellement téléchargée.
+ * The injected variable is the one `tokens.generated.css` expects: the font
+ * stack is still described by the tokens, and this loader only plugs the
+ * actually-downloaded family into it.
  */
 const display = Fraunces({
   subsets: ["latin"],
@@ -45,20 +44,20 @@ export async function buildMetadata(locale: Locale): Promise<Metadata> {
   return {
     metadataBase: new URL(SITE_URL),
     /**
-     * Le **témoin de fraîcheur** exigé par l'ADR 0006.
+     * The **freshness witness** required by ADR 0006.
      *
-     * L'empreinte du contenu sur lequel cette page a été construite, publiée
-     * dans la page elle-même. L'API sert la sienne dans `meta.contentVersion` :
-     * comparer les deux répond en une requête à la seule question qu'on ne
-     * pouvait pas poser jusqu'ici — *le site en ligne a-t-il été construit sur
-     * le contenu courant ?*
+     * The fingerprint of the content this page was built on, published in the
+     * page itself. The API serves its own in `meta.contentVersion`: comparing
+     * the two answers, in a single request, the one question we could not ask
+     * until now — *was the live site built on the current content?*
      *
-     * Sans lui, un site figé sur du contenu périmé est **indiscernable** d'un
-     * site à jour : tout répond 200, tout s'affiche, et la page ment.
+     * Without it, a site frozen on stale content is **indistinguishable** from
+     * an up-to-date one: everything answers 200, everything renders, and the
+     * page lies.
      *
-     * Elle voyage avec la page plutôt que dans un fichier à part parce qu'un
-     * gestionnaire de route remettrait un Worker sur le chemin chaud de chaque
-     * page vue, ce que l'hébergement gratuit ne supporte pas (ADR 0005).
+     * It travels with the page rather than in a separate file because a route
+     * handler would put a Worker back on the hot path of every page view, which
+     * the free hosting does not support (ADR 0005).
      */
     other: { "content-version": await getContentVersion(locale) },
     title: meta.title,
@@ -66,9 +65,9 @@ export async function buildMetadata(locale: Locale): Promise<Metadata> {
     alternates: {
       canonical: path,
       /**
-       * `hreflang` par langue, plus `x-default` vers la racine : sans lui, un
-       * moteur choisit lui-même la version à servir à un visiteur dont la langue
-       * n'est ni le français ni l'anglais.
+       * One `hreflang` per language, plus `x-default` pointing at the root:
+       * without it, a search engine picks for itself which version to serve to
+       * a visitor whose language is neither French nor English.
        */
       languages: {
         ...Object.fromEntries(LOCALES.map((code) => [code, pathForLocale(code)])),
@@ -76,10 +75,10 @@ export async function buildMetadata(locale: Locale): Promise<Metadata> {
       },
     },
     /**
-     * L'image Open Graph n'est pas déclarée ici : `opengraph-image.tsx` la
-     * fabrique par route, et Next l'injecte lui-même avec ses dimensions. La
-     * déclarer aussi à la main produirait deux balises `og:image`, dont une
-     * potentiellement fausse.
+     * The Open Graph image is not declared here: `opengraph-image.tsx` builds
+     * it per route, and Next injects it itself along with its dimensions.
+     * Declaring it by hand as well would produce two `og:image` tags, one of
+     * them potentially wrong.
      */
     openGraph: {
       type: "profile",
@@ -97,9 +96,9 @@ export async function buildMetadata(locale: Locale): Promise<Metadata> {
     },
     robots: { index: true, follow: true },
     /**
-     * Une favicone SVG générée depuis les tokens : 230 octets, nette à toutes
-     * les tailles, et qui suit la palette. Le `.ico` du gabarit de départ en
-     * pesait 26 000 — pour afficher le logo de Next.js sur un portfolio.
+     * An SVG favicon generated from the tokens: 230 bytes, sharp at every size,
+     * and it follows the palette. The starting template's `.ico` weighed 26,000
+     * — to display the Next.js logo on a portfolio.
      */
     icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }] },
   };
@@ -115,7 +114,7 @@ export function LayoutShell({
   return (
     <html lang={locale} className={`${display.variable} ${text.variable}`} suppressHydrationWarning>
       <head>
-        {/* Avant toute peinture : pose `js` et le thème mémorisé. Voir lib/theme.ts. */}
+        {/* Before any paint: sets `js` and the remembered theme. See lib/theme.ts. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
       </head>
       <body>

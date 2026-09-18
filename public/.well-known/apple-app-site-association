@@ -4,14 +4,14 @@
       {
         "appIDs": ["R55L6Z8K6R.dev.amissan.portfolio"],
         "components": [
-          { "/": "/", "comment": "L'accueil ouvre l'onglet Profil." },
-          { "/": "/en", "comment": "La page anglaise ouvre l'onglet Profil, en anglais." },
-          { "/": "/cas/*", "comment": "Une étude de cas ouvre son écran." },
-          { "/": "/parcours", "comment": "Le parcours ouvre son onglet." },
+          { "/": "/", "comment": "The home page opens the Profile tab." },
+          { "/": "/en", "comment": "The English page opens the Profile tab, in English." },
+          { "/": "/cas/*", "comment": "A case study opens its own screen." },
+          { "/": "/parcours", "comment": "The background opens its tab." },
           {
             "/": "/v1/*",
             "exclude": true,
-            "comment": "L'API n'est pas servie ici, mais on l'exclut par principe."
+            "comment": "The API is not served here, but we exclude it on principle."
           }
         ]
       }

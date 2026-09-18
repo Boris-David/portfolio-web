@@ -4,17 +4,17 @@ import { getSiteContent } from "@/content/source";
 import type { Locale } from "@/content/types";
 
 /**
- * L'image Open Graph — la vignette qu'un recruteur voit quand le lien est
- * partagé sur LinkedIn.
+ * The Open Graph image — the thumbnail a recruiter sees when the link is
+ * shared on LinkedIn.
  *
- * Elle est **générée au build** plutôt que dessinée à la main : une image
- * exportée deviendrait une deuxième source de vérité pour l'accroche et pour
- * les couleurs, et divergerait à la première retouche du contenu.
+ * It is **generated at build time** rather than drawn by hand: an exported
+ * image would become a second source of truth for the headline and for the
+ * colours, and would drift on the first content edit.
  *
- * Les couleurs viennent de `design/tokens.json`, jamais d'un hexadécimal écrit
- * ici. La typographie, en revanche, est celle du moteur : embarquer Fraunces
- * demanderait de lire un fichier de police au build pour un gain purement
- * décoratif sur une vignette de 1200 × 630.
+ * The colours come from `design/tokens.json`, never from a hex value written
+ * here. The typography, on the other hand, is the engine's own: embedding
+ * Fraunces would mean reading a font file at build time for a purely decorative
+ * gain on a 1200 × 630 thumbnail.
  */
 
 export const OG_SIZE = { width: 1200, height: 630 };

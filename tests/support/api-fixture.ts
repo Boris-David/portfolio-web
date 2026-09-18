@@ -6,23 +6,23 @@ import frFixture from "../fixtures/portfolio-fr.json";
 import enFixture from "../fixtures/portfolio-en.json";
 
 /**
- * Le contenu servi par l'API, figé — pour que les tests unitaires exercent le
- * **vrai** chemin de `source.ts` sans dépendre du réseau.
+ * The content the API serves, frozen — so that the unit tests exercise the
+ * **real** path through `source.ts` without depending on the network.
  *
- * Deux façons de tester une source distante existaient :
+ * Two ways of testing a remote source existed:
  *
- *   - adapter la fixture à la main dans chaque test. Rapide à écrire, et ça
- *     laisse `source.ts` — la mémoïsation, le choix du chrome, le filtrage —
- *     entièrement non testé. C'est-à-dire précisément le code nouveau ;
- *   - **remplacer le transport**, et laisser tout le reste s'exécuter pour de
- *     vrai. Retenu : le seul élément simulé est celui qu'on ne veut pas
- *     joindre, la requête HTTP elle-même.
+ *   - adapt the fixture by hand in each test. Quick to write, and it leaves
+ *     `source.ts` — the memoisation, the chrome selection, the filtering —
+ *     entirely untested. Which is to say, precisely the new code;
+ *   - **replace the transport**, and let everything else run for real. Chosen:
+ *     the only thing stubbed out is the one thing we do not want to reach, the
+ *     HTTP request itself.
  *
- * La fixture n'est **pas** une seconde source de vérité : c'est une capture
- * datée, et un test de contrat — `npm run test:contract` — vérifie contre l'API
- * en production qu'elle décrit toujours la même forme. Une capture qui dérive
- * sans qu'on l'apprenne redeviendrait une seconde vérité, et c'est exactement
- * ce que l'ADR 0002 refuse.
+ * The fixture is **not** a second source of truth: it is a dated snapshot, and
+ * a contract test — `npm run test:contract` — checks against the API in
+ * production that it still describes the same shape. A snapshot that drifts
+ * without us finding out would become a second truth again, and that is exactly
+ * what ADR 0002 rules out.
  */
 
 export const FIXTURES: Readonly<Record<Locale, unknown>> = {
@@ -32,16 +32,16 @@ export const FIXTURES: Readonly<Record<Locale, unknown>> = {
 
 let calls = 0;
 
-/** Le nombre de requêtes servies depuis la pose du stub — compté, jamais supposé. */
+/** The number of requests served since the stub went in — counted, never assumed. */
 export function fixtureRequestCount(): number {
   return calls;
 }
 
 /**
- * Repart d'un état net : caches vidés, compteur remis à zéro.
+ * Starts again from a clean state: caches cleared, counter back to zero.
  *
- * Nécessaire au test de mémoïsation, qui doit observer la **première** lecture.
- * Les autres tests profitent au contraire du cache partagé du fichier.
+ * Needed by the memoisation test, which has to observe the **first** read. The
+ * other tests, conversely, benefit from the file's shared cache.
  */
 export function resetFixtureState(): void {
   resetPortfolioCache();
@@ -50,19 +50,19 @@ export function resetFixtureState(): void {
 }
 
 /**
- * Sert les fixtures à la place du réseau, pour la durée d'un fichier de tests.
+ * Serves the fixtures instead of the network, for the duration of one test file.
  *
- * Posé en `beforeAll` — et non `beforeEach` — parce qu'un fichier de tests doit
- * pouvoir résoudre son contenu une seule fois, dans son propre `beforeAll` :
- * celui-ci s'exécute après le nôtre, l'ordre d'enregistrement suffisant à le
- * garantir puisque `withApiFixtures()` est appelée en tête de module.
+ * Installed in `beforeAll` — and not `beforeEach` — because a test file must be
+ * able to resolve its content exactly once, in its own `beforeAll`: that one
+ * runs after ours, and registration order is enough to guarantee it since
+ * `withApiFixtures()` is called at the top of the module.
  *
- * Nommée `with…` et non `use…` : le préfixe `use` désigne un hook React, et la
- * règle `rules-of-hooks` refuse — à juste titre — qu'on en appelle un au niveau
- * d'un module.
+ * Named `with…` and not `use…`: the `use` prefix denotes a React hook, and the
+ * `rules-of-hooks` rule refuses — rightly — to let one be called at module
+ * level.
  *
- * Une URL inattendue **échoue** au lieu de renvoyer quoi que ce soit : un test
- * qui tape sans le savoir une autre route doit le découvrir tout de suite.
+ * An unexpected URL **throws** instead of returning anything: a test that
+ * unknowingly hits another route should find out straight away.
  */
 export function withApiFixtures(): void {
   beforeAll(() => {
@@ -75,7 +75,7 @@ export function withApiFixtures(): void {
       const lang = url.searchParams.get("lang");
 
       if (!url.pathname.endsWith("/v1/portfolio") || (lang !== "fr" && lang !== "en")) {
-        throw new Error(`Requête non prévue par les fixtures : ${url.toString()}`);
+        throw new Error(`Request not covered by the fixtures: ${url.toString()}`);
       }
       return new Response(JSON.stringify(FIXTURES[lang]), {
         status: 200,

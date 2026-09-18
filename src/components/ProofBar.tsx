@@ -1,12 +1,12 @@
 import type { ProofPoint } from "@/content/types";
 
 /**
- * Le bandeau des quatre chiffres.
+ * The band of four figures.
  *
- * Chaque valeur est rendue **complète** par le serveur. L'animation de décompte
- * ne fait que la remplacer temporairement : sans JavaScript, le chiffre est déjà
- * là et juste. C'est la règle de toute la page — une animation n'est jamais ce
- * qui rend une information visible.
+ * Every value is rendered **in full** by the server. The count-up animation only
+ * replaces it temporarily: without JavaScript, the figure is already there and
+ * correct. That is the rule for the whole page — an animation is never what
+ * makes a piece of information visible.
  */
 export function ProofBar({ points }: { readonly points: readonly ProofPoint[] }) {
   return (

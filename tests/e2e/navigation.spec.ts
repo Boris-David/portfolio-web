@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Les parcours qui comptent pour un recruteur : arriver, changer de langue,
- * atteindre une section, partir vers un lien externe.
+ * The journeys that matter to a recruiter: arriving, switching language,
+ * reaching a section, leaving through an external link.
  */
 
-test.describe("la bascule de langue", () => {
-  test("mène à une vraie page anglaise, avec son propre <html lang>", async ({ page }) => {
+test.describe("the language switch", () => {
+  test("leads to a real English page, with its own <html lang>", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
 
@@ -17,7 +17,7 @@ test.describe("la bascule de langue", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  test("revient au français par la même bascule", async ({ page }) => {
+  test("comes back to French through the same switch", async ({ page }) => {
     await page.goto("/en");
     await page.getByTestId("locale-switch").click();
 
@@ -25,7 +25,7 @@ test.describe("la bascule de langue", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
   });
 
-  test("traduit réellement le contenu, pas seulement l'étiquette", async ({ page }) => {
+  test("really translates the content, not just the label", async ({ page }) => {
     await page.goto("/");
     const frenchIntro = await page.locator(".hero__lede").first().innerText();
 
@@ -36,7 +36,7 @@ test.describe("la bascule de langue", () => {
     expect(englishIntro).toContain("mobile ticketing");
   });
 
-  test("déclare hreflang pour les deux langues et un x-default", async ({ page }) => {
+  test("declares hreflang for both languages and an x-default", async ({ page }) => {
     await page.goto("/");
     const langs = await page.locator('link[rel="alternate"][hreflang]').evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute("hreflang")),
@@ -44,8 +44,8 @@ test.describe("la bascule de langue", () => {
     expect(langs).toEqual(expect.arrayContaining(["fr", "en", "x-default"]));
   });
 
-  /** Sans JavaScript, la page anglaise reste atteignable : c'est un lien, pas un bouton. */
-  test("la bascule est un lien, donc utilisable sans JavaScript", async ({ page }) => {
+  /** Without JavaScript, the English page stays reachable: it is a link, not a button. */
+  test("the switch is a link, so it works without JavaScript", async ({ page }) => {
     await page.goto("/");
     const control = page.getByTestId("locale-switch");
     await expect(control).toHaveAttribute("href", "/en");
@@ -53,8 +53,8 @@ test.describe("la bascule de langue", () => {
   });
 });
 
-test.describe("la navigation par ancres", () => {
-  test("chaque lien de la barre mène à une section existante", async ({ page }) => {
+test.describe("anchor navigation", () => {
+  test("every link in the bar leads to a section that exists", async ({ page }) => {
     await page.goto("/");
     const links = page.locator("[data-nav-link]");
     const count = await links.count();
@@ -68,22 +68,22 @@ test.describe("la navigation par ancres", () => {
   });
 
   /**
-   * Testé par l'URL et non par un clic : la barre de liens n'existe qu'au-delà
-   * de 1000 px — en dessous, la page est un seul défilement, comme la maquette.
-   * La garantie à vérifier est la même dans les deux cas : `scroll-padding-top`
-   * doit poser la section **sous** la barre collante.
+   * Tested through the URL rather than a click: the link bar only exists above
+   * 1000 px — below that, the page is a single scroll, as in the mockup. The
+   * guarantee to check is the same either way: `scroll-padding-top` has to land
+   * the section **below** the pinned bar.
    */
-  test("amène la section visée sous la barre collante, pas dessous", async ({ page }) => {
+  test("brings the target section below the pinned bar, not under it", async ({ page }) => {
     await page.goto("/#parcours");
 
     const navHeight = await page.locator("nav.nav").evaluate((node) => node.clientHeight);
     const top = await page.locator("#parcours").evaluate((node) => node.getBoundingClientRect().top);
-    // La section commence sous la barre : son titre n'est jamais masqué.
+    // The section starts below the bar: its title is never hidden.
     expect(top).toBeGreaterThanOrEqual(navHeight - 2);
   });
 
-  test("navigue au clic sur un lien de la barre", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== "desktop", "La barre de liens n'existe qu'au-delà de 1000 px.");
+  test("navigates when a link in the bar is clicked", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "The link bar only exists above 1000 px.");
 
     await page.goto("/");
     await page.locator('[data-nav-link][href="#parcours"]').click();
@@ -91,7 +91,7 @@ test.describe("la navigation par ancres", () => {
     await expect(page.locator("#parcours")).toBeInViewport();
   });
 
-  test("signale la section courante par aria-current", async ({ page }) => {
+  test("marks the current section with aria-current", async ({ page }) => {
     await page.goto("/");
     await page.locator("#apps").scrollIntoViewIfNeeded();
     await expect(page.locator('[data-nav-link][href="#apps"]')).toHaveAttribute(
@@ -101,8 +101,8 @@ test.describe("la navigation par ancres", () => {
   });
 });
 
-test.describe("les liens sortants", () => {
-  test("ouvrent les profils publics attendus", async ({ page }) => {
+test.describe("the outbound links", () => {
+  test("open the expected public profiles", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("link", { name: "GitHub" }).first()).toHaveAttribute(
       "href",
@@ -114,17 +114,17 @@ test.describe("les liens sortants", () => {
     );
   });
 
-  test("pointent le CV vers l'API, jamais vers une impression du site", async ({ page }) => {
+  test("point the résumé at the API, never at a printout of the site", async ({ page }) => {
     await page.goto("/");
     const cv = page.getByTestId("cv-link");
     await expect(cv).toHaveAttribute("href", /\/v1\/cv\/amissan\.ag-cv-fr\.pdf$/);
-    // Pas de `download` : l'attribut est inerte sur une origine différente, et
-    // l'API sert le PDF en `inline`. Le lien ouvre, il ne télécharge pas.
+    // No `download`: the attribute is inert cross-origin, and the API serves the
+    // PDF `inline`. The link opens, it does not download.
     await expect(cv).not.toHaveAttribute("download", /.*/);
     await expect(cv).toHaveAttribute("target", "_blank");
     await expect(cv).toHaveAttribute("rel", /noopener/);
 
-    // ADR 0004 : le site n'a plus de feuille d'impression, et ne doit pas en avoir.
+    // ADR 0004: the site no longer has a print stylesheet, and must not have one.
     const printRules = await page.evaluate(() =>
       [...document.styleSheets]
         .flatMap((sheet) => {
@@ -139,7 +139,7 @@ test.describe("les liens sortants", () => {
     expect(printRules).toBe(0);
   });
 
-  test("traduisent le lien du CV avec la page", async ({ page }) => {
+  test("translate the résumé link along with the page", async ({ page }) => {
     await page.goto("/en");
     await expect(page.getByTestId("cv-link")).toHaveAttribute(
       "href",
@@ -147,7 +147,7 @@ test.describe("les liens sortants", () => {
     );
   });
 
-  test("marquent rel=noopener sur chaque lien ouvert dans un nouvel onglet", async ({ page }) => {
+  test("mark rel=noopener on every link opened in a new tab", async ({ page }) => {
     await page.goto("/");
     const blank = page.locator('a[target="_blank"]');
     const count = await blank.count();
@@ -158,7 +158,7 @@ test.describe("les liens sortants", () => {
     }
   });
 
-  test("n'expose aucun identifiant de réseau interne dans les chemins d'icônes", async ({ page }) => {
+  test("expose no internal network identifier in the icon paths", async ({ page }) => {
     await page.goto("/");
     const sources = await page
       .locator("img")

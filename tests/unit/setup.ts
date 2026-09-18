@@ -3,12 +3,12 @@ import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
 /**
- * jsdom n'implémente ni `matchMedia` ni les Web Animations.
+ * jsdom implements neither `matchMedia` nor the Web Animations API.
  *
- * On ne les simule pas pour « faire passer » les tests : on les laisse absents
- * quand c'est le comportement à vérifier. `matchMedia` est en revanche appelé
- * par du code qui doit répondre « pas de préférence » par défaut — sans lui, le
- * composant planterait au lieu de tester ce qu'on veut tester.
+ * We do not stub them out to "make the tests pass": we leave them absent when
+ * that is the behaviour under test. `matchMedia`, on the other hand, is called
+ * by code that has to answer "no preference" by default — without it the
+ * component would crash instead of testing what we want to test.
  */
 if (!window.matchMedia) {
   window.matchMedia = ((query: string) => ({

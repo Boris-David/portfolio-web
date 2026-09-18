@@ -1,0 +1,163 @@
+name: Content freshness
+
+# The site is a static export: its content is frozen at build time. That is what
+# makes it free and fast — and it is also what makes it capable of **lying
+# silently**. A change published in `portfolio-api` changes nothing on an
+# already-built page: everything answers 200, everything renders, and the visitor
+# reads stale content without a single indicator moving.
+#
+# This workflow is the witness required by ADR 0006, and the **pull** path of the
+# propagation described by ADR 0007:
+#
+#   1. it compares the fingerprint each page publishes — `<meta name="content-version">` —
+#      against the one the API serves;
+#   2. if they diverge, it **republishes**;
+#   3. then it **checks again**, because a repair we do not verify replaces one
+#      silent failure with another.
+#
+# It needs no secret shared between repositories: it is the web that goes and
+# reads the API, never the API that pushes. The **push** path —
+# `repository_dispatch` from `portfolio-api` — is only an accelerator, and this
+# witness stays true even when it is not wired up.
+
+on:
+  schedule:
+    # Every three hours. The content changes rarely, and the push path covers
+    # the urgent case: this cadence is not the expected propagation delay, it is
+    # the **maximum** delay before a missed propagation is detected and repaired.
+    - cron: "17 */3 * * *"
+
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Republish even when the fingerprints match"
+        type: boolean
+        default: false
+
+concurrency:
+  # Never two at once, and we do not cut short a republication in progress.
+  group: freshness
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  SITE_URL: https://amissan.dev
+  API_URL: https://api.amissan.dev
+
+jobs:
+  compare:
+    name: Compare the fingerprints
+    runs-on: ubuntu-latest
+    outputs:
+      stale: ${{ steps.comparison.outputs.stale }}
+      detail: ${{ steps.comparison.outputs.detail }}
+    steps:
+      - name: Read the live fingerprints
+        id: comparison
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+
+          # The fingerprint served by the source.
+          expected="$(curl -fsS "$API_URL/v1/portfolio?lang=fr" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["meta"]["contentVersion"])')"
+
+          # A repair path we cannot exercise is a repair path we do not have: it
+          # only fires on the day everything goes wrong, and that is the day we
+          # find out it does not work. This input makes it exercisable on
+          # demand — and incidentally serves as a "republish by force", useful
+          # after an asset purge.
+          stale="${FORCE:-false}"
+          detail=""
+          [ "$stale" = "true" ] && detail=" (forced republication)"
+          for page in "/" "/en"; do
+            html="$(curl -fsS "$SITE_URL$page")"
+            # `grep -o` on the tag rather than a parser: the page is a static
+            # export, the tag is written by Next, and one more dependency just
+            # to read an attribute does not justify itself.
+            published="$(printf '%s' "$html" \
+              | grep -o '<meta name="content-version" content="[^"]*"' \
+              | head -1 | sed 's/.*content="//; s/"$//')"
+
+            if [ -z "$published" ]; then
+              echo "::error::$page publishes no content fingerprint — the witness itself is broken."
+              exit 1
+            fi
+            if [ "$published" != "$expected" ]; then
+              stale=true
+              detail="$detail $page($published)"
+            fi
+            echo "  $page → $published"
+          done
+
+          echo "  API  → $expected"
+          echo "stale=$stale" >> "$GITHUB_OUTPUT"
+          echo "detail=$detail" >> "$GITHUB_OUTPUT"
+
+          if [ "$stale" = "true" ]; then
+            echo "::warning::Republication requested:$detail — expected $expected."
+          else
+            echo "The live site carries the current content."
+          fi
+
+  # The unit tests' fixture is a **dated snapshot** of the API. It makes the
+  # suite deterministic and offline — and, if it drifts without us finding out,
+  # it becomes the second source of truth we have just removed: the tests would
+  # keep passing against a shape that no longer exists.
+  #
+  # This check lives here, and not in the pull request CI: it hits the API in
+  # production, and a suite that depends on an outside service goes red for
+  # reasons that have nothing to do with this repository.
+  contract:
+    name: The fixture still describes what the API serves
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:contract
+
+  republish:
+    name: Republish the site
+    needs: compare
+    if: needs.compare.outputs.stale == 'true'
+    # The deployment is not described again here: we call the one that exists.
+    # Two descriptions of the same deployment always end up diverging, and it is
+    # the one used least often that breaks.
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+
+  verify:
+    name: Verify that the republication took
+    needs: [compare, republish]
+    if: needs.compare.outputs.stale == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: The fingerprints now match
+        run: |
+          set -euo pipefail
+
+          expected="$(curl -fsS "$API_URL/v1/portfolio?lang=fr" \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin)["meta"]["contentVersion"])')"
+
+          discrepancies=""
+          for page in "/" "/en"; do
+            published="$(curl -fsS "$SITE_URL$page" \
+              | grep -o '<meta name="content-version" content="[^"]*"' \
+              | head -1 | sed 's/.*content="//; s/"$//')"
+            [ "$published" = "$expected" ] || discrepancies="$discrepancies $page($published)"
+          done
+
+          if [ -n "$discrepancies" ]; then
+            echo "::error::Republication had no effect:$discrepancies — expected $expected."
+            echo "Stale content is still being served. The propagation chain is broken,"
+            echo "not merely late — running it again will not be enough."
+            exit 1
+          fi
+          echo "Content up to date in both languages: $expected."

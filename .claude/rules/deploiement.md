@@ -50,7 +50,7 @@ motive**, pas avant.
 Copié dans `out/` par l'export, lu par Cloudflare comme configuration — il n'est
 jamais servi, et un test le vérifie.
 
-- toute modification d'en-tête se reflète dans `tests/e2e/deploiement.spec.ts` ;
+- toute modification d'en-tête se reflète dans `tests/e2e/deployment.spec.ts` ;
 - `connect-src` reste `'self'` : le contenu est consommé au build et le CV est
   une navigation, pas une requête. Y ajouter l'origine de l'API ouvrirait une
   porte que personne n'emprunte ;

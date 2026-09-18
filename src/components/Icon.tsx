@@ -1,12 +1,12 @@
 import type { IconName } from "@/content/types";
 
 /**
- * Le jeu d'icônes est un sprite SVG inline, déposé une fois dans le document.
+ * The icon set is an inline SVG sprite, dropped into the document once.
  *
- * Trois raisons de ne pas rendre chaque icône en entier : le chevron apparaît
- * dix fois sur la page, un sprite ne paie le tracé qu'une seule fois ; aucune
- * requête réseau ne s'ajoute ; et `currentColor` laisse chaque contexte décider
- * du remplissage ou du contour, ce qu'un `<img>` ne permettrait pas.
+ * Three reasons not to render each icon in full: the chevron appears ten times
+ * on the page, and a sprite pays for the path only once; no network request is
+ * added; and `currentColor` lets each context decide on the fill or the stroke,
+ * which an `<img>` would not allow.
  */
 
 const PATHS: Record<IconName, React.ReactNode> = {
@@ -23,9 +23,9 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <path d="M16.3 12.7c0-2.2 1.8-3.3 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.7.8-3.4.8-.7 0-1.8-.8-2.9-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.8 2.3 1.1 0 1.5-.7 2.8-.7s1.7.7 2.9.7c1.2 0 1.9-1.1 2.7-2.2.8-1.2 1.2-2.4 1.2-2.5 0 0-2.2-.9-2.2-3.8zM14.2 5.6c.6-.7 1-1.7.9-2.7-.9 0-2 .6-2.6 1.3-.6.6-1.1 1.7-.9 2.6 1 .1 2-.5 2.6-1.2z" />
   ),
   /**
-   * Un téléchargement, pas une imprimante : le CV est un PDF produit par l'API
-   * (ADR 0004). Une icône d'imprimante promettrait une feuille d'impression que
-   * le site n'a plus — et ne doit plus avoir.
+   * A download, not a printer: the résumé is a PDF produced by the API
+   * (ADR 0004). A printer icon would promise a print stylesheet the site no
+   * longer has — and must no longer have.
    */
   document: <path d="M13 3v9.2l3.6-3.6L18 10l-6 6-6-6 1.4-1.4L11 12.2V3h2zM4 18h16v2H4v-2z" />,
   external: (
@@ -83,7 +83,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
 
 const symbolId = (name: IconName) => `icon-${name}`;
 
-/** Déposé une seule fois par document, juste après l'ouverture du `<body>`. */
+/** Dropped in exactly once per document, right after the opening `<body>`. */
 export function IconSprite() {
   return (
     <svg
@@ -110,9 +110,10 @@ interface IconProps {
 }
 
 /**
- * Les icônes sont décoratives : le sens est porté par le texte à côté, ou par
- * l'`aria-label` du contrôle qui les contient. Elles sont donc masquées aux
- * lecteurs d'écran — annoncer « image » avant chaque libellé n'aide personne.
+ * The icons are decorative: the meaning is carried by the text next to them, or
+ * by the `aria-label` of the control that contains them. They are therefore
+ * hidden from screen readers — announcing "image" before every label helps
+ * nobody.
  */
 export function Icon({ name, className }: IconProps) {
   return (

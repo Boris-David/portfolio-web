@@ -1,21 +1,21 @@
 /**
- * Les cartes dépliantes — chantiers d'étude de cas et expériences.
+ * The expandable cards — case-study workstreams and experiences.
  *
- * Le socle est un `<details>` natif, et ce choix porte tout le reste :
+ * The foundation is a native `<details>`, and that choice carries everything
+ * else:
  *
- *   - **sans JavaScript**, la carte s'ouvre et se ferme quand même. Rien de ce
- *     fichier ne cache de contenu par défaut : la hauteur n'est contrainte que
- *     par une valeur en ligne posée par le script ;
- *   - **au clavier**, Entrée et Espace fonctionnent sans qu'on écrive une ligne,
- *     et le rôle `group`/`button` est donné par le navigateur. Une `<div>` avec
- *     `onClick` aurait demandé de réimplémenter tout ça — mal ;
- *   - **la recherche** et `Ctrl+F` voient le contenu replié, parce qu'il est
- *     dans le DOM.
+ *   - **without JavaScript**, the card still opens and closes. Nothing in this
+ *     file hides content by default: the height is constrained only by an inline
+ *     value the script sets;
+ *   - **on the keyboard**, Enter and Space work without a line being written,
+ *     and the `group`/`button` role is given by the browser. A `<div>` with an
+ *     `onClick` would have meant reimplementing all of that — badly;
+ *   - **search** and `Ctrl+F` see the collapsed content, because it is in the
+ *     DOM.
  *
- * L'animation de hauteur elle-même est pilotée par Motion, pas par une
- * transition CSS : une transition ne sait pas repartir de la vitesse courante
- * quand on referme une carte en cours d'ouverture, et ce saut est exactement ce
- * qui fait qu'un dépliage « fait cheap ».
+ * The height animation itself is driven by Motion, not by a CSS transition: a
+ * transition cannot pick up from the current velocity when a card is closed
+ * mid-opening, and that jump is exactly what makes a disclosure "feel cheap".
  */
 
 .disclosure__summary {
@@ -46,9 +46,9 @@
 }
 
 /**
- * Le conteneur animé. `overflow: hidden` en permanence, mais **aucune hauteur
- * imposée ici** : tant que le script n'en pose pas une, le contenu s'affiche en
- * entier. C'est ce qui garde la page utilisable sans JavaScript.
+ * The animated container. `overflow: hidden` at all times, but **no height
+ * imposed here**: until the script sets one, the content shows in full. That is
+ * what keeps the page usable without JavaScript.
  */
 .disclosure__wrap {
   overflow: hidden;
@@ -95,9 +95,9 @@
 }
 
 /**
- * Le chevron dépasse légèrement en fin de rotation (`--e-back`) : un demi-tour
- * parfaitement linéaire se lit comme mécanique, ce petit dépassement le rend
- * vivant sans le rendre bavard.
+ * The chevron overshoots slightly at the end of its rotation (`--e-back`): a
+ * perfectly linear half-turn reads as mechanical, and this small overshoot makes
+ * it alive without making it noisy.
  */
 .disclosure__chevron {
   width: 18px;
@@ -117,7 +117,7 @@
   stroke: var(--accent);
 }
 
-/* Les chantiers s'empilent en liste séparée par des filets, sans cadre propre. */
+/* The workstreams stack as a rule-separated list, with no frame of their own. */
 .workstreams .disclosure {
   border-bottom: 1px solid var(--line);
 }
@@ -126,7 +126,7 @@
   border-bottom: 0;
 }
 
-/* L'expérience, elle, est une carte : son résumé s'aligne sur la ligne de base. */
+/* An experience, on the other hand, is a card: its summary aligns on the baseline. */
 .job > .disclosure__summary {
   align-items: baseline;
   flex-wrap: wrap;

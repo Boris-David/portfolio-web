@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  // Les alias `@/*` viennent de tsconfig.json — une seule déclaration, pas deux.
+  // The `@/*` aliases come from tsconfig.json — one declaration, not two.
   resolve: { tsconfigPaths: true },
   test: {
     environment: "jsdom",
