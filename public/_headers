@@ -1,20 +1,20 @@
-# En-têtes servis par Cloudflare Workers Static Assets.
+# Headers served by Cloudflare Workers Static Assets.
 #
-# Ce fichier remplace les `headers` de `vercel.json`, supprimé avec Vercel. Il
-# est copié dans `out/` par l'export, et Cloudflare le lit comme configuration
-# au lieu de le servir comme un fichier.
+# This file replaces the `headers` from `vercel.json`, removed along with
+# Vercel. It is copied into `out/` by the export, and Cloudflare reads it as
+# configuration instead of serving it as a file.
 #
-# Il est versionné et relu en revue, ce qu'une configuration posée dans un
-# tableau de bord ne serait jamais.
+# It is tracked and reviewed in code review, which configuration set in a
+# dashboard never would be.
 
 /*
-  # Le site ne charge aucun script tiers, n'affiche aucune entrée utilisateur et
-  # ne fait aucune requête sortante — sauf le lien vers le CV de l'API.
+  # The site loads no third-party script, displays no user input and makes no
+  # outbound request — except the link to the API's résumé.
   #
-  # `'unsafe-inline'` sur les scripts est un choix documenté, pas un oubli : Next
-  # place ses propres scripts inline pour la charge utile RSC, et les interdire
-  # exigerait un nonce, donc un rendu à la requête, donc un Worker sur le chemin
-  # chaud. On paierait la génération statique pour fermer une surface vide.
+  # `'unsafe-inline'` on scripts is a documented choice, not an oversight: Next
+  # inlines its own scripts for the RSC payload, and forbidding them would
+  # require a nonce, therefore per-request rendering, therefore a Worker on the
+  # hot path. We would pay with static generation to close an empty surface.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'; upgrade-insecure-requests
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
@@ -24,30 +24,30 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
 
-# Les actifs de Next portent une empreinte dans leur nom : leur contenu ne peut
-# pas changer sans que l'URL change. Ils sont donc immuables pour un an.
+# Next's assets carry a fingerprint in their name: their content cannot change
+# without the URL changing. They are therefore immutable for a year.
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Les images sont versionnées avec le dépôt et changent avec un déploiement.
-# Une journée de cache navigateur, puis revalidation.
+# The images are tracked with the repository and change with a deployment.
+# One day of browser cache, then revalidation.
 /icons/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 /shots/*
   Cache-Control: public, max-age=86400, stale-while-revalidate=604800
 
-# ── Liens universels ────────────────────────────────────────────────────────
+# ── Universal links ─────────────────────────────────────────────────────────
 #
-# Le fichier d'association que lit iOS. Trois exigences de la plateforme, et
-# chacune se paie par un lien qui s'ouvre dans Safari au lieu de l'application —
-# sans le moindre message d'erreur :
+# The association file iOS reads. Three platform requirements, and each one is
+# paid for with a link that opens in Safari instead of the app — without a
+# single error message:
 #
-#   1. servi en `application/json`, alors qu'il n'a **pas** d'extension `.json` ;
-#   2. servi en HTTPS, sans aucune redirection ;
-#   3. non signé — ce qui était exigé avant iOS 9 et ne l'est plus.
+#   1. served as `application/json`, even though it has **no** `.json` extension;
+#   2. served over HTTPS, with no redirect at all;
+#   3. unsigned — which was required before iOS 9 and no longer is.
 #
-# Il ne se met pas en cache longtemps : iOS le relit au fil des installations, et
-# une association corrigée doit pouvoir se propager sans attendre un an.
+# It is not cached for long: iOS rereads it as installs happen, and a corrected
+# association has to be able to propagate without waiting a year.
 /.well-known/apple-app-site-association
   Content-Type: application/json
   Cache-Control: public, max-age=3600

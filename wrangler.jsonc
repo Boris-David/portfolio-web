@@ -2,37 +2,36 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "portfolio-web",
 
-  // Les API de la plateforme sont figées à cette date : une mise à jour de
-  // workerd ne peut pas changer le comportement sans qu'on l'ait décidé en
-  // avançant cette ligne. Même date que `portfolio-api`, volontairement.
+  // The platform APIs are pinned to this date: a workerd update cannot change
+  // behaviour without us having decided it by moving this line forward. Same
+  // date as `portfolio-api`, deliberately.
   "compatibility_date": "2026-09-17",
 
-  // PAS de `main`. Il n'y a aucun script de Worker, et c'est le cœur du choix :
-  // le site est intégralement pré-rendu, donc chaque requête est servie par le
-  // magasin d'actifs statiques — gratuit, illimité, et **hors du quota de
-  // 100 000 requêtes par jour**. Ajouter un Worker sur le chemin chaud
-  // transformerait chaque page vue en invocation facturable, pour ne rendre
-  // exactement rien de plus.
+  // NO `main`. There is no Worker script at all, and that is the heart of the
+  // choice: the site is entirely prerendered, so every request is served by the
+  // static asset store — free, unlimited, and **outside the quota of 100,000
+  // requests a day**. Adding a Worker on the hot path would turn every page
+  // view into a billable invocation, to deliver exactly nothing more.
 
   "assets": {
-    // Produit par `next build` avec `output: "export"`.
+    // Produced by `next build` with `output: "export"`.
     "directory": "./out",
 
-    // `/en` sert `en.html`, `/` sert `index.html`. C'est exactement la forme
-    // que produit l'export de Next — aucune réécriture à prévoir.
+    // `/en` serves `en.html`, `/` serves `index.html`. That is exactly the
+    // shape Next's export produces — no rewriting to plan for.
     "html_handling": "auto-trailing-slash",
 
-    // La page 404 de Next, avec sa mise en page et ses deux langues.
+    // Next's 404 page, with its layout and its two languages.
     "not_found_handling": "404-page",
   },
 
-  // `amissan.dev` est enregistré chez Cloudflare Registrar, donc la zone est
-  // déjà sur le compte : `wrangler deploy` crée l'enregistrement DNS et le
-  // domaine personnalisé lui-même. Rien à cliquer.
+  // `amissan.dev` is registered with Cloudflare Registrar, so the zone is
+  // already on the account: `wrangler deploy` creates the DNS record and the
+  // custom domain itself. Nothing to click.
   //
-  // `www.amissan.dev` n'est PAS ici, et c'est délibéré — voir l'en-tête de
-  // `.github/workflows/deploy.yml` : une redirection d'hôte ne peut pas se
-  // faire depuis ce fichier sans remettre un Worker sur le chemin chaud.
+  // `www.amissan.dev` is NOT here, and that is deliberate — see the header of
+  // `.github/workflows/deploy.yml`: a host redirect cannot be done from this
+  // file without putting a Worker back on the hot path.
   "routes": [{ "pattern": "amissan.dev", "custom_domain": true }],
 
   "observability": { "enabled": true },

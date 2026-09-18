@@ -1,13 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Les tests de bout en bout tournent sur la **construction de production servie
- * par Cloudflare**, pas sur le serveur de développement de Next.
+ * The end-to-end tests run against the **production build served by
+ * Cloudflare**, not against Next's development server.
  *
- * `wrangler dev` exécute le même magasin d'actifs statiques que la production :
- * la même résolution d'URL (`/en` → `en.html`), le même `_headers`, la même page
- * 404. Les tests voient donc ce que verra un visiteur, en-têtes de sécurité
- * compris — ce qu'aucun serveur statique improvisé n'aurait garanti.
+ * `wrangler dev` runs the same static asset store as production: the same URL
+ * resolution (`/en` → `en.html`), the same `_headers`, the same 404 page. The
+ * tests therefore see what a visitor will see, security headers included —
+ * which no improvised static server would have guaranteed.
  */
 const PORT = 3111;
 
@@ -26,8 +26,8 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     /**
-     * Un viewport à 400 px de large : la contrainte de responsive la plus
-     * serrée du projet. Aucun défilement horizontal ne doit y apparaître.
+     * A viewport 400 px wide: the tightest responsive constraint in the
+     * project. No horizontal scrolling may appear there.
      */
     {
       name: "mobile-400",

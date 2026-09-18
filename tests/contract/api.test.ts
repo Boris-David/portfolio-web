@@ -6,22 +6,22 @@ import { LOCALES } from "@/lib/site";
 import { FIXTURES } from "../support/api-fixture";
 
 /**
- * Le contrat avec `portfolio-api`, vérifié contre l'**API réelle**.
+ * The contract with `portfolio-api`, checked against the **real API**.
  *
- * Les tests unitaires servent une fixture : c'est ce qui les rend déterministes
- * et hors-ligne. Mais une fixture est une **capture datée**, et une capture
- * qu'on ne confronte jamais redevient une seconde source de vérité — exactement
- * ce que l'ADR 0002 refuse.
+ * The unit tests serve a fixture: that is what makes them deterministic and
+ * offline. But a fixture is a **dated snapshot**, and a snapshot that is never
+ * confronted becomes a second source of truth again — exactly what ADR 0002
+ * rules out.
  *
- * Ce fichier est la confrontation. Il ne tourne pas dans la suite ordinaire :
- * une suite qui dépend d'un service extérieur devient rouge pour des raisons
- * qui ne regardent pas ce dépôt.
+ * This file is the confrontation. It does not run in the ordinary suite: a suite
+ * that depends on an outside service goes red for reasons that have nothing to
+ * do with this repository.
  *
  *   npm run test:contract
  *
- * Il ne compare pas les **valeurs** — le contenu a le droit de changer sans
- * prévenir, c'est même le but de toute la chaîne. Il compare la **forme** : que
- * tout ce que l'adaptateur lit soit encore là, et encore du même type.
+ * It does not compare **values** — the content is allowed to change without
+ * warning, that is the whole point of the chain. It compares the **shape**: that
+ * everything the adapter reads is still there, and still of the same type.
  */
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.amissan.dev";
@@ -32,20 +32,20 @@ async function live(locale: (typeof LOCALES)[number]): Promise<unknown> {
     headers: { accept: "application/json" },
     signal: AbortSignal.timeout(20_000),
   });
-  expect(response.status, `l'API a répondu ${response.status}`).toBe(200);
+  expect(response.status, `the API responded ${response.status}`).toBe(200);
   return response.json();
 }
 
-describe("le contrat de contenu avec l'API", () => {
+describe("the content contract with the API", () => {
   it.each(LOCALES)(
-    "sert une charge que l'adaptateur traverse entièrement (%s)",
+    "serves a payload the adapter traverses in full (%s)",
     async (locale) => {
       const payload = readPayload(await live(locale), locale);
 
-      // `adapt` lit chaque champ dont le site a besoin et lève sur le premier
-      // qui manque, avec son chemin. Le faire tourner en entier est donc la
-      // vérification de forme la plus complète possible — et la seule qui ne
-      // puisse pas dériver de ce que le site lit réellement.
+      // `adapt` reads every field the site needs and throws on the first one
+      // that is missing, with its path. Running it in full is therefore the most
+      // complete shape check possible — and the only one that cannot drift from
+      // what the site actually reads.
       const content = adapt(payload, CHROME[locale]);
 
       expect(content.locale).toBe(locale);
@@ -56,15 +56,15 @@ describe("le contrat de contenu avec l'API", () => {
   );
 
   /**
-   * La fixture décrit-elle encore la même **forme** que l'API ?
+   * Does the fixture still describe the same **shape** as the API?
    *
-   * On compare les arbres de clés, pas les valeurs : une phrase réécrite ou un
-   * réseau ajouté ne doit rien casser ici — c'est du contenu, et il a le droit
-   * de bouger. Un champ **renommé, ajouté ou retiré**, en revanche, rend la
-   * fixture menteuse : les tests unitaires continueraient de passer sur une
-   * forme qui n'existe plus.
+   * We compare the key trees, not the values: a rewritten sentence or an added
+   * network must break nothing here — that is content, and it is allowed to
+   * move. A field **renamed, added or removed**, on the other hand, makes the
+   * fixture a liar: the unit tests would keep passing against a shape that no
+   * longer exists.
    */
-  it.each(LOCALES)("garde la fixture alignée sur la forme servie (%s)", async (locale) => {
+  it.each(LOCALES)("keeps the fixture aligned with the shape served (%s)", async (locale) => {
     const fixture = shapeOf(FIXTURES[locale]);
     const served = shapeOf(await live(locale));
 
@@ -73,7 +73,7 @@ describe("le contrat de contenu avec l'API", () => {
 
     expect(
       { missing, added },
-      "La fixture a dérivé de l'API. Régénérer :\n" +
+      "The fixture has drifted from the API. Regenerate it:\n" +
         `  curl -s "${BASE_URL}/v1/portfolio?lang=${locale}" | ` +
         `python3 -m json.tool > tests/fixtures/portfolio-${locale}.json`,
     ).toEqual({ missing: [], added: [] });
@@ -81,12 +81,12 @@ describe("le contrat de contenu avec l'API", () => {
 });
 
 /**
- * L'ensemble des chemins typés d'une valeur, les index de liste effacés.
+ * The set of typed paths within a value, with list indices erased.
  *
- * `data.experience[0].start` et `data.experience[2].start` donnent le même
- * chemin : la forme d'une collection est celle de ses éléments, pas son compte.
- * Le type est conservé — renommer un champ *et* changer son type doit se voir
- * comme deux écarts, pas comme un seul.
+ * `data.experience[0].start` and `data.experience[2].start` give the same path:
+ * a collection's shape is the shape of its items, not its count. The type is
+ * kept — renaming a field *and* changing its type must show up as two
+ * discrepancies, not one.
  */
 function shapeOf(value: unknown, path = "", into = new Set<string>()): Set<string> {
   if (Array.isArray(value)) {

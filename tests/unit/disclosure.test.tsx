@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 import { Disclosure } from "@/components/Disclosure";
 
 /**
- * jsdom n'implémente pas les Web Animations. C'est exactement l'environnement
- * qu'on veut tester ici : le dépliage doit rester **fonctionnel** sans
- * animation. Si ces tests passaient uniquement grâce à une simulation de
- * `Element.animate`, ils ne diraient rien du navigateur qui ne l'a pas.
+ * jsdom does not implement the Web Animations API. That is exactly the
+ * environment we want to test here: the disclosure has to stay **functional**
+ * without animation. If these tests only passed thanks to a stubbed
+ * `Element.animate`, they would say nothing about the browser that lacks it.
  */
 describe("Disclosure", () => {
   const renderOne = (defaultOpen = false) =>
@@ -16,94 +16,93 @@ describe("Disclosure", () => {
         className="disclosure"
         summaryClassName="disclosure__summary"
         defaultOpen={defaultOpen}
-        testId="carte"
-        summary={<span>Le titre du chantier</span>}
+        testId="card"
+        summary={<span>The workstream title</span>}
       >
-        <p>Le détail qui se déplie.</p>
+        <p>The detail that expands.</p>
       </Disclosure>,
     );
 
-  it("s'appuie sur un <details> natif — donc utilisable sans JavaScript", () => {
+  it("builds on a native <details> — so it works without JavaScript", () => {
     renderOne();
-    const details = screen.getByTestId("carte");
+    const details = screen.getByTestId("card");
     expect(details.tagName).toBe("DETAILS");
     expect(details.querySelector("summary")).not.toBeNull();
   });
 
-  it("rend son contenu dans le DOM même replié, pour la recherche et l'indexation", () => {
+  it("renders its content in the DOM even when collapsed, for search and indexing", () => {
     renderOne();
-    expect(screen.getByText("Le détail qui se déplie.")).toBeInTheDocument();
+    expect(screen.getByText("The detail that expands.")).toBeInTheDocument();
   });
 
-  it("est replié par défaut", () => {
+  it("is collapsed by default", () => {
     renderOne();
-    const details = screen.getByTestId("carte") as HTMLDetailsElement;
+    const details = screen.getByTestId("card") as HTMLDetailsElement;
     expect(details.open).toBe(false);
     expect(details).toHaveAttribute("data-open", "false");
   });
 
-  it("s'ouvre au clic sur le résumé", async () => {
+  it("opens when the summary is clicked", async () => {
     const user = userEvent.setup();
     renderOne();
-    await user.click(screen.getByText("Le titre du chantier"));
+    await user.click(screen.getByText("The workstream title"));
 
-    const details = screen.getByTestId("carte") as HTMLDetailsElement;
+    const details = screen.getByTestId("card") as HTMLDetailsElement;
     expect(details.open).toBe(true);
     expect(details).toHaveAttribute("data-open", "true");
   });
 
-  it("se referme au second clic", async () => {
+  it("closes on the second click", async () => {
     const user = userEvent.setup();
     renderOne();
-    const summary = screen.getByText("Le titre du chantier");
+    const summary = screen.getByText("The workstream title");
 
     await user.click(summary);
     await user.click(summary);
 
-    const details = screen.getByTestId("carte") as HTMLDetailsElement;
+    const details = screen.getByTestId("card") as HTMLDetailsElement;
     expect(details).toHaveAttribute("data-open", "false");
     expect(details.open).toBe(false);
   });
 
   /**
-   * Le résumé est focusable **sans** `tabindex` : c'est le navigateur qui le
-   * rend atteignable au clavier, parce que c'est un `<summary>`. Une réécriture
-   * en `<div onClick>` casserait cette propriété sans bruit.
+   * The summary is focusable **without** a `tabindex`: it is the browser that
+   * makes it reachable from the keyboard, because it is a `<summary>`. Rewriting
+   * it as a `<div onClick>` would break that property silently.
    *
-   * L'activation elle-même — Entrée et Espace traduits en `click` — est un
-   * comportement du navigateur que jsdom n'implémente pas. La vérifier ici
-   * testerait jsdom ; elle est donc couverte par le test de bout en bout, dans
-   * un vrai Chromium.
+   * The activation itself — Enter and Space translated into a `click` — is a
+   * browser behaviour jsdom does not implement. Checking it here would test
+   * jsdom; it is therefore covered by the end-to-end test, in a real Chromium.
    */
-  it("expose un résumé atteignable au clavier, sans tabindex ajouté", async () => {
+  it("exposes a summary reachable from the keyboard, with no tabindex added", async () => {
     const user = userEvent.setup();
     renderOne();
 
-    const summary = screen.getByTestId("carte").querySelector("summary");
+    const summary = screen.getByTestId("card").querySelector("summary");
     expect(summary).not.toHaveAttribute("tabindex");
 
     await user.tab();
     expect(summary).toHaveFocus();
   });
 
-  it("honore une ouverture par défaut sans rien animer au montage", () => {
+  it("honours a default-open card without animating anything on mount", () => {
     renderOne(true);
-    const details = screen.getByTestId("carte") as HTMLDetailsElement;
+    const details = screen.getByTestId("card") as HTMLDetailsElement;
     expect(details.open).toBe(true);
     expect(details).toHaveAttribute("data-open", "true");
-    // Aucune hauteur en ligne : le contenu occupe sa taille naturelle.
+    // No inline height: the content takes up its natural size.
     expect(details.querySelector<HTMLElement>(".disclosure__wrap")?.style.height).toBe("");
   });
 
-  it("ne laisse aucune hauteur figée après un aller-retour", async () => {
+  it("leaves no frozen height behind after a round trip", async () => {
     const user = userEvent.setup();
     renderOne();
-    const summary = screen.getByText("Le titre du chantier");
+    const summary = screen.getByText("The workstream title");
 
     await user.click(summary);
     await user.click(summary);
 
-    const wrap = screen.getByTestId("carte").querySelector<HTMLElement>(".disclosure__wrap");
+    const wrap = screen.getByTestId("card").querySelector<HTMLElement>(".disclosure__wrap");
     expect(wrap?.style.height).toBe("");
   });
 });

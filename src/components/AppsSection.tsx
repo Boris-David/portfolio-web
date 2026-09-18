@@ -3,15 +3,14 @@ import { SectionHead } from "@/components/SectionHead";
 import type { ProductionApp, SectionHead as SectionHeadContent } from "@/content/types";
 
 /**
- * La grille des applications en production.
+ * The grid of apps in production.
  *
- * Les icônes sont nommées d'après le **slug public** de chaque application
- * (`tcl.png`, `oura.png`) et non d'après un identifiant interne : ce dépôt est
- * public, et les numéros de réseau internes ne le sont pas.
+ * The icons are named after each app's **public slug** (`tcl.png`, `oura.png`)
+ * and not after an internal identifier: this repository is public, and internal
+ * network numbers are not.
  *
- * Chaque carte est un lien vers l'App Store. Le nom de l'application y suffit
- * comme libellé : l'icône est décorative, elle ne répète que ce que le texte
- * dit déjà.
+ * Every card is a link to the App Store. The app's name is enough as its label:
+ * the icon is decorative, it only repeats what the text already says.
  */
 export function AppsSection({
   head,

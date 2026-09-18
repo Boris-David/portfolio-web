@@ -4,17 +4,17 @@ import { Icon } from "@/components/Icon";
 import { THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 /**
- * La bascule de thème.
+ * The theme toggle.
  *
- * Ce composant **ne tient aucun état**, et c'est le point important : le thème
- * est déjà porté par `data-theme` sur `<html>`, posé par un script inline avant
- * la première peinture. Le dupliquer dans un `useState` créerait une seconde
- * vérité — désynchronisée pendant toute l'hydratation, puisque React ne sait
- * rien de ce que le script a décidé.
+ * This component **holds no state**, and that is the point: the theme is
+ * already carried by `data-theme` on `<html>`, set by an inline script before
+ * the first paint. Duplicating it in a `useState` would create a second truth —
+ * out of sync for the whole of hydration, since React knows nothing of what the
+ * script decided.
  *
- * On lit donc le DOM au moment du clic, et on lui réécrit. L'icône, elle, est
- * choisie par le CSS selon le thème effectif : le bouton est juste dès le HTML
- * serveur, avant même que ce composant ne soit hydraté.
+ * So we read the DOM at click time, and write back to it. The icon is picked by
+ * the CSS according to the effective theme: the button is correct from the
+ * server HTML onwards, before this component is even hydrated.
  */
 export function ThemeToggle({ label }: { readonly label: string }) {
   const toggle = () => {
@@ -28,7 +28,7 @@ export function ThemeToggle({ label }: { readonly label: string }) {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
-      // Navigation privée, stockage refusé : le thème vaut pour cette page, et c'est tout.
+      // Private browsing, storage refused: the theme holds for this page, and that is all.
     }
   };
 

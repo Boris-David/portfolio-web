@@ -1,11 +1,10 @@
 /**
- * `prefers-reduced-motion` n'est pas une préférence esthétique : pour une partie
- * des utilisateurs, une animation de parallaxe ou un fondu insistant déclenche
- * un vrai malaise vestibulaire.
+ * `prefers-reduced-motion` is not an aesthetic preference: for some users, a
+ * parallax animation or an insistent fade triggers real vestibular discomfort.
  *
- * On ne « réduit » donc pas les animations, on les **supprime**. Et on écoute le
- * changement : la préférence peut basculer pendant la session, et une page qui
- * ne la relit jamais continuerait d'animer après coup.
+ * So we do not "reduce" animations, we **remove** them. And we listen for
+ * changes: the preference can flip during the session, and a page that never
+ * reads it again would keep animating afterwards.
  */
 
 const QUERY = "(prefers-reduced-motion: reduce)";
@@ -15,7 +14,7 @@ export function prefersReducedMotion(): boolean {
   return window.matchMedia(QUERY).matches;
 }
 
-/** Appelle `onChange` à chaque bascule, et rend la fonction de désabonnement. */
+/** Calls `onChange` on every flip, and returns the unsubscribe function. */
 export function watchReducedMotion(onChange: (reduced: boolean) => void): () => void {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return () => {};

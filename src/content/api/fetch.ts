@@ -3,30 +3,28 @@ import { API_BASE_URL } from "@/lib/site";
 import { readPayload, type PortfolioPayload } from "@/content/api/adapt";
 
 /**
- * Le contenu, récupéré **une fois par construction**.
+ * The content, fetched **once per build**.
  *
- * ADR 0002 : la source de vérité est l'API. ADR 0005 : le site reste un export
- * entièrement statique. Les deux tiennent ensemble parce que la requête a lieu
- * au `next build`, jamais chez le visiteur — la page servie est du HTML figé,
- * et le contenu s'y trouve déjà.
+ * ADR 0002: the source of truth is the API. ADR 0005: the site stays a fully
+ * static export. The two hold together because the request happens at
+ * `next build`, never on the visitor's machine — the page served is frozen
+ * HTML, and the content is already in it.
  *
- * Trois propriétés valent d'être explicitées.
+ * Three properties are worth spelling out.
  *
- * **Une seule requête par langue et par construction.** Sans mémoïsation, chaque
- * page et chaque appel de métadonnées repartirait sur le réseau, et deux appels
- * pourraient tomber de part et d'autre d'un déploiement de l'API — une page du
- * site porterait alors une version du contenu, la suivante une autre. La
- * mémoïsation n'est donc pas une optimisation, c'est ce qui rend la
- * construction **cohérente avec elle-même**.
+ * **One request per locale per build.** Without memoisation, every page and
+ * every metadata call would go back to the network, and two calls could land on
+ * either side of an API deployment — one page of the site would then carry one
+ * version of the content, the next another. Memoisation is therefore not an
+ * optimisation, it is what makes the build **consistent with itself**.
  *
- * **Un échec arrête la construction.** Pas de contenu de secours, pas de page
- * partielle : `wrangler` publierait sans broncher ce qu'on lui donne, et une
- * section vide sur l'écran d'un recruteur coûte infiniment plus cher qu'un
- * déploiement rouge.
+ * **A failure stops the build.** No fallback content, no partial page:
+ * `wrangler` would happily publish whatever it is handed, and an empty section
+ * on a recruiter's screen costs infinitely more than a red deployment.
  *
- * **Quelques réessais, pas plus.** Une coupure réseau d'une seconde ne doit pas
- * faire échouer une livraison ; une API réellement en panne doit, elle, la faire
- * échouer tout de suite. D'où un nombre de tentatives petit et borné.
+ * **A few retries, no more.** A one-second network blip must not fail a
+ * release; an API that is genuinely down must fail it straight away. Hence a
+ * small, bounded number of attempts.
  */
 
 const ATTEMPTS = 3;
@@ -44,7 +42,7 @@ export function fetchPortfolio(locale: Locale): Promise<PortfolioPayload> {
   return pending;
 }
 
-/** Vide le cache — réservé aux tests, qui doivent pouvoir repartir d'un état net. */
+/** Clears the cache — for tests only, which must be able to start from a clean state. */
 export function resetPortfolioCache(): void {
   inFlight.clear();
 }
@@ -65,17 +63,17 @@ async function load(locale: Locale): Promise<PortfolioPayload> {
       return readPayload(await response.json(), locale);
     } catch (error) {
       lastError = error;
-      // Une charge utile mal formée ne se rejoue pas : la réponse suivante sera
-      // la même. Seules les pannes de transport méritent une seconde chance.
+      // A malformed payload is not worth replaying: the next response will be
+      // the same. Only transport failures deserve a second chance.
       if (error instanceof Error && error.name === "ContentShapeError") break;
       if (attempt < ATTEMPTS) await wait(BACKOFF_MS * attempt);
     }
   }
 
   throw new Error(
-    `Contenu introuvable sur ${url} après ${ATTEMPTS} tentatives : ${reason(lastError)}.\n` +
-      "La construction s'arrête : publier le site sans son contenu servirait des " +
-      "sections vides. Vérifier que l'API répond, puis relancer.",
+    `Content not found at ${url} after ${ATTEMPTS} attempts: ${reason(lastError)}.\n` +
+      "The build stops here: publishing the site without its content would serve " +
+      "empty sections. Check that the API responds, then run it again.",
     { cause: lastError },
   );
 }

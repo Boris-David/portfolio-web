@@ -67,8 +67,8 @@ vérité sur la **forme**. `api/field.ts` valide **en lisant** : chaque accès
 connaît son chemin et lève en le nommant.
 
 ```
-ContentShapeError: Contenu de l'API inattendu en « portfolio.data.profile.headline » :
-une chaîne non vide attendu, reçu rien.
+ContentShapeError: Unexpected API content at “portfolio.data.profile.headline”:
+expected a non-empty string, received nothing.
 ```
 
 Un champ qu'on ne lit jamais ne peut pas casser la construction ; un champ qu'on

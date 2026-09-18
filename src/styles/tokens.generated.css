@@ -1,9 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────────
- * FICHIER GÉNÉRÉ — ne pas modifier à la main.
+ * GENERATED FILE — do not edit by hand.
  *
- * Source   : design/tokens.json
- * Produit  : npm run tokens
- * Vérifié  : npm run tokens:check  (la CI échoue si ce fichier diverge)
+ * Source    : design/tokens.json
+ * Produced  : npm run tokens
+ * Verified  : npm run tokens:check  (CI fails if this file drifts)
  * ───────────────────────────────────────────────────────────────────────────── */
 
 :root {

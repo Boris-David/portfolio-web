@@ -1,13 +1,13 @@
 /**
- * Le lien de navigation de la section qu'on lit se souligne.
+ * The nav link of the section being read gets underlined.
  *
- * `aria-current` plutôt qu'une simple classe : l'information « vous êtes ici »
- * est une information, pas une décoration, et un lecteur d'écran doit pouvoir
- * l'annoncer. La classe suit l'attribut, jamais l'inverse.
+ * `aria-current` rather than a plain class: "you are here" is information, not
+ * decoration, and a screen reader must be able to announce it. The class
+ * follows the attribute, never the other way round.
  *
- * Cet effet n'est jamais actif en `prefers-reduced-motion` ? Si — et c'est
- * voulu. Il ne bouge rien : il change un état. Une préférence de mouvement ne
- * doit pas retirer une information.
+ * Is this effect never active under `prefers-reduced-motion`? It is — and
+ * deliberately so. It moves nothing: it changes a state. A motion preference
+ * must not take information away.
  */
 
 export function setupActiveSection({ root = document }: { root?: Document } = {}): () => void {
@@ -33,8 +33,9 @@ export function setupActiveSection({ root = document }: { root?: Document } = {}
       }
     },
     /**
-     * La bande active est une tranche au milieu de l'écran. Prendre toute la
-     * fenêtre ferait clignoter deux liens dès que deux sections s'y croisent.
+     * The active band is a slice in the middle of the screen. Taking the whole
+     * viewport would make two links flicker as soon as two sections overlap in
+     * it.
      */
     { rootMargin: "-45% 0px -50% 0px" },
   );

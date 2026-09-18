@@ -1,20 +1,19 @@
 /**
- * Lire les tokens de design depuis le CSS, au runtime.
+ * Reading the design tokens from the CSS, at runtime.
  *
- * Les animations JavaScript ont besoin des mêmes courbes que les transitions
- * CSS. Les recopier dans le code — `[0.65, 0.02, 0.28, 1]` — créerait une
- * deuxième source de vérité pour le design : changer une courbe dans
- * `tokens.json` laisserait le dépliage sur l'ancienne, sans que rien ne le dise.
+ * JavaScript animations need the same easing curves as the CSS transitions.
+ * Copying them into the code — `[0.65, 0.02, 0.28, 1]` — would create a second
+ * source of truth for the design: changing a curve in `tokens.json` would leave
+ * the disclosure on the old one, with nothing to say so.
  *
- * On lit donc la propriété personnalisée déjà calculée par le navigateur. Le
- * repli n'est pas une valeur de design : c'est une courbe neutre, présente
- * uniquement pour qu'un environnement sans CSS calculé (jsdom en test) ne casse
- * pas.
+ * So we read the custom property the browser has already computed. The fallback
+ * is not a design value: it is a neutral curve, present only so that an
+ * environment without computed CSS (jsdom in tests) does not break.
  */
 
 export type CubicBezier = [number, number, number, number];
 
-/** Repli neutre — jamais une valeur du design system, pour ne pas la dupliquer. */
+/** Neutral fallback — never a design system value, so as not to duplicate one. */
 const neutral = (): CubicBezier => [0.25, 0.1, 0.25, 1];
 
 const CUBIC_BEZIER = /cubic-bezier\(\s*([^)]+)\)/;
@@ -28,7 +27,7 @@ export function parseCubicBezier(value: string): CubicBezier | null {
 }
 
 /**
- * @param variable le nom de la variable, par exemple `--e-io`.
+ * @param variable the name of the variable, for example `--e-io`.
  */
 export function readEasing(variable: string): CubicBezier {
   if (typeof window === "undefined" || typeof getComputedStyle !== "function") return neutral();

@@ -12,9 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Artefacts de construction : `out/` est l'export publié, `.wrangler/`
-    // l'état local du serveur d'actifs. Ni l'un ni l'autre n'est écrit à la
-    // main, donc ni l'un ni l'autre ne se relit.
+    // Build artefacts: `out/` is the published export, `.wrangler/` the local
+    // state of the asset server. Neither is written by hand, so neither is ever
+    // read back.
     ".wrangler/**",
   ]),
 ]);

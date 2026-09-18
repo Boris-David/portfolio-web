@@ -1,10 +1,9 @@
 import type { SiteChrome } from "@/content/chrome/types";
 
 /**
- * Le chrome d'interface en anglais.
+ * The interface chrome in English.
  *
- * Mêmes règles que `fr.ts` : aucun fait, seulement ce qui n'existe que parce
- * qu'il y a une page.
+ * Same rules as `fr.ts`: no facts, only what exists because there is a page.
  */
 export const enChrome: SiteChrome = {
   meta: {

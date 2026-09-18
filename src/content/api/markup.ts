@@ -3,21 +3,20 @@ import { parseRichText, type RichNode } from "@/content/rich-text";
 import { ContentShapeError, type Field } from "@/content/api/field";
 
 /**
- * Le texte riche de l'API, ramené au balisage du site.
+ * The API's rich text, brought back to the site's markup.
  *
- * L'API sert des segments typés — `{ text, style }` — là où le site manipule
- * des chaînes `**balisées**`. La conversion est triviale ; ce qui ne l'est pas,
- * c'est qu'elle soit **sans perte**.
+ * The API serves typed spans — `{ text, style }` — where the site handles
+ * `**marked-up**` strings. The conversion is trivial; what is not trivial is
+ * that it be **lossless**.
  *
- * Le balisage n'a pas d'échappement : c'est un choix assumé de `rich-text.ts`,
- * une grammaire minuscule pour deux emphases. Un segment dont le texte
- * contiendrait lui-même `**` ou une accolade inverse produirait donc un
- * balisage faux — et ce faux passerait inaperçu, parce qu'il resterait une
- * chaîne parfaitement valide.
+ * The markup has no escaping: that is a deliberate choice in `rich-text.ts`, a
+ * tiny grammar for two emphases. A span whose text itself contained `**` or a
+ * backtick would therefore produce wrong markup — and that wrongness would go
+ * unnoticed, because it would still be a perfectly valid string.
  *
- * D'où la garde : on sérialise, **on relit avec l'analyseur du site**, et on
- * compare au point de départ. Une conversion qui perdrait quelque chose casse
- * la construction au lieu de publier une phrase déformée.
+ * Hence the guard: we serialise, **we read it back with the site's parser**, and
+ * we compare against the starting point. A conversion that would lose something
+ * breaks the build instead of publishing a mangled sentence.
  */
 
 const STYLES = ["plain", "strong", "code"] as const;
@@ -28,7 +27,7 @@ interface Span {
   readonly style: Style;
 }
 
-/** Une suite de segments — `profile.summary[0]`, le texte d'un paragraphe… */
+/** A run of spans — `profile.summary[0]`, a paragraph's text… */
 export function readMarkup(field: Field): Markup {
   const spans = field.list().map(readSpan);
   const markup = spans.map(serialize).join("");
@@ -55,10 +54,10 @@ function serialize({ text, style }: Span): string {
 }
 
 /**
- * Relit le balisage produit et vérifie qu'il redonne exactement les segments
- * de départ. Les segments voisins de même style sont fusionnés des deux côtés :
- * l'analyseur produit un seul nœud de texte là où l'API peut envoyer deux
- * segments `plain` consécutifs, et cette différence-là n'est pas une perte.
+ * Reads the produced markup back and checks that it yields exactly the spans we
+ * started from. Adjacent spans of the same style are merged on both sides: the
+ * parser produces a single text node where the API may send two consecutive
+ * `plain` spans, and that particular difference is not a loss.
  */
 function assertLossless(markup: Markup, spans: readonly Span[], path: string): void {
   const expected = merge(spans);
@@ -77,10 +76,10 @@ function assertLossless(markup: Markup, spans: readonly Span[], path: string): v
 
 function roundTripMessage(expected: readonly Span[], actual: readonly Span[]): string {
   return (
-    "un texte convertible sans perte vers le balisage du site — " +
-    `${expected.length} segment(s) à l'aller, ${actual.length} au retour. ` +
-    "Un segment contient probablement « ** » ou une accolade inverse, " +
-    "que le balisage ne sait pas échapper"
+    "text convertible to the site's markup without loss — " +
+    `${expected.length} span(s) on the way out, ${actual.length} on the way back. ` +
+    "A span probably contains “**” or a backtick, " +
+    "which the markup cannot escape"
   );
 }
 

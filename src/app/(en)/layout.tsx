@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata, LayoutShell } from "@/app/layout-shell";
 
-/** Racine anglaise, servie à `/en`. Voir la racine française pour le mécanisme. */
+/** The English root, served at `/en`. See the French root for the mechanism. */
 export const generateMetadata = (): Promise<Metadata> => buildMetadata("en");
 
 export default function EnglishLayout({ children }: { children: React.ReactNode }) {

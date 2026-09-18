@@ -1,43 +1,42 @@
 /**
- * Génération du CSS de design depuis `design/tokens.json`.
+ * Generation of the design CSS from `design/tokens.json`.
  *
- * Aucune couleur, aucun espacement, aucun rayon et aucune courbe n'est écrit à
- * la main dans le CSS de l'application : tout descend d'ici. Le fichier produit
- * est versionné et `npm run tokens:check` refuse qu'il diverge de sa source.
+ * No colour, no spacing, no radius and no easing curve is written by hand in
+ * the application CSS: everything comes down from here. The produced file is
+ * tracked and `npm run tokens:check` refuses to let it drift from its source.
  *
- * Deux couches, et la séparation n'est pas cosmétique :
+ * Two layers, and the separation is not cosmetic:
  *
- *   1. **la couche runtime** — des propriétés personnalisées classiques
- *      (`--paper`, `--s5`, `--e-io`…), écrites en CSS ordinaire. C'est ce que
- *      lisent les feuilles de style écrites à la main, et c'est ce que le thème
- *      sombre redéfinit ;
- *   2. **le pont Tailwind** — un `@theme inline` qui mappe les espaces de noms
- *      de Tailwind (`--color-*`, `--spacing-*`, `--radius-*`…) sur la couche 1.
- *      `inline` est le point décisif : Tailwind écrit alors `var(--paper)` dans
- *      l'utilitaire `bg-paper` au lieu d'y figer `#FAF8F3`. Une bascule de thème
- *      repeint donc tout le design system d'un coup, sans une seule variante
- *      `dark:` dans les composants.
+ *   1. **the runtime layer** — plain custom properties (`--paper`, `--s5`,
+ *      `--e-io`…), written as ordinary CSS. This is what the hand-written
+ *      stylesheets read, and this is what the dark theme redefines;
+ *   2. **the Tailwind bridge** — a `@theme inline` that maps Tailwind's
+ *      namespaces (`--color-*`, `--spacing-*`, `--radius-*`…) onto layer 1.
+ *      `inline` is the decisive bit: Tailwind then writes `var(--paper)` into
+ *      the `bg-paper` utility instead of freezing `#FAF8F3` into it. Switching
+ *      theme therefore repaints the whole design system at once, without a
+ *      single `dark:` variant in the components.
  *
- * Les deux couches portent des noms différents **à dessein** : `--radius-md`
- * côté Tailwind, `--r-md` côté runtime. Les nommer pareil produirait
- * `--radius-md: var(--radius-md)` — un cycle que le navigateur résout en
- * n'appliquant rien du tout, en silence.
+ * The two layers carry different names **by design**: `--radius-md` on the
+ * Tailwind side, `--r-md` on the runtime side. Naming them the same would
+ * produce `--radius-md: var(--radius-md)` — a cycle that the browser resolves
+ * by applying nothing at all, silently.
  */
 
-/** Les quatre familles dont AUCUNE valeur ne peut être écrite ailleurs. */
+/** The four families of which NO value may be written anywhere else. */
 export const GENERATED_NAMESPACES = ["color", "space", "radius", "ease"];
 
 const BANNER = `/* ─────────────────────────────────────────────────────────────────────────────
- * FICHIER GÉNÉRÉ — ne pas modifier à la main.
+ * GENERATED FILE — do not edit by hand.
  *
- * Source   : design/tokens.json
- * Produit  : npm run tokens
- * Vérifié  : npm run tokens:check  (la CI échoue si ce fichier diverge)
+ * Source    : design/tokens.json
+ * Produced  : npm run tokens
+ * Verified  : npm run tokens:check  (CI fails if this file drifts)
  * ───────────────────────────────────────────────────────────────────────────── */`;
 
 /**
- * Noms de la couche runtime. Courts parce qu'on les lit partout dans le CSS des
- * composants, et distincts des espaces de noms Tailwind pour éviter le cycle.
+ * Runtime-layer names. Short, because they are read all over the component CSS,
+ * and distinct from the Tailwind namespaces to avoid the cycle.
  */
 const RUNTIME = {
   space: (key) => `--s${key}`,
@@ -48,7 +47,7 @@ const RUNTIME = {
   color: (key) => `--${key}`,
 };
 
-/** Espaces de noms attendus par Tailwind v4. */
+/** The namespaces Tailwind v4 expects. */
 const TAILWIND = {
   space: (key) => `--spacing-s${key}`,
   radius: (key) => `--radius-${key}`,
@@ -61,30 +60,30 @@ const TAILWIND = {
 const typeKeys = (tokens) => Object.keys(tokens.type).filter((key) => !key.startsWith("$"));
 
 /**
- * `Fraunces` et `Instrument Sans` sont des noms propres et se citent ;
- * `ui-monospace` est un mot-clé CSS et le citer le rendrait inopérant.
+ * `Fraunces` and `Instrument Sans` are proper names and must be quoted;
+ * `ui-monospace` is a CSS keyword and quoting it would make it inoperative.
  */
 const quoteFamily = (family) => (/^[a-z][a-z0-9-]*$/.test(family) ? family : `"${family}"`);
 
 /**
- * Chaîne de polices avec un point d'injection.
+ * A font stack with an injection point.
  *
- * Les polices sont auto-hébergées par `next/font`, qui ne laisse pas choisir le
- * nom de famille : il génère quelque chose comme `__Fraunces_1a2b3c`. Le nom
- * écrit dans les tokens ne peut donc pas être utilisé directement.
+ * The fonts are self-hosted by `next/font`, which does not let you choose the
+ * family name: it generates something like `__Fraunces_1a2b3c`. The name
+ * written in the tokens therefore cannot be used directly.
  *
- * D'où ce `var(--font-loaded-display, "Fraunces")` : le chargeur de polices
- * renseigne la variable, et la famille des tokens reste le repli — celui qui
- * s'applique si le chargeur disparaît. La chaîne de secours continue de
- * descendre des tokens, sans être recopiée nulle part.
+ * Hence this `var(--font-loaded-display, "Fraunces")`: the font loader fills the
+ * variable in, and the family from the tokens stays as the fallback — the one
+ * that applies if the loader disappears. The fallback chain still comes down
+ * from the tokens, without being copied anywhere.
  */
 const fontStack = (key, { family, fallback }) =>
   `var(--font-loaded-${key}, ${quoteFamily(family)}), ${fallback}`;
 
 /**
- * L'ombre est dérivée des tokens plutôt que choisie : composée de l'encre en
- * clair, du noir pur en sombre. Écrite ici, elle suit une mise à jour de la
- * palette au lieu de rester silencieusement sur l'ancienne.
+ * The box-shadow is derived from the tokens rather than picked: composed of the
+ * ink in light mode, of pure black in dark mode. Written here, it follows a
+ * palette update instead of silently staying on the old one.
  */
 function shadow(theme, tokens) {
   const base = theme === "light" ? hexToRgb(tokens.color.ink.light) : "0,0,0";
@@ -96,12 +95,12 @@ function hexToRgb(hex) {
   const value = hex.replace("#", "");
   const int = Number.parseInt(value, 16);
   if (Number.isNaN(int) || value.length !== 6) {
-    throw new Error(`Couleur hexadécimale invalide dans les tokens : « ${hex} »`);
+    throw new Error(`Invalid hexadecimal colour in the tokens: “${hex}”`);
   }
   return [(int >> 16) & 255, (int >> 8) & 255, int & 255].join(",");
 }
 
-/** Le bloc de couleurs d'un thème — le seul qui change entre clair et sombre. */
+/** A theme's colour block — the only part that changes between light and dark. */
 function colorBlock(tokens, theme, indent = "  ") {
   const lines = Object.entries(tokens.color).map(
     ([name, value]) => `${indent}${RUNTIME.color(name)}: ${value[theme]};`,
@@ -140,11 +139,11 @@ function runtimeLayer(tokens) {
 }
 
 /**
- * Le thème sombre s'applique de deux façons, et il faut les deux : la
- * préférence système, et le choix explicite porté par `data-theme`. Le garde
- * `:not([data-theme="light"])` fait que le choix explicite gagne toujours sur
- * la préférence — sans lui, quelqu'un dont le système est en sombre ne pourrait
- * jamais forcer le clair.
+ * The dark theme applies in two ways, and both are needed: the system
+ * preference, and the explicit choice carried by `data-theme`. The
+ * `:not([data-theme="light"])` guard makes the explicit choice always win over
+ * the preference — without it, somebody whose system is in dark mode could
+ * never force light.
  */
 function darkTheme(tokens) {
   return [
@@ -161,10 +160,10 @@ function darkTheme(tokens) {
 }
 
 /**
- * Les espacements sont exposés sous `s1`…`s9` — et non `1`…`9` — pour ne pas se
- * confondre avec l'échelle dynamique par défaut de Tailwind : `p-s5` se lit
- * « l'espacement 5 du design system », `p-5` se lirait « 20 px ». Confondre les
- * deux est exactement ce qui fait dériver un rythme vertical.
+ * Spacings are exposed as `s1`…`s9` — and not `1`…`9` — so as not to be
+ * confused with Tailwind's default dynamic scale: `p-s5` reads as "design
+ * system spacing 5", `p-5` would read as "20 px". Confusing the two is exactly
+ * what makes a vertical rhythm drift.
  */
 function tailwindBridge(tokens) {
   const bridge = (namespace, keys) =>
@@ -190,14 +189,14 @@ function tailwindBridge(tokens) {
 }
 
 /**
- * La favicone, dessinée depuis les tokens.
+ * The favicon, drawn from the tokens.
  *
- * Elle est générée — et non déposée — pour la même raison que le CSS : ses deux
- * couleurs sont l'accent et son contraste, et une favicone figée continuerait
- * d'afficher l'ancien bleu après un changement de palette.
+ * It is generated — rather than dropped in — for the same reason as the CSS:
+ * its two colours are the accent and its contrast, and a frozen favicon would
+ * keep showing the old blue after a palette change.
  *
- * En SVG, elle pèse deux cent trente octets contre vingt-six kilo-octets pour
- * l'icône ICO par défaut du gabarit — et reste nette à toutes les tailles.
+ * As SVG it weighs two hundred and thirty bytes against twenty-six kilobytes
+ * for the template's default ICO icon — and stays sharp at every size.
  */
 export function generateFaviconSvg(tokens) {
   const background = tokens.color.accent.light;
@@ -210,7 +209,7 @@ export function generateFaviconSvg(tokens) {
   );
 }
 
-/** @param {object} tokens le contenu de `design/tokens.json` */
+/** @param {object} tokens the contents of `design/tokens.json` */
 export function generateTokensCss(tokens) {
   assertShape(tokens);
   return [BANNER, "", runtimeLayer(tokens), "", darkTheme(tokens), "", tailwindBridge(tokens), ""].join(
@@ -219,34 +218,34 @@ export function generateTokensCss(tokens) {
 }
 
 /**
- * Un token manquant doit casser la génération, pas produire un CSS
- * silencieusement incomplet où `bg-accent` ne peindrait plus rien.
+ * A missing token must break generation, not produce a silently incomplete CSS
+ * where `bg-accent` would no longer paint anything.
  */
 function assertShape(tokens) {
   for (const namespace of [...GENERATED_NAMESPACES, "type", "font", "a11y"]) {
     if (!tokens[namespace] || typeof tokens[namespace] !== "object") {
-      throw new Error(`tokens.json : espace de noms « ${namespace} » absent ou invalide`);
+      throw new Error(`tokens.json: namespace “${namespace}” missing or invalid`);
     }
   }
   for (const [name, value] of Object.entries(tokens.color)) {
     for (const theme of ["light", "dark"]) {
       if (typeof value[theme] !== "string") {
-        throw new Error(`tokens.json : color.${name} n'a pas de valeur « ${theme} »`);
+        throw new Error(`tokens.json: color.${name} has no “${theme}” value`);
       }
       hexToRgb(value[theme]);
     }
   }
   for (const [name, value] of Object.entries(tokens.space)) {
     if (!Number.isFinite(value)) {
-      throw new Error(`tokens.json : space.${name} doit être un nombre de pixels`);
+      throw new Error(`tokens.json: space.${name} must be a number of pixels`);
     }
   }
   for (const [name, value] of Object.entries(tokens.font)) {
     if (typeof value?.family !== "string" || typeof value?.fallback !== "string") {
-      throw new Error(`tokens.json : font.${name} doit porter « family » et « fallback »`);
+      throw new Error(`tokens.json: font.${name} must carry “family” and “fallback”`);
     }
   }
   if (!Number.isFinite(tokens.a11y.minTouchTarget)) {
-    throw new Error("tokens.json : a11y.minTouchTarget doit être un nombre de pixels");
+    throw new Error("tokens.json: a11y.minTouchTarget must be a number of pixels");
   }
 }

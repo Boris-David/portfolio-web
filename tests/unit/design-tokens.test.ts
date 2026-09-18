@@ -9,23 +9,23 @@ const tokens = JSON.parse(readFileSync(resolve(ROOT, "design/tokens.json"), "utf
 const generated = readFileSync(resolve(ROOT, "src/styles/tokens.generated.css"), "utf8");
 
 /**
- * Le générateur est la pièce qui garantit qu'aucune valeur de design n'est
- * recopiée à la main. Ces tests vérifient qu'il produit ce qu'on croit, et
- * surtout qu'il **casse** quand la source est incohérente.
+ * The generator is the piece that guarantees no design value is copied out by
+ * hand. These tests check that it produces what we think it does, and above all
+ * that it **breaks** when the source is inconsistent.
  */
-describe("le générateur de tokens", () => {
-  it("produit exactement le fichier versionné", () => {
+describe("the token generator", () => {
+  it("produces exactly the tracked file", () => {
     expect(generateTokensCss(tokens)).toBe(generated);
   });
 
-  it("émet chaque couleur dans les deux thèmes", () => {
+  it("emits every colour in both themes", () => {
     for (const [name, value] of Object.entries<Record<string, string>>(tokens.color)) {
       expect(generated).toContain(`--${name}: ${value.light};`);
       expect(generated).toContain(`--${name}: ${value.dark};`);
     }
   });
 
-  it("émet chaque espacement, rayon et courbe", () => {
+  it("emits every spacing, radius and easing curve", () => {
     for (const [key, value] of Object.entries(tokens.space)) {
       expect(generated).toContain(`--s${key}: ${value}px;`);
     }
@@ -37,81 +37,81 @@ describe("le générateur de tokens", () => {
     }
   });
 
-  it("dérive la cible tactile minimale des tokens d'accessibilité", () => {
+  it("derives the minimum touch target from the accessibility tokens", () => {
     expect(generated).toContain(`--touch-target: ${tokens.a11y.minTouchTarget}px;`);
   });
 
   /**
-   * `--radius-md: var(--radius-md)` est un cycle : le navigateur n'applique
-   * alors rien, en silence. C'est précisément le bug qu'a produit la première
-   * version du générateur, d'où ce test.
+   * `--radius-md: var(--radius-md)` is a cycle: the browser then applies
+   * nothing at all, silently. That is precisely the bug the first version of the
+   * generator produced, hence this test.
    */
-  it("ne produit aucune variable qui se référence elle-même", () => {
+  it("produces no variable that references itself", () => {
     const cycles = [...generated.matchAll(/^\s*(--[\w-]+):\s*var\(\1\)/gm)];
     expect(cycles.map((match) => match[1])).toEqual([]);
   });
 
-  it("laisse un point d'injection au chargeur de polices, avec repli", () => {
+  it("leaves an injection point for the font loader, with a fallback", () => {
     expect(generated).toContain('--f-display: var(--font-loaded-display, "Fraunces"), Georgia, serif;');
-    // `ui-monospace` est un mot-clé CSS : le citer le rendrait inopérant.
+    // `ui-monospace` is a CSS keyword: quoting it would make it inoperative.
     expect(generated).toContain("--f-mono: var(--font-loaded-mono, ui-monospace)");
   });
 
-  it("fait primer le thème explicite sur la préférence système", () => {
+  it("makes the explicit theme win over the system preference", () => {
     expect(generated).toContain(':root:not([data-theme="light"])');
     expect(generated).toContain(':root[data-theme="dark"]');
   });
 
-  it.each(GENERATED_NAMESPACES)("refuse une source où « %s » manque", (namespace) => {
+  it.each(GENERATED_NAMESPACES)("rejects a source where “%s” is missing", (namespace) => {
     const broken = { ...tokens, [namespace]: undefined };
     expect(() => generateTokensCss(broken)).toThrow(new RegExp(namespace));
   });
 
-  it("refuse une couleur hexadécimale invalide", () => {
+  it("rejects an invalid hexadecimal colour", () => {
     const broken = { ...tokens, color: { ...tokens.color, ink: { light: "bleu", dark: "#000000" } } };
-    expect(() => generateTokensCss(broken)).toThrow(/hexadécimale/);
+    expect(() => generateTokensCss(broken)).toThrow(/hexadecimal/);
   });
 
-  it("refuse un espacement qui n'est pas un nombre", () => {
+  it("rejects a spacing that is not a number", () => {
     const broken = { ...tokens, space: { ...tokens.space, 1: "4px" } };
     expect(() => generateTokensCss(broken)).toThrow(/space\.1/);
   });
 });
 
 /**
- * Les animations JavaScript lisent les courbes dans le CSS calculé. Si le
- * format change, elles retomberaient silencieusement sur une courbe neutre —
- * et le dépliage perdrait son caractère sans que rien ne le signale.
+ * The JavaScript animations read their easing curves out of the computed CSS. If
+ * the format changed, they would silently fall back to a neutral curve — and the
+ * disclosure would lose its character with nothing to flag it.
  */
-describe("la lecture des courbes par les animations", () => {
-  it.each(Object.entries<string>(tokens.ease))("sait relire la courbe « %s »", (_, value) => {
+describe("how the animations read the easing curves", () => {
+  it.each(Object.entries<string>(tokens.ease))("can read the “%s” curve back", (_, value) => {
     const parsed = parseCubicBezier(value);
     expect(parsed).not.toBeNull();
     expect(parsed).toHaveLength(4);
   });
 
-  it("rend null sur une valeur qui n'est pas une courbe", () => {
+  it("returns null on a value that is not a curve", () => {
     expect(parseCubicBezier("linear")).toBeNull();
     expect(parseCubicBezier("cubic-bezier(1,2)")).toBeNull();
   });
 });
 
 /**
- * La garde qui donne son sens à tout le générateur : si une valeur de design
- * peut être écrite à la main dans une feuille de style, alors rien ne dérive
- * plus de `tokens.json`.
+ * The guard that gives the whole generator its meaning: if a design value can be
+ * written by hand in a stylesheet, then nothing derives from `tokens.json` any
+ * more.
  */
-describe("aucune valeur de design écrite en dur dans le CSS de l'application", () => {
+describe("no design value hard-coded in the application CSS", () => {
   const stylesheets = ["base.css", "motion.css", "components.css", "disclosure.css"].map((name) => ({
     name,
     css: readFileSync(resolve(ROOT, "src/styles", name), "utf8"),
   }));
 
-  it.each(stylesheets)("$name ne contient aucune couleur hexadécimale", ({ css }) => {
+  it.each(stylesheets)("$name contains no hexadecimal colour", ({ css }) => {
     expect(css.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).toEqual([]);
   });
 
-  it.each(stylesheets)("$name ne contient aucune courbe de Bézier littérale", ({ css }) => {
+  it.each(stylesheets)("$name contains no literal Bézier curve", ({ css }) => {
     expect(css.match(/cubic-bezier\(/g) ?? []).toEqual([]);
   });
 });

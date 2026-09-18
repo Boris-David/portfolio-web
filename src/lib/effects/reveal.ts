@@ -1,20 +1,18 @@
 import { prefersReducedMotion } from "./reduced-motion";
 
 /**
- * Les apparitions au défilement, posées en **une seule passe** sur tout le
- * document.
+ * The scroll reveals, wired up in **a single pass** over the whole document.
  *
- * Pourquoi un observateur unique plutôt qu'un composant client par bloc : les
- * quinze sections de la page restent des composants serveur. Rien de leur
- * balisage ne descend dans le bundle — seule cette couche d'amélioration le
- * fait, et elle tient en quelques centaines d'octets.
+ * Why one observer rather than a client component per block: the page's fifteen
+ * sections stay server components. None of their markup goes down into the
+ * bundle — only this enhancement layer does, and it fits in a few hundred bytes.
  *
- * L'attribut `data-reveal` est rendu par le serveur ; la feuille de style ne le
- * cache que sous `html.js`. Sans JavaScript, il ne se passe donc rien du tout —
- * ce qui est le comportement voulu, pas un repli dégradé.
+ * The `data-reveal` attribute is rendered by the server; the stylesheet only
+ * hides it under `html.js`. Without JavaScript, therefore, nothing happens at
+ * all — which is the intended behaviour, not a degraded fallback.
  */
 
-/** Le décalage maximal : au-delà, une apparition retarde la lecture. */
+/** The maximum delay: beyond it, a reveal holds up reading. */
 const MAX_REVEAL_DELAY_MS = 280;
 const MAX_STAGGER_DELAY_MS = 620;
 const STAGGER_STEP_MS = 42;
@@ -28,16 +26,16 @@ function markAllVisible(elements: Iterable<Element>, attribute: string) {
 }
 
 /**
- * @returns la fonction de nettoyage, à appeler au démontage.
+ * @returns the cleanup function, to be called on unmount.
  */
 export function setupReveal({ root = document }: RevealOptions = {}): () => void {
   const revealed = root.querySelectorAll<HTMLElement>("[data-reveal]");
   const staggered = root.querySelectorAll<HTMLElement>("[data-stagger]");
 
   /**
-   * Sans `IntersectionObserver` — ou quand le mouvement est refusé — tout
-   * s'affiche immédiatement. L'absence d'animation ne doit jamais se traduire
-   * par une absence de contenu.
+   * Without `IntersectionObserver` — or when motion is declined — everything
+   * shows immediately. The absence of an animation must never translate into
+   * the absence of content.
    */
   if (typeof IntersectionObserver === "undefined" || prefersReducedMotion()) {
     markAllVisible(revealed, "data-reveal");

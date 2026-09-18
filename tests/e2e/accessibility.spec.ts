@@ -2,34 +2,34 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * L'audit d'accessibilité automatisé.
+ * The automated accessibility audit.
  *
- * Il ne remplace pas une relecture humaine — aucun outil ne juge si un `alt`
- * dit la bonne chose. Mais il rend **impossible** de régresser sur ce qui se
- * mesure : contraste, noms accessibles, ordre des titres, rôles.
+ * It does not replace a human review — no tool judges whether an `alt` says the
+ * right thing. But it makes it **impossible** to regress on what can be
+ * measured: contrast, accessible names, heading order, roles.
  *
- * Il tourne sur les deux langues et dans les deux thèmes : le contraste du
- * thème sombre est un autre calcul que celui du thème clair, et seul un audit
- * qui les voit tous les deux le garantit.
+ * It runs on both languages and in both themes: the dark theme's contrast is a
+ * different calculation from the light theme's, and only an audit that sees both
+ * guarantees it.
  */
 
 const analyze = (page: Page) =>
   new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
 
 /**
- * Terminer toutes les apparitions avant de mesurer quoi que ce soit.
+ * Finish every reveal before measuring anything.
  *
- * Sans cela, on mesure une page en mouvement, et on obtient deux faux positifs
- * bien réels :
+ * Without this we measure a page in motion, and get two very real false
+ * positives:
  *
- *   - **le contraste** : un texte à mi-apparition est à opacité 0,5, donc
- *     mélangé à son fond. Axe calcule alors le contraste d'une couleur qui
- *     n'existe à aucun moment stable de la page ;
- *   - **les cibles tactiles** : l'apparition applique un `scale(.994)`, qui rend
- *     43,7 px là où le CSS en impose 44.
+ *   - **contrast**: text mid-reveal is at opacity 0.5, so blended into its
+ *     background. Axe then computes the contrast of a colour that exists at no
+ *     stable moment of the page;
+ *   - **touch targets**: the reveal applies a `scale(.994)`, which yields
+ *     43.7 px where the CSS requires 44.
  *
- * On coupe donc les transitions et on force l'état final. Ce que l'audit doit
- * juger, c'est la page telle qu'on la lit — pas une image intermédiaire.
+ * So we cut the transitions and force the final state. What the audit has to
+ * judge is the page as it is read — not an intermediate frame.
  */
 const settleReveals = async (page: Page) => {
   await page.evaluate(() => {
@@ -57,25 +57,25 @@ const forceTheme = async (page: Page, theme: "light" | "dark") => {
 };
 
 for (const { path, label } of [
-  { path: "/", label: "française" },
-  { path: "/en", label: "anglaise" },
+  { path: "/", label: "French" },
+  { path: "/en", label: "English" },
 ]) {
-  test.describe(`la page ${label}`, () => {
-    test("ne présente aucune violation WCAG 2.1 AA en thème clair", async ({ page }) => {
+  test.describe(`the ${label} page`, () => {
+    test("has no WCAG 2.1 AA violation in the light theme", async ({ page }) => {
       await page.goto(path);
       await forceTheme(page, "light");
       const results = await analyze(page);
       expect(results.violations).toEqual([]);
     });
 
-    test("ne présente aucune violation WCAG 2.1 AA en thème sombre", async ({ page }) => {
+    test("has no WCAG 2.1 AA violation in the dark theme", async ({ page }) => {
       await page.goto(path);
       await forceTheme(page, "dark");
       const results = await analyze(page);
       expect(results.violations).toEqual([]);
     });
 
-    test("reste conforme une fois les cartes dépliées", async ({ page }) => {
+    test("stays conformant once the cards are expanded", async ({ page }) => {
       await page.goto(path);
       for (const summary of await page.locator("details > summary").all()) {
         await summary.click();
@@ -87,7 +87,7 @@ for (const { path, label } of [
       expect(results.violations).toEqual([]);
     });
 
-    test("n'a qu'un seul <h1> et une hiérarchie de titres continue", async ({ page }) => {
+    test("has exactly one <h1> and an unbroken heading hierarchy", async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
 
@@ -96,12 +96,12 @@ for (const { path, label } of [
         .evaluateAll((nodes) => nodes.map((node) => Number(node.tagName.slice(1))));
 
       for (let index = 1; index < levels.length; index += 1) {
-        // Un niveau ne se saute jamais vers le bas : h2 → h4 est une rupture.
+        // A level is never skipped on the way down: h2 → h4 is a break.
         expect(levels[index] - levels[index - 1]).toBeLessThanOrEqual(1);
       }
     });
 
-    test("donne un alt à chaque image, vide si l'image est décorative", async ({ page }) => {
+    test("gives every image an alt, empty when the image is decorative", async ({ page }) => {
       await page.goto(path);
       const missing = await page
         .locator("img")
@@ -109,7 +109,7 @@ for (const { path, label } of [
       expect(missing).toBe(0);
     });
 
-    test("expose un lien d'évitement en premier au clavier", async ({ page }) => {
+    test("exposes a skip link first from the keyboard", async ({ page }) => {
       await page.goto(path);
       await page.keyboard.press("Tab");
 
@@ -121,7 +121,7 @@ for (const { path, label } of [
       await expect(page).toHaveURL(/#contenu$/);
     });
 
-    test("respecte 44 px de cible tactile sur tous les contrôles", async ({ page }) => {
+    test("honours a 44 px touch target on every control", async ({ page }) => {
       await page.goto(path);
       await settleReveals(page);
       const tooSmall = await page
@@ -131,8 +131,8 @@ for (const { path, label } of [
             .filter((node) => {
               const style = getComputedStyle(node);
               if (style.display === "none" || style.visibility === "hidden") return false;
-              // Un lien à l'intérieur d'un paragraphe suit la ligne de texte :
-              // la règle des 44 px vise les contrôles, pas les liens en ligne.
+              // A link inside a paragraph follows the line of text: the 44 px
+              // rule targets controls, not inline links.
               if (node.closest("p") && node.tagName === "A") return false;
               const rect = node.getBoundingClientRect();
               if (rect.width === 0 && rect.height === 0) return false;
@@ -143,7 +143,7 @@ for (const { path, label } of [
       expect(tooSmall).toEqual([]);
     });
 
-    test("rend le focus visible sur chaque contrôle atteint au clavier", async ({ page }) => {
+    test("makes focus visible on every control reached from the keyboard", async ({ page }) => {
       await page.goto(path);
       for (let index = 0; index < 12; index += 1) {
         await page.keyboard.press("Tab");
@@ -157,16 +157,16 @@ for (const { path, label } of [
   });
 }
 
-test.describe("le responsive", () => {
+test.describe("responsiveness", () => {
   test.use({ viewport: { width: 400, height: 850 } });
 
   /**
-   * Les deux langues, et pas seulement le français : « CV » fait deux
-   * caractères, « Résumé » en fait six. Une barre qui ne tient que dans la
-   * langue courte casse dans l'autre, et c'est exactement ce qui est arrivé.
+   * Both languages, and not only French: "CV" is two characters, "Résumé" is
+   * six. A bar that only fits in the short language breaks in the other, and
+   * that is exactly what happened.
    */
   for (const path of ["/", "/en"]) {
-    test(`ne produit aucun défilement horizontal à 400 px sur ${path}`, async ({ page }) => {
+    test(`produces no horizontal scrolling at 400 px on ${path}`, async ({ page }) => {
       await page.goto(path);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -174,7 +174,7 @@ test.describe("le responsive", () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
 
-    test(`ne laisse déborder aucun élément à 400 px sur ${path}`, async ({ page }) => {
+    test(`lets no element overflow at 400 px on ${path}`, async ({ page }) => {
       await page.goto(path);
       const overflowing = await page.locator("body *").evaluateAll((nodes) =>
         nodes
@@ -189,12 +189,12 @@ test.describe("le responsive", () => {
     });
   }
 
-  test("garde le bouton CV atteignable et nommé, même sans son intitulé", async ({ page }) => {
+  test("keeps the résumé button reachable and named, even without its label", async ({ page }) => {
     await page.goto("/en");
     const cv = page.getByTestId("cv-link");
 
     await expect(cv).toBeVisible();
-    // L'intitulé disparaît, le nom accessible reste entier.
+    // The label disappears, the accessible name stays whole.
     await expect(cv).toHaveAttribute("aria-label", /résumé/i);
     await expect(cv).toHaveAttribute("aria-label", /new tab/i);
     const box = await cv.boundingBox();
@@ -202,7 +202,7 @@ test.describe("le responsive", () => {
     expect(box?.height).toBeGreaterThanOrEqual(44);
   });
 
-  test("ne produit pas de défilement horizontal cartes dépliées", async ({ page }) => {
+  test("produces no horizontal scrolling with the cards expanded", async ({ page }) => {
     await page.goto("/");
     for (const summary of await page.locator("details > summary").all()) {
       await summary.click();

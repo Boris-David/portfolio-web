@@ -5,12 +5,12 @@ import { SectionHead } from "@/components/SectionHead";
 import type { Background, Job, TimelineRow } from "@/content/types";
 
 /**
- * Parcours : expériences dépliables, puis formation, certifications et
- * compétences.
+ * Background: expandable experiences, then education, certifications and
+ * skills.
  *
- * L'expérience en cours est dépliée par défaut — c'est celle qu'on vient lire.
- * Les deux autres se déplient à la demande : un recruteur scanne, il ouvre ce
- * qui l'intéresse.
+ * The current experience is expanded by default — it is the one people come to
+ * read. The other two expand on demand: a recruiter scans, and opens what
+ * interests them.
  */
 export function BackgroundSection({ background }: { readonly background: Background }) {
   return (

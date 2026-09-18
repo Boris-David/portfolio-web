@@ -1,11 +1,11 @@
 import type { SiteChrome } from "@/content/chrome/types";
 
 /**
- * Le chrome d'interface en français.
+ * The interface chrome in French.
  *
- * Aucun fait ici — ni chiffre, ni date, ni phrase du dossier. Tout cela vient
- * de l'API. Ce fichier ne porte que ce qui n'existe que parce qu'il y a une
- * page : des gestes, des repères de navigation et le référencement.
+ * No facts here — no figure, no date, no sentence from the record. All of that
+ * comes from the API. This file carries only what exists because there is a
+ * page: gestures, navigation landmarks and search metadata.
  */
 export const frChrome: SiteChrome = {
   meta: {

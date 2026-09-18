@@ -11,25 +11,24 @@ import {
 import { prefersReducedMotion } from "@/lib/effects/reduced-motion";
 
 /**
- * Une carte dépliante, bâtie **sur** `<details>` plutôt qu'à la place.
+ * An expandable card, built **on top of** `<details>` rather than instead of it.
  *
- * Le problème classique : `<details>` coupe net: le navigateur masque son
- * contenu à l'instant où `open` passe à `false`, ce qui interdit toute
- * animation de fermeture. La solution est de dissocier deux choses que le
- * navigateur confond :
+ * The classic problem: `<details>` cuts off dead — the browser hides its content
+ * the instant `open` goes to `false`, which rules out any closing animation. The
+ * fix is to separate two things the browser conflates:
  *
- *   - `open` — le contenu est-il dans le flux ? Il doit rester vrai **pendant**
- *     la fermeture, jusqu'à ce que la hauteur atteigne zéro ;
- *   - l'état visuel — chevron, fond, numéro — qui bascule immédiatement, parce
- *     qu'un contrôle qui ne réagit pas au clic paraît cassé.
+ *   - `open` — is the content in the flow? It has to stay true **during** the
+ *     close, until the height reaches zero;
+ *   - the visual state — chevron, background, number — which flips immediately,
+ *     because a control that does not react to a click looks broken.
  *
- * D'où la petite machine à états ci-dessous. Elle a aussi le mérite de rendre
- * les états impossibles inatteignables : il n'existe pas de « fermé mais en
- * train de s'ouvrir ».
+ * Hence the small state machine below. It also has the merit of making the
+ * impossible states unreachable: there is no such thing as "closed but
+ * opening".
  *
- * Ce qui reste natif, et qu'on n'a donc pas à réécrire : le rôle ARIA,
- * `aria-expanded`, Entrée et Espace au clavier, la recherche dans la page sur
- * du contenu replié, et l'ouverture complète avant impression.
+ * What stays native, and therefore does not have to be rewritten: the ARIA
+ * role, `aria-expanded`, Enter and Space on the keyboard, find-in-page over
+ * collapsed content, and expanding fully before printing.
  */
 
 type State = "closed" | "opening" | "open" | "closing";
@@ -37,13 +36,13 @@ type State = "closed" | "opening" | "open" | "closing";
 const isVisuallyOpen = (state: State) => state === "opening" || state === "open";
 
 export interface DisclosureProps {
-  /** Le contenu du `<summary>` : titre, sous-titre, chevron. */
+  /** The `<summary>` content: title, subtitle, chevron. */
   readonly summary: ReactNode;
   readonly children: ReactNode;
   readonly defaultOpen?: boolean;
   readonly className?: string;
   readonly summaryClassName?: string;
-  /** Rendu sur l'élément `<details>`, pour cibler un test. */
+  /** Rendered on the `<details>` element, so a test can target it. */
   readonly testId?: string;
 }
 
@@ -61,9 +60,9 @@ export function Disclosure({
   const bodyRef = useRef<HTMLDivElement>(null);
   const heightAnimation = useRef<Animation | null>(null);
   const cascadeAnimations = useRef<Animation[]>([]);
-  /** Le premier rendu ne doit rien animer : `defaultOpen` est déjà à l'écran. */
+  /** The first render must animate nothing: `defaultOpen` is already on screen. */
   const mounted = useRef(false);
-  /** L'état précédent décide d'où repart la hauteur — voir plus bas. */
+  /** The previous state decides where the height restarts from — see below. */
   const previousState = useRef<State>(state);
 
   const stopAll = useCallback(() => {
@@ -72,10 +71,10 @@ export function Disclosure({
     cascadeAnimations.current.forEach((animation) => animation.stop());
     cascadeAnimations.current = [];
     /**
-     * Motion applique la valeur courante au style au moment de l'arrêt. Pour la
-     * hauteur c'est exactement ce qu'on veut — c'est de là que repart
-     * l'animation inverse. Pour la cascade, non : une opacité figée à 0,4
-     * laisserait le texte à moitié effacé. On la rend au CSS.
+     * Motion writes the current value into the style at the moment it stops.
+     * For the height that is exactly what we want — it is where the reverse
+     * animation starts from. For the cascade it is not: an opacity frozen at
+     * 0.4 would leave the text half erased. We hand it back to the CSS.
      */
     bodyRef.current?.querySelectorAll<HTMLElement>("[data-cascade]").forEach((item) => {
       item.style.opacity = "";
@@ -106,13 +105,13 @@ export function Disclosure({
         return;
       }
       /**
-       * `<details>` vient de s'ouvrir : le contenu occupe déjà toute sa hauteur.
-       * On la ramène à zéro avant de mesurer, dans un effet de *layout* — donc
-       * avant le premier rendu à l'écran, sans clignotement.
+       * `<details>` has just opened: the content already takes up its full
+       * height. We bring it back to zero before measuring, inside a *layout*
+       * effect — so before the first paint, with no flicker.
        *
-       * Si on interrompt une fermeture, en revanche, il ne faut surtout pas
-       * repartir de zéro : l'arrêt de l'animation précédente a laissé la hauteur
-       * courante en ligne, et c'est de là que le dépliage doit reprendre.
+       * When we interrupt a close, on the other hand, we must absolutely not
+       * restart from zero: stopping the previous animation left the current
+       * height inline, and that is where the expansion has to pick up again.
        */
       if (previous === "closed") wrap.style.height = "0px";
       const animation = expandHeight(wrap, body);
@@ -137,7 +136,7 @@ export function Disclosure({
       heightAnimation.current = animation;
       void animation.finished.then(() => {
         if (animation.wasStopped()) return;
-        // La hauteur en ligne disparaît : `<details>` reprend la main sur l'affichage.
+        // The inline height goes away: `<details>` takes display back over.
         wrap.style.height = "";
         setState("closed");
       });
@@ -147,9 +146,9 @@ export function Disclosure({
   useEffect(() => stopAll, [stopAll]);
 
   /**
-   * On empêche la bascule native pour la piloter nous-mêmes. `<summary>`
-   * transforme Entrée et Espace en `click`, donc le clavier passe par ici aussi
-   * — sans un seul gestionnaire de touche à écrire.
+   * We prevent the native toggle so we can drive it ourselves. `<summary>` turns
+   * Enter and Space into a `click`, so the keyboard goes through here too —
+   * without a single key handler to write.
    */
   const onSummaryClick = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
@@ -162,11 +161,11 @@ export function Disclosure({
       data-open={isVisuallyOpen(state)}
       data-testid={testId}
       /**
-       * Ouvert dès que l'état n'est pas « fermé » : c'est ce qui laisse le
-       * contenu à l'écran pendant toute l'animation de fermeture.
+       * Open as soon as the state is not "closed": that is what keeps the
+       * content on screen for the whole closing animation.
        */
       open={state !== "closed"}
-      /** Contrôlé par le clic : React exige un gestionnaire, le nôtre est ailleurs. */
+      /** Driven by the click: React requires a handler, ours lives elsewhere. */
       onToggle={() => {}}
     >
       <summary className={summaryClassName} onClick={onSummaryClick}>

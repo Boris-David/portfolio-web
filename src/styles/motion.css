@@ -1,18 +1,18 @@
 /**
- * Les primitives d'animation.
+ * The animation primitives.
  *
- * Une règle tient tout ce fichier : **l'état initial caché n'existe que si le
- * script tourne.** D'où le garde `html.js`, posé par un script inline avant le
- * premier rendu. Sans JavaScript, aucune de ces règles ne s'applique et la page
- * est intégralement lisible — ce qui est la seule façon honnête d'animer une
- * apparition au défilement.
+ * One rule holds this whole file together: **the initial hidden state exists
+ * only if the script runs.** Hence the `html.js` guard, set by an inline script
+ * before the first render. Without JavaScript, none of these rules applies and
+ * the page is entirely readable — which is the only honest way to animate a
+ * scroll reveal.
  *
- * Deuxième règle : `prefers-reduced-motion` ne réduit pas les animations, il les
- * supprime. Une animation « discrète » reste une animation pour quelqu'un que le
- * mouvement rend malade.
+ * Second rule: `prefers-reduced-motion` does not reduce animations, it removes
+ * them. A "subtle" animation is still an animation to somebody motion makes
+ * sick.
  */
 
-/* ── Révélation au défilement ──────────────────────────────────────────────── */
+/* ── Scroll reveal ─────────────────────────────────────────────────────────── */
 
 html.js [data-reveal] {
   opacity: 0;
@@ -30,7 +30,7 @@ html.js [data-reveal="in"] {
     filter 0.7s var(--e-soft);
 }
 
-/* ── Cascade : chaque enfant entre décalé de son voisin ────────────────────── */
+/* ── Stagger: each child enters offset from its neighbour ──────────────────── */
 
 html.js [data-stagger] > * {
   opacity: 0;
@@ -71,8 +71,8 @@ html.js [data-stagger="in"] > * {
 }
 
 /**
- * Le retour tactile : un objet qu'on presse doit reculer. 0.97 est assez pour
- * se sentir, assez peu pour ne pas sauter.
+ * Tactile feedback: an object you press has to give way. 0.97 is enough to be
+ * felt, little enough not to jump.
  */
 .press:active {
   transform: scale(0.97);
@@ -91,9 +91,9 @@ html.js [data-stagger="in"] > * {
 }
 
 /**
- * La pastille de disponibilité. Elle pulse parce qu'elle dit « maintenant » —
- * c'est la seule animation permanente de la page, et elle disparaît dès que le
- * mouvement est refusé.
+ * The availability dot. It pulses because it says "right now" — it is the only
+ * permanent animation on the page, and it goes away as soon as motion is
+ * declined.
  */
 .pulse-dot {
   animation: pulse-ring 2.6s infinite;

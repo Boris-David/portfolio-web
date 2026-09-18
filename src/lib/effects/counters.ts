@@ -1,23 +1,23 @@
 import { prefersReducedMotion } from "./reduced-motion";
 
 /**
- * Les chiffres de preuve se comptent quand ils arrivent à l'écran.
+ * The proof figures count up when they come into view.
  *
- * Le mouvement dit une quantité : voir « 33 » monter depuis zéro fait sentir
- * trente-trois applications, là où le nombre posé ne fait que l'affirmer.
+ * The movement conveys a quantity: watching "33" climb from zero makes you feel
+ * thirty-three apps, where the number sitting still merely asserts it.
  *
- * Deux garanties tiennent cet effet :
+ * Two guarantees hold this effect together:
  *
- *   - **la valeur finale est celle rendue par le serveur.** On la relit dans le
- *     DOM et on la réécrit telle quelle à la fin, au lieu de la reformater. Un
- *     compteur qui reformate finit par afficher « 99.8 » sur une page française ;
- *   - **sans JavaScript, le chiffre est déjà là.** L'animation ne fait que
- *     remplacer temporairement un texte déjà correct.
+ *   - **the final value is the one rendered by the server.** We read it back out
+ *     of the DOM and write it as is at the end, instead of reformatting it. A
+ *     counter that reformats ends up showing "99.8" on a French page;
+ *   - **without JavaScript, the figure is already there.** The animation only
+ *     temporarily replaces text that is already correct.
  */
 
 const DURATION_MS = 900;
 
-/** Décélération cubique : rapide au départ, longue à l'arrivée. */
+/** Cubic deceleration: fast at the start, long on arrival. */
 const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
 
 interface CounterTarget {
@@ -50,7 +50,7 @@ function animate(counter: CounterTarget, locale: string) {
   const step = (now: number) => {
     const progress = Math.min((now - start) / DURATION_MS, 1);
     if (progress >= 1) {
-      // Le texte du serveur reprend la main : aucune divergence de formatage.
+      // The server's text takes over again: no formatting divergence.
       counter.element.textContent = counter.finalText;
       return;
     }

@@ -1,14 +1,15 @@
 import { defineConfig } from "vitest/config";
 
 /**
- * Les tests de contrat, isolés de la suite ordinaire.
+ * The contract tests, isolated from the ordinary suite.
  *
- * Ils tapent `portfolio-api` en production : les inclure dans `npm run test`
- * rendrait rouge un dépôt qui n'a rien cassé, le jour où l'API est
- * indisponible. Ils se lancent explicitement — `npm run test:contract` — et en
- * CI sur un déclencheur dédié.
+ * They hit `portfolio-api` in production: including them in `npm run test`
+ * would turn a repository that broke nothing red on the day the API is
+ * unavailable. They are run explicitly — `npm run test:contract` — and in CI on
+ * a dedicated trigger.
  *
- * Environnement Node et non jsdom : on parle à un service, pas à un document.
+ * Node environment rather than jsdom: we are talking to a service, not to a
+ * document.
  */
 export default defineConfig({
   resolve: { tsconfigPaths: true },
