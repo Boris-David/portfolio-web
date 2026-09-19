@@ -140,7 +140,6 @@ function adaptHero(profile: Field, chrome: SiteChrome): Hero {
       label,
     })),
     primaryCta: chrome.heroCtas.primary,
-    secondaryCta: chrome.heroCtas.secondary,
     shotAlt: showcase.child("alt").text(),
     shotTag: showcase.child("caption").text(),
     shotFile: shotFile(showcase.child("id").text()),

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Icon } from "@/components/Icon";
-import { RichText } from "@/components/RichText";
+import { RichParagraph } from "@/components/RichText";
 import type { Hero as HeroContent } from "@/content/types";
 
 /**
@@ -32,9 +32,7 @@ export function Hero({
           <h1 className="hero__name">{hero.name}</h1>
 
           {hero.lede.map((paragraph) => (
-            <p className="hero__lede" key={paragraph.slice(0, 32)}>
-              <RichText value={paragraph} />
-            </p>
+            <RichParagraph className="hero__lede" key={paragraph.slice(0, 32)} value={paragraph} />
           ))}
 
           <ul className="hero__meta">
@@ -46,13 +44,16 @@ export function Hero({
             ))}
           </ul>
 
+          {/* Une seule action, et c'est la bonne.
+              « Voir mon travail » menait à la section juste en dessous, vers
+              laquelle le lecteur descend de toute façon — et il partageait le
+              poids visuel de la seule chose qui compte ici : écrire. Deux
+              boutons côte à côte, c'est une page qui demande de choisir avant
+              d'avoir rien lu. */}
           <div className="cta-row">
             <a className="btn btn--primary lift press" href={`mailto:${email}`}>
               <Icon name="mail" />
               <span>{hero.primaryCta}</span>
-            </a>
-            <a className="btn lift press" href="#cas">
-              {hero.secondaryCta}
             </a>
           </div>
         </div>

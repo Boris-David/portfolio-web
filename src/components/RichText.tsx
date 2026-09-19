@@ -24,7 +24,15 @@ export function RichText({ value }: { readonly value: Markup }) {
   return <>{parseRichText(value).map(renderNode)}</>;
 }
 
-/** A paragraph of editorial content. */
+/** A paragraph of editorial content.
+ *
+ * ⚠️ It carries `prose`, and that class is what gets justified — not `p`.
+ *
+ * Justifying every paragraph was the first version and it caught the wrong
+ * ones: a metric's caption is three words in a narrow column, and justified it
+ * came out as "d'utilisateurs des applications aux-quelles j'ai contribué",
+ * with a hyphen break and stretched spacing, to fill a line nobody asked to be
+ * full. Prose is a thing a text **is**, not a tag it uses. */
 export function RichParagraph({
   value,
   className,
@@ -33,7 +41,7 @@ export function RichParagraph({
   readonly className?: string;
 }) {
   return (
-    <p className={className}>
+    <p className={className ? `prose ${className}` : "prose"}>
       <RichText value={value} />
     </p>
   );

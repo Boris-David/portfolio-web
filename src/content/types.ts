@@ -61,7 +61,6 @@ export interface Hero {
   readonly lede: readonly Markup[];
   readonly meta: readonly MetaItem[];
   readonly primaryCta: string;
-  readonly secondaryCta: string;
   readonly shotAlt: string;
   readonly shotTag: string;
   /** The screenshot file, in `public/shots/`. Named after the media item. */

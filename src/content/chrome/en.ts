@@ -50,7 +50,6 @@ export const enChrome: SiteChrome = {
   },
   heroCtas: {
     primary: "Get in touch",
-    secondary: "See my work",
   },
   backgroundTitles: {
     education: "Education",

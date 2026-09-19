@@ -23,14 +23,35 @@ export function setupActiveSection({ root = document }: { root?: Document } = {}
 
   if (sections.length === 0) return () => {};
 
+  /**
+   * Which sections are in the band right now.
+   *
+   * ⚠️ The first version only ever **added** the mark: it looped over the
+   * entries, skipped the ones that had left, and set `aria-current` on the one
+   * that had arrived. So nothing ever cleared it — landing on the page
+   * underlined the first link before the reader had scrolled anywhere near it,
+   * and it stayed underlined until another section took over.
+   *
+   * "You are here" has to be able to say **nowhere**: at the top of the page,
+   * the reader is in the header, which is not a section.
+   */
+  const inBand = new Set<string>();
+
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        for (const link of links) link.removeAttribute("aria-current");
-        const active = links.find((link) => link.getAttribute("href") === `#${entry.target.id}`);
-        active?.setAttribute("aria-current", "true");
+        if (entry.isIntersecting) inBand.add(entry.target.id);
+        else inBand.delete(entry.target.id);
       }
+
+      for (const link of links) link.removeAttribute("aria-current");
+      // The topmost of them, in document order: two sections can share the
+      // band on a short screen, and the one being read is the one above.
+      const current = sections.find((section) => inBand.has(section.id));
+      if (!current) return;
+      links
+        .find((link) => link.getAttribute("href") === `#${current.id}`)
+        ?.setAttribute("aria-current", "true");
     },
     /**
      * The active band is a slice in the middle of the screen. Taking the whole
