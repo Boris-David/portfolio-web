@@ -1,4 +1,4 @@
-import { RichText } from "@/components/RichText";
+import { RichParagraph } from "@/components/RichText";
 import type { SectionHead as SectionHeadContent } from "@/content/types";
 
 /**
@@ -14,9 +14,7 @@ export function SectionHead({ head }: { readonly head: SectionHeadContent }) {
       <div className="sec-head__eyebrow">{head.eyebrow}</div>
       <h2>{head.title}</h2>
       {head.intro ? (
-        <p>
-          <RichText value={head.intro} />
-        </p>
+        <RichParagraph value={head.intro} />
       ) : null}
     </div>
   );

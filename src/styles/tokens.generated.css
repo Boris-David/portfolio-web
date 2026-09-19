@@ -54,6 +54,8 @@
   --f-mono: var(--font-loaded-mono, ui-monospace), SFMono-Regular, monospace;
 
   --touch-target: 44px;
+
+  --align-prose: justify;
 }
 
 @media (prefers-color-scheme: dark) {

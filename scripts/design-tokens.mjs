@@ -134,6 +134,12 @@ function runtimeLayer(tokens) {
     section(map("font", (value, key) => fontStack(key, value))),
     "",
     `  --touch-target: ${tokens.a11y.minTouchTarget}px;`,
+    "",
+    // How a block of text is set. Shared with the application and the résumé —
+    // see the `text` group in `design/tokens.json`. The vocabulary is neutral
+    // (`start`, `center`, `end`, `justify`) and happens to be CSS's own here,
+    // which is a coincidence of this platform and not the reason for it.
+    ...Object.entries(tokens.text.align).map(([role, value]) => `  --align-${role}: ${value};`),
     "}",
   ].join("\n");
 }
@@ -222,7 +228,7 @@ export function generateTokensCss(tokens) {
  * where `bg-accent` would no longer paint anything.
  */
 function assertShape(tokens) {
-  for (const namespace of [...GENERATED_NAMESPACES, "type", "font", "a11y"]) {
+  for (const namespace of [...GENERATED_NAMESPACES, "type", "font", "a11y", "text"]) {
     if (!tokens[namespace] || typeof tokens[namespace] !== "object") {
       throw new Error(`tokens.json: namespace “${namespace}” missing or invalid`);
     }
@@ -247,5 +253,15 @@ function assertShape(tokens) {
   }
   if (!Number.isFinite(tokens.a11y.minTouchTarget)) {
     throw new Error("tokens.json: a11y.minTouchTarget must be a number of pixels");
+  }
+  // A value the other surfaces cannot map is a value that silently does
+  // nothing on one of them.
+  const ALIGNMENTS = new Set(["start", "center", "end", "justify"]);
+  for (const [role, value] of Object.entries(tokens.text.align ?? {})) {
+    if (!ALIGNMENTS.has(value)) {
+      throw new Error(
+        `tokens.json: text.align.${role} is “${value}” — expected one of ${[...ALIGNMENTS].join(", ")}`,
+      );
+    }
   }
 }

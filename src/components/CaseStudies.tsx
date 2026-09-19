@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Disclosure } from "@/components/Disclosure";
 import { Icon } from "@/components/Icon";
-import { RichText } from "@/components/RichText";
+import { RichParagraph, RichText } from "@/components/RichText";
 import { SectionHead } from "@/components/SectionHead";
 import type {
   CaseStudy,
@@ -57,9 +57,7 @@ function PdrColumn({
     <div data-cascade="">
       <h4>{label}</h4>
       {paragraphs?.map((paragraph) => (
-        <p key={paragraph.slice(0, 32)}>
-          <RichText value={paragraph} />
-        </p>
+        <RichParagraph key={paragraph.slice(0, 32)} value={paragraph} />
       ))}
       {children}
     </div>
@@ -114,9 +112,7 @@ function WorkstreamCaseCard({ study }: { readonly study: WorkstreamCase }) {
       </div>
 
       <div className="case__intro">
-        <p>
-          <RichText value={study.intro} />
-        </p>
+        <RichParagraph value={study.intro} />
       </div>
 
       <div className="workstreams">

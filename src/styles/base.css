@@ -56,6 +56,35 @@ p {
 }
 
 /**
+ * Editorial prose — and only it. The value comes from `design/tokens.json`,
+ * shared with the application and the résumé, so the three cannot drift apart
+ * on how a paragraph is set.
+ *
+ * ⚠️ Not on `p`. A metric's caption is three words in a narrow column, and
+ * justified it came out as "aux-quelles j'ai contribué" with a hyphen break
+ * and stretched spacing, to fill a line nobody asked to be full. Prose is what
+ * a text **is**; the tag does not say it, `RichParagraph` does.
+ *
+ * `text-wrap: pretty` and `hyphens: auto` are not decoration: justified text
+ * without them widens the word spacing of a line to hide a bad break, which is
+ * exactly the river of white a justified column is accused of. Hyphenation
+ * needs `lang` on the document, which each locale's layout sets — French and
+ * English do not break words in the same places.
+ *
+ * ⚠️ `hyphenate-limit-chars` is what stops it being worse than no hyphenation
+ * at all. Left to itself, the engine broke **Inetum** — a six-letter company
+ * name — into "In-etum" on a phone column. A word needs eight letters to be
+ * cut, with at least four on each side, which leaves proper nouns alone and
+ * still lets "entreprises" and "environnement" do their job.
+ */
+.prose {
+  text-align: var(--align-prose);
+  text-wrap: pretty;
+  hyphens: auto;
+  hyphenate-limit-chars: 8 4 4;
+}
+
+/**
  * Lists carry no marker and no indent by default.
  *
  * Every list on this site is a layout device — a row of metadata, a set of

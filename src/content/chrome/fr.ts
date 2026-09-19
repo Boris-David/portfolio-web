@@ -52,7 +52,6 @@ export const frChrome: SiteChrome = {
   },
   heroCtas: {
     primary: "Me contacter",
-    secondary: "Voir mon travail",
   },
   backgroundTitles: {
     education: "Formation",

@@ -23,7 +23,7 @@ export interface SiteChrome {
   readonly meta: Metadata;
   readonly chrome: Chrome;
   /** The hero's two calls to action — gestures, not facts. */
-  readonly heroCtas: { readonly primary: string; readonly secondary: string };
+  readonly heroCtas: { readonly primary: string };
   /** The headings of the three background blocks that carry no fact. */
   readonly backgroundTitles: {
     readonly education: string;

@@ -1,5 +1,5 @@
 import { Icon } from "@/components/Icon";
-import { RichText } from "@/components/RichText";
+import { RichParagraph } from "@/components/RichText";
 import { SectionHead } from "@/components/SectionHead";
 import type { DepthItem, SectionHead as SectionHeadContent } from "@/content/types";
 
@@ -21,9 +21,7 @@ export function DepthSection({
               <Icon name={item.icon} />
             </div>
             <h3>{item.title}</h3>
-            <p>
-              <RichText value={item.body} />
-            </p>
+            <RichParagraph value={item.body} />
           </article>
         ))}
       </div>
