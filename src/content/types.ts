@@ -253,11 +253,20 @@ export interface SiteContent {
   readonly contact: Contact;
 }
 
-/** An app in production, as published by the content source. */
+/**
+ * An app in production, as published by the content source.
+ *
+ * Both links are nullable: an app shipped inside somebody else's product has an
+ * App Store page and no public source, and one of the author's own can be
+ * readable long before it is downloadable. The grid in section 02 only ever
+ * renders the ticketing apps, which all have a store page — it skips anything
+ * without one rather than emitting an anchor that goes nowhere.
+ */
 export interface ProductionApp {
   readonly slug: string;
   readonly name: string;
   readonly territory: string;
-  readonly appStoreUrl: string;
+  readonly appStoreUrl: string | null;
+  readonly sourceUrl: string | null;
   readonly role: "ticketing" | "features" | "end-to-end";
 }
