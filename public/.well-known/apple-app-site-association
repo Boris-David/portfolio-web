@@ -4,14 +4,18 @@
       {
         "appIDs": ["R55L6Z8K6R.dev.amissan.portfolio"],
         "components": [
-          { "/": "/", "comment": "The home page opens the Profile tab." },
-          { "/": "/en", "comment": "The English page opens the Profile tab, in English." },
-          { "/": "/cas/*", "comment": "A case study opens its own screen." },
-          { "/": "/parcours", "comment": "The background opens its tab." },
           {
             "/": "/v1/*",
             "exclude": true,
             "comment": "The API is not served here, but we exclude it on principle."
+          },
+          {
+            "/": "/",
+            "comment": "The French page. Its anchors — #cas, #parcours, #profondeur, #apps, #contact — travel with the URL and the app reads them; the path is what iOS matches on, and it is the same for all of them."
+          },
+          {
+            "/": "/en",
+            "comment": "The English page, same anchors."
           }
         ]
       }
