@@ -18,7 +18,7 @@ export const frChrome: SiteChrome = {
     navLinks: [
       {
         target: "cas",
-        label: "Projets",
+        label: "Problèmes",
       },
       {
         target: "apps",
