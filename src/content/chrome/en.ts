@@ -16,7 +16,7 @@ export const enChrome: SiteChrome = {
     navLinks: [
       {
         target: "cas",
-        label: "Case studies",
+        label: "Problems",
       },
       {
         target: "apps",
@@ -24,11 +24,15 @@ export const enChrome: SiteChrome = {
       },
       {
         target: "profondeur",
-        label: "Depth",
+        label: "Expertise",
       },
       {
         target: "parcours",
-        label: "Background",
+        label: "Experience",
+      },
+      {
+        target: "formation",
+        label: "Education",
       },
       {
         target: "contact",

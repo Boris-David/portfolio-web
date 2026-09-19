@@ -18,7 +18,7 @@ export const frChrome: SiteChrome = {
     navLinks: [
       {
         target: "cas",
-        label: "Études de cas",
+        label: "Problèmes",
       },
       {
         target: "apps",
@@ -26,11 +26,15 @@ export const frChrome: SiteChrome = {
       },
       {
         target: "profondeur",
-        label: "Profondeur",
+        label: "Expertise",
       },
       {
         target: "parcours",
-        label: "Parcours",
+        label: "Missions",
+      },
+      {
+        target: "formation",
+        label: "Formation",
       },
       {
         target: "contact",
