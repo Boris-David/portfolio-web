@@ -45,7 +45,7 @@ export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
         <ContactSection contact={content.contact} />
       </main>
 
-      <SiteFooter fullName={content.fullName} chrome={content.chrome} />
+      <SiteFooter formalName={content.formalName} chrome={content.chrome} />
 
       {/* The progressive enhancement layer, mounted exactly once. */}
       <PageEffects />

@@ -9,17 +9,17 @@ import type { Chrome } from "@/content/types";
  * with the first without anybody noticing.
  */
 export function SiteFooter({
-  fullName,
+  formalName,
   chrome,
 }: {
-  readonly fullName: string;
+  readonly formalName: string;
   readonly chrome: Chrome;
 }) {
   return (
     <footer className="wrap">
       <div className="site-footer">
         <span>
-          {fullName} — {chrome.footerRole}
+          {formalName} — {chrome.footerRole}
         </span>
         <span>{chrome.footerLocation}</span>
       </div>

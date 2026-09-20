@@ -134,14 +134,14 @@ const FIXTURE_SHAPE = structuredClone(
  *
  * A fact typed into a component is a second place that claims to know it, and
  * the two stop agreeing without anybody noticing. This one had already
- * happened: `SiteFooter` carried the author's full name as a literal while the
- * API served `profile.name.full` -- the same string, in two repositories, one
- * of which nobody would think to update.
+ * happened: `SiteFooter` carried the author's name as a literal while the
+ * API served `profile.name.formal` -- the same string, in two repositories,
+ * one of which nobody would think to update.
  */
 describe("no published fact is written in this repository", () => {
   withApiFixtures();
 
-  it("reads the long form of the name from the source, and writes it nowhere", async () => {
+  it("reads the formal name from the source, and writes it nowhere", async () => {
     const { readFile, readdir } = await import("node:fs/promises");
     const { join } = await import("node:path");
 
@@ -157,20 +157,20 @@ describe("no published fact is written in this repository", () => {
       return found.flat();
     };
 
-    const { fullName, hero } = await getSiteContent("fr");
+    const { formalName, hero } = await getSiteContent("fr");
 
     // Asserted before the search: an empty needle makes `includes` answer true
     // for every file, so the test would either "fail" by reporting the whole
     // source tree or pass for a reason that has nothing to do with the rule.
-    expect(fullName.length).toBeGreaterThan(0);
-    expect(fullName).not.toBe(hero.name);
+    expect(formalName.length).toBeGreaterThan(0);
+    expect(formalName).not.toBe(hero.name);
 
     const files = await sourceFiles("src");
     expect(files.length).toBeGreaterThan(20);
 
     const offenders: string[] = [];
     for (const path of files) {
-      if ((await readFile(path, "utf8")).includes(fullName)) offenders.push(path);
+      if ((await readFile(path, "utf8")).includes(formalName)) offenders.push(path);
     }
 
     expect(offenders).toEqual([]);

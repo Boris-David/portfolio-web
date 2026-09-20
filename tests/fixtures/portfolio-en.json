@@ -1,18 +1,18 @@
 {
   "meta": {
     "locale": "en",
-    "contentVersion": "tFWH-cL7W2lGqk0dhjQ1Hx"
+    "contentVersion": "vymZ6K1FYeAODkg6A2-OXj"
   },
   "data": {
     "profile": {
       "name": {
         "display": "Amissan Amoussou-G.",
-        "full": "Amissan Boris-David Amoussou-Guenou"
+        "formal": "Amissan AMOUSSOU-G."
       },
       "headline": "Senior iOS Engineer",
-      "availability": "Open to opportunities",
+      "availability": "Open to remote roles, or mostly-remote ones",
       "location": "French Riviera, France",
-      "remote": "Fully remote, or mostly remote",
+      "remote": "Fully or mostly remote",
       "languages": "French · professional English (TOEIC 840)",
       "summary": [
         [
@@ -62,8 +62,9 @@
         "media": {
           "id": "journal",
           "alt": "KCalories' main screen: the day's food diary.",
-          "caption": "KCalories — on the App Store"
+          "caption": "KCalories"
         },
+        "description": "KCalories' dashboard: calorie needs at a glance, step count, the day's water intake — and a good deal more for anyone fasting or on a particular diet.",
         "caseStudy": "kcalories"
       },
       "contact": {
@@ -94,21 +95,24 @@
         "value": "~5",
         "unit": "M",
         "countTo": null,
-        "caption": "users of the apps I have contributed to"
+        "caption": "users of the apps I have contributed to",
+        "detail": "That is how many people use apps I have contributed to, today."
       },
       {
         "id": "experience",
         "value": "6",
         "unit": "yrs",
         "countTo": 6,
-        "caption": "of iOS engineering, since October 2020"
+        "caption": "of iOS engineering, since October 2020",
+        "detail": "Six years of professional iOS development, one of them as an apprentice."
       },
       {
         "id": "kcalories-crash-free",
         "value": "> 99.9",
         "unit": "%",
         "countTo": null,
-        "caption": "crash-free sessions on KCalories"
+        "caption": "crash-free sessions on KCalories",
+        "detail": "That is KCalories' crash-free session rate, and the measure of the care I put into what I ship."
       }
     ],
     "sections": [
@@ -126,8 +130,8 @@
       },
       {
         "id": "apps",
-        "eyebrow": "In production",
-        "title": "33 apps, 3 territories, one platform",
+        "eyebrow": "Apps in production",
+        "title": "33 transport apps I have worked on",
         "intro": [
           {
             "text": "At Instant System, transport apps are built white-label on a shared platform. ",
@@ -151,14 +155,9 @@
       },
       {
         "id": "depth",
-        "eyebrow": "Expertise",
-        "title": "The subjects I know best",
-        "intro": [
-          {
-            "text": "Three subjects I can go into detail on, in an interview as in a code review.",
-            "style": "plain"
-          }
-        ],
+        "eyebrow": "Key skills",
+        "title": "A few key skills, and concrete examples of them in use",
+        "intro": null,
         "note": null
       },
       {
@@ -720,8 +719,8 @@
       },
       {
         "slug": "kcalories",
-        "title": "KCalories — four stacks, alone, in five months",
-        "subtitle": "Personal project · published on the App Store",
+        "title": "KCalories, the nutrition companion",
+        "subtitle": "Personal project · four stacks, alone, in five months",
         "intro": null,
         "link": {
           "label": "App Store",
