@@ -228,6 +228,21 @@ export interface Metadata {
   readonly ogImageAlt: string;
 }
 
+/**
+ * Who he is when he is not writing code.
+ *
+ * Told by facts rather than adjectives: the API refuses "leader", "jovial",
+ * "proactif" and the rest outright, because a reader can check a role and can
+ * never check an adjective.
+ */
+export interface Personality {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly summary: readonly Markup[];
+  readonly interestsLabel: string;
+  readonly interests: readonly string[];
+}
+
 export interface SiteContent {
   readonly locale: Locale;
   readonly meta: Metadata;
@@ -250,6 +265,7 @@ export interface SiteContent {
   readonly depthHead: SectionHead;
   readonly depth: readonly DepthItem[];
   readonly background: Background;
+  readonly personality: Personality;
   readonly contact: Contact;
 }
 

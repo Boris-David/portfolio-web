@@ -5,6 +5,7 @@ import { ContactSection } from "@/components/ContactSection";
 import { DepthSection } from "@/components/DepthSection";
 import { Hero } from "@/components/Hero";
 import { PageEffects } from "@/components/PageEffects";
+import { PersonalitySection } from "@/components/PersonalitySection";
 import { ProofBar } from "@/components/ProofBar";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -20,7 +21,10 @@ import type { Locale } from "@/content/types";
  * changes.
  */
 export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
-  const [content, apps] = await Promise.all([getSiteContent(locale), getTicketingApps(locale)]);
+  const [content, apps] = await Promise.all([
+    getSiteContent(locale),
+    getTicketingApps(locale),
+  ]);
 
   return (
     <>
@@ -39,9 +43,14 @@ export async function PortfolioPage({ locale }: { readonly locale: Locale }) {
         <Hero hero={content.hero} email={content.contact.email} />
         <ProofBar points={content.proof} />
         <CaseStudies head={content.casesHead} cases={content.cases} />
-        <AppsSection head={content.appsHead} note={content.appsNote} apps={apps} />
+        <AppsSection
+          head={content.appsHead}
+          note={content.appsNote}
+          apps={apps}
+        />
         <DepthSection head={content.depthHead} items={content.depth} />
         <BackgroundSection background={content.background} />
+        <PersonalitySection personality={content.personality} />
         <ContactSection contact={content.contact} />
       </main>
 
