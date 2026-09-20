@@ -23,10 +23,19 @@ import type {
 } from "@/content/types";
 import { ICON_NAMES } from "@/content/types";
 import type { SiteChrome } from "@/content/chrome/types";
-import { EXPERTISE_ICONS, ICON_STACK, IDENTITY_ICONS } from "@/content/chrome/types";
+import {
+  EXPERTISE_ICONS,
+  ICON_STACK,
+  IDENTITY_ICONS,
+} from "@/content/chrome/types";
 import { Field } from "@/content/api/field";
 import { readMarkup } from "@/content/api/markup";
-import { formatLong, formatRange, formatYearSpan, parseYearMonth } from "@/content/api/dates";
+import {
+  formatLong,
+  formatRange,
+  formatYearSpan,
+  parseYearMonth,
+} from "@/content/api/dates";
 
 /**
  * The API's domain model, brought back to the site's presentation model.
@@ -54,9 +63,15 @@ export interface PortfolioPayload {
 }
 
 /** Unwraps the `{ meta, data }` envelope and checks it did answer in the right language. */
-export function readPayload(body: unknown, requested: Locale): PortfolioPayload {
+export function readPayload(
+  body: unknown,
+  requested: Locale,
+): PortfolioPayload {
   const root = Field.root(body, "portfolio");
-  const locale = root.child("meta").child("locale").oneOf(["fr", "en"] as const);
+  const locale = root
+    .child("meta")
+    .child("locale")
+    .oneOf(["fr", "en"] as const);
 
   // A response in a language other than the one requested is an error, not a
   // fallback: publishing the English page with French content is exactly the
@@ -74,7 +89,10 @@ export function readPayload(body: unknown, requested: Locale): PortfolioPayload 
   };
 }
 
-export function adapt(payload: PortfolioPayload, chrome: SiteChrome): SiteContent {
+export function adapt(
+  payload: PortfolioPayload,
+  chrome: SiteChrome,
+): SiteContent {
   const { data, locale } = payload;
   const profile = data.child("profile");
   const sections = readSections(data);
@@ -89,12 +107,20 @@ export function adapt(payload: PortfolioPayload, chrome: SiteChrome): SiteConten
     hero: adaptHero(profile, chrome),
     proof: data.child("metrics").list().map(adaptMetric),
     casesHead: sections.get("case-studies") as SectionHead,
-    cases: data.child("caseStudies").list().map((study) => adaptCase(study, ticketing.length)),
+    cases: data
+      .child("caseStudies")
+      .list()
+      .map((study) => adaptCase(study, ticketing.length)),
     appsHead: sections.get("apps") as SectionHead,
     appsNote: sections.note("apps"),
     depthHead: sections.get("depth") as SectionHead,
     depth: data.child("expertise").list().map(adaptExpertise),
-    background: adaptBackground(data, sections.get("background") as SectionHead, chrome, locale),
+    background: adaptBackground(
+      data,
+      sections.get("background") as SectionHead,
+      chrome,
+      locale,
+    ),
     contact: adaptContact(profile.child("contact"), chrome),
   };
 }
@@ -109,8 +135,12 @@ export function adaptApps(data: Field): readonly ProductionApp[] {
       slug: app.child("slug").text(),
       name: app.child("name").text(),
       territory: app.child("territory").text(),
-      appStoreUrl: app.child("appStoreUrl").text(),
-      role: app.child("role").oneOf(["ticketing", "features", "end-to-end"] as const),
+      appStoreUrl: app.child("appStoreUrl").textOrNull(),
+      sourceUrl: app.child("sourceUrl").textOrNull(),
+      summary: app.child("summary").textOrNull(),
+      role: app
+        .child("role")
+        .oneOf(["ticketing", "features", "end-to-end"] as const),
     }));
 }
 
@@ -268,7 +298,10 @@ function adaptCase(study: Field, ticketingCount: number): CaseStudy {
     title: study.child("title").text(),
     subtitle: study.child("subtitle").text(),
     labels,
-    tags: study.child("tags").list().map((tag) => tag.text()),
+    tags: study
+      .child("tags")
+      .list()
+      .map((tag) => tag.text()),
   };
 
   if (first.title !== null) {
@@ -305,7 +338,9 @@ function readChapter(chapter: Field): Chapter {
     let chips: readonly string[] | undefined;
 
     for (const block of entry.child("blocks").list()) {
-      switch (block.child("type").oneOf(["paragraph", "list", "tags"] as const)) {
+      switch (
+        block.child("type").oneOf(["paragraph", "list", "tags"] as const)
+      ) {
         case "paragraph":
           blocks.push(readMarkup(block.child("text")));
           break;
@@ -313,10 +348,14 @@ function readChapter(chapter: Field): Chapter {
         // column: the distinction is a detail of how it was written, not a
         // difference in meaning.
         case "list":
-          for (const item of block.child("items").list()) blocks.push(readMarkup(item));
+          for (const item of block.child("items").list())
+            blocks.push(readMarkup(item));
           break;
         case "tags":
-          chips = block.child("items").list().map((tag) => tag.text());
+          chips = block
+            .child("items")
+            .list()
+            .map((tag) => tag.text());
           break;
       }
     }
@@ -408,14 +447,19 @@ function adaptBackground(
 
   return {
     head,
-    jobs: data.child("experience").list().map((job, index) => adaptJob(job, locale, index === 0)),
+    jobs: data
+      .child("experience")
+      .list()
+      .map((job, index) => adaptJob(job, locale, index === 0)),
     educationTitle: chrome.backgroundTitles.education,
     education: background.child("education").list().map(adaptEducation),
     certificationsTitle: chrome.backgroundTitles.certifications,
     certifications: background
       .child("certifications")
       .list()
-      .map((certification) => adaptCertification(certification, chrome, locale)),
+      .map((certification) =>
+        adaptCertification(certification, chrome, locale),
+      ),
     openProjectsTitle: chrome.backgroundTitles.openProjects,
     openProjects: background
       .child("openProjects")
@@ -443,7 +487,11 @@ function adaptJob(job: Field, locale: Locale, isMostRecent: boolean): Job {
     ),
     ...(roles.length > 0 ? { roles: roles.map((role) => role.text()) } : {}),
     bullets: job.child("highlights").list().map(readMarkup),
-    stack: job.child("stack").list().map((item) => item.text()).join(" · "),
+    stack: job
+      .child("stack")
+      .list()
+      .map((item) => item.text())
+      .join(" · "),
     // Exactly one experience is expanded on load: the most recent one. Its rank
     // already says so; the API has no business carrying a display flag.
     ...(isMostRecent ? { openByDefault: true } : {}),
@@ -455,13 +503,20 @@ function adaptEducation(entry: Field): TimelineRow {
   const school = entry.child("school").text();
 
   return {
-    when: formatYearSpan(entry.child("startYear").integer(), entry.child("endYear").integer()),
+    when: formatYearSpan(
+      entry.child("startYear").integer(),
+      entry.child("endYear").integer(),
+    ),
     what: entry.child("degree").text(),
     where: detail.isPresent ? `${school} — ${detail.text()}` : school,
   };
 }
 
-function adaptCertification(certification: Field, chrome: SiteChrome, locale: Locale): TimelineRow {
+function adaptCertification(
+  certification: Field,
+  chrome: SiteChrome,
+  locale: Locale,
+): TimelineRow {
   const verifyUrl = certification.child("verifyUrl");
   const awarded = certification.child("awardedOn");
 
@@ -490,7 +545,10 @@ function adaptOpenProject(project: Field, chrome: SiteChrome): TimelineRow {
 function adaptSkillGroup(group: Field): SkillGroup {
   return {
     title: group.child("title").text(),
-    items: group.child("items").list().map((item) => item.text()),
+    items: group
+      .child("items")
+      .list()
+      .map((item) => item.text()),
   };
 }
 
@@ -507,10 +565,13 @@ function adaptContact(contact: Field, chrome: SiteChrome): Contact {
     // The link's id doubles as the icon name. Constraining it to the bundled set
     // means a profile added at the source without an icon breaks the build,
     // instead of showing an empty button.
-    links: contact.child("links").list().map<ProfileLink>((link) => ({
-      id: link.child("id").oneOf(ICON_NAMES),
-      label: link.child("label").text(),
-      href: link.child("url").text(),
-    })),
+    links: contact
+      .child("links")
+      .list()
+      .map<ProfileLink>((link) => ({
+        id: link.child("id").oneOf(ICON_NAMES),
+        label: link.child("label").text(),
+        href: link.child("url").text(),
+      })),
   };
 }
