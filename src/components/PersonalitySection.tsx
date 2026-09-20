@@ -31,6 +31,18 @@ export function PersonalitySection({
       </div>
 
       <div className="persona" data-reveal="">
+        {/*
+         * The one line a reader repeats after meeting somebody. It was a
+         * paragraph among the others and disappeared into them; the emphasis is
+         * typographic and nothing else — same paper, no card, no rule, no tint.
+         * A distinction that needed a badge to be noticed would be one nobody
+         * gave him.
+         */}
+        <p className="persona__highlight">
+          <strong>{personality.highlight.title}</strong>
+          <span>{personality.highlight.detail}</span>
+        </p>
+
         {personality.summary.map((paragraph, index) => (
           <RichParagraph key={index} value={paragraph} />
         ))}

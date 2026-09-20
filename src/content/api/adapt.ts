@@ -124,17 +124,32 @@ export function adapt(
     personality: {
       eyebrow: chrome.personality.eyebrow,
       title: chrome.personality.title,
+      highlight: {
+        title: profile
+          .child("personality")
+          .child("highlight")
+          .child("title")
+          .text(),
+        detail: profile
+          .child("personality")
+          .child("highlight")
+          .child("detail")
+          .text(),
+      },
       summary: profile
         .child("personality")
         .child("summary")
         .list()
         .map(readMarkup),
       interestsLabel: chrome.personality.interests,
+      // The identity beside each label exists so a native client can put a
+      // glyph there. The site has no glyph for "strength training", so it reads
+      // the label and leaves the identity alone.
       interests: profile
         .child("personality")
         .child("interests")
         .list()
-        .map((interest) => interest.text()),
+        .map((interest) => interest.child("label").text()),
     },
     contact: adaptContact(profile.child("contact"), chrome),
   };

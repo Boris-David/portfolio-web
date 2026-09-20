@@ -238,6 +238,13 @@ export interface Metadata {
 export interface Personality {
   readonly eyebrow: string;
   readonly title: string;
+  /**
+   * The one fact set apart, because a reader remembers it.
+   *
+   * `detail` carries the vote and the year: without them the title is somebody
+   * handing themselves a prize.
+   */
+  readonly highlight: { readonly title: string; readonly detail: string };
   readonly summary: readonly Markup[];
   readonly interestsLabel: string;
   readonly interests: readonly string[];

@@ -1132,6 +1132,34 @@
   gap: var(--s4);
 }
 
+/*
+ * The distinction, set as a line rather than a badge. The title borrows the
+ * display face at section-title size; the detail underneath is what stops it
+ * being a self-awarded prize, so it is set quiet and never hidden.
+ */
+.persona__highlight {
+  display: grid;
+  gap: var(--s1);
+  margin-block-end: var(--s2);
+  padding-block-end: var(--s4);
+  border-block-end: 1px solid var(--line);
+}
+
+.persona__highlight strong {
+  font-family: var(--f-display);
+  font-variation-settings: "opsz" 40;
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.persona__highlight span {
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
 .persona__label {
   font-size: var(--t-caption);
   font-weight: 600;
