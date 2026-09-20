@@ -207,6 +207,10 @@ describe("who he is away from the code", () => {
       // chrome, never from the API. The sentences under them are the opposite.
       expect(personality.title.length).toBeGreaterThan(0);
       expect(personality.interestsLabel.length).toBeGreaterThan(0);
+      // La distinction porte son détail : sans le vote et l'année, c'est
+      // quelqu'un qui se décerne un titre.
+      expect(personality.highlight.title.length).toBeGreaterThan(0);
+      expect(personality.highlight.detail).toMatch(/2024/);
     },
   );
 

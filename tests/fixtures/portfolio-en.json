@@ -1,7 +1,7 @@
 {
   "meta": {
     "locale": "en",
-    "contentVersion": "7oL7djThd2TQWtEjEo9y4g"
+    "contentVersion": "7bTkB5qEo1bTKZEdrgDPpR"
   },
   "data": {
     "profile": {
@@ -68,10 +68,14 @@
         "caseStudy": "kcalories"
       },
       "personality": {
+        "highlight": {
+          "title": "Mister Good Mood",
+          "detail": "Voted for by the whole company, in 2024."
+        },
         "summary": [
           [
             {
-              "text": "Class representative, president of the student committee, team captain: I have always taken the roles where somebody has to hold a group together. These days, ",
+              "text": "Class representative, president of the student committee, team captain. It started early and never really stopped: today I am ",
               "style": "plain"
             },
             {
@@ -79,67 +83,60 @@
               "style": "strong"
             },
             {
-              "text": " of my team, and captain of the company football team.",
+              "text": " of my team, and I wear the armband for the company football side.",
               "style": "plain"
             }
           ],
           [
             {
-              "text": "In 2024 the whole company voted, and I came out of it ",
+              "text": "The subjects nobody wants, I take. The ",
               "style": "plain"
             },
             {
-              "text": "Mister Good Mood",
+              "text": "anti-fraud library",
               "style": "strong"
             },
             {
-              "text": ".",
+              "text": " came out of an innovation sprint where I had a free hand. Authentication had not moved since 2019 and everyone worked around it — I took it back. And being the only one on a whole scope does not scare me: I did it for a year.",
               "style": "plain"
             }
           ],
           [
             {
-              "text": "I am glad to take the subjects nobody wants: the anti-fraud library came out of an ",
+              "text": "Outside of that, it is the gym and the pitch. ",
               "style": "plain"
             },
             {
-              "text": "initiative in an innovation sprint",
+              "text": "Nutrition",
               "style": "strong"
             },
             {
-              "text": ", and the authentication rebuild out of code nobody would open any more. And I can hold a scope ",
-              "style": "plain"
-            },
-            {
-              "text": "on my own",
-              "style": "strong"
-            },
-            {
-              "text": " when that is what it takes.",
-              "style": "plain"
-            }
-          ],
-          [
-            {
-              "text": "And what I look for elsewhere is the same thing: ",
-              "style": "plain"
-            },
-            {
-              "text": "pushing myself",
-              "style": "strong"
-            },
-            {
-              "text": ". Nutrition and the way the body works fascinate me — enough that I built an app out of it.",
+              "text": " and the mechanics of the body fascinate me — enough that I built an app out of it.",
               "style": "plain"
             }
           ]
         ],
         "interests": [
-          "Strength training",
-          "Nutrition",
-          "Football",
-          "Landscape photography",
-          "Travel"
+          {
+            "id": "strength",
+            "label": "Strength training"
+          },
+          {
+            "id": "nutrition",
+            "label": "Nutrition"
+          },
+          {
+            "id": "football",
+            "label": "Football"
+          },
+          {
+            "id": "photography",
+            "label": "Landscape photography"
+          },
+          {
+            "id": "travel",
+            "label": "Travel"
+          }
         ]
       },
       "contact": {
