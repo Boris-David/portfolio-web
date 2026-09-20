@@ -137,6 +137,7 @@ export function adaptApps(data: Field): readonly ProductionApp[] {
       territory: app.child("territory").text(),
       appStoreUrl: app.child("appStoreUrl").textOrNull(),
       sourceUrl: app.child("sourceUrl").textOrNull(),
+      summary: app.child("summary").textOrNull(),
       role: app
         .child("role")
         .oneOf(["ticketing", "features", "end-to-end"] as const),

@@ -268,5 +268,7 @@ export interface ProductionApp {
   readonly territory: string;
   readonly appStoreUrl: string | null;
   readonly sourceUrl: string | null;
+  /** One sentence on what the app is, where no case study already says it. */
+  readonly summary: string | null;
   readonly role: "ticketing" | "features" | "end-to-end";
 }
