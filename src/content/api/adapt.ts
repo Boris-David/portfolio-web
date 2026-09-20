@@ -121,6 +121,21 @@ export function adapt(
       chrome,
       locale,
     ),
+    personality: {
+      eyebrow: chrome.personality.eyebrow,
+      title: chrome.personality.title,
+      summary: profile
+        .child("personality")
+        .child("summary")
+        .list()
+        .map(readMarkup),
+      interestsLabel: chrome.personality.interests,
+      interests: profile
+        .child("personality")
+        .child("interests")
+        .list()
+        .map((interest) => interest.text()),
+    },
     contact: adaptContact(profile.child("contact"), chrome),
   };
 }

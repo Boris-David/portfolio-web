@@ -25,6 +25,15 @@ export interface SiteChrome {
   /** The hero's two calls to action — gestures, not facts. */
   readonly heroCtas: { readonly primary: string };
   /** The headings of the three background blocks that carry no fact. */
+  /**
+   * The headings of the personality section. Chrome and not content: they would
+   * not be true if the site did not exist -- the sentences under them would.
+   */
+  readonly personality: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly interests: string;
+  };
   readonly backgroundTitles: {
     readonly education: string;
     readonly certifications: string;
@@ -51,7 +60,11 @@ export const EXPERTISE_ICONS: Readonly<Record<string, IconName>> = {
 };
 
 /** The hero's three identity lines, in order, with their icon. */
-export const IDENTITY_ICONS = ["pin", "home", "globe"] as const satisfies readonly IconName[];
+export const IDENTITY_ICONS = [
+  "pin",
+  "home",
+  "globe",
+] as const satisfies readonly IconName[];
 
 /**
  * The five apps whose icons make up the case study's stack.
@@ -60,4 +73,10 @@ export const IDENTITY_ICONS = ["pin", "home", "globe"] as const satisfies readon
  * not an order the API could know about. The count shown next to it ("+28") is
  * computed, from the real number of apps.
  */
-export const ICON_STACK = ["tcl", "oura", "at-bus", "tere-tahiti", "twisto"] as const;
+export const ICON_STACK = [
+  "tcl",
+  "oura",
+  "at-bus",
+  "tere-tahiti",
+  "twisto",
+] as const;

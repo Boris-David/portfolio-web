@@ -1,7 +1,7 @@
 {
   "meta": {
     "locale": "fr",
-    "contentVersion": "vymZ6K1FYeAODkg6A2-OXj"
+    "contentVersion": "zCyvFyDuZPwpgbHPxtfu5A"
   },
   "data": {
     "profile": {
@@ -66,6 +66,66 @@
         },
         "description": "Le tableau de bord de KCalories : ses besoins en calories d'un coup d'œil, son nombre de pas, sa consommation d'eau du jour — et bien plus pour qui jeûne ou suit un régime particulier.",
         "caseStudy": "kcalories"
+      },
+      "personality": {
+        "summary": [
+          [
+            {
+              "text": "Délégué de classe, président du comité étudiant, capitaine d'équipe : j'ai toujours pris les rôles où il faut tenir un groupe. Aujourd'hui, c'est l'équipe de ",
+              "style": "plain"
+            },
+            {
+              "text": "football de l'entreprise",
+              "style": "strong"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Je prends volontiers les sujets dont personne ne veut : la bibliothèque anti-fraude est née d'une ",
+              "style": "plain"
+            },
+            {
+              "text": "initiative en sprint d'innovation",
+              "style": "strong"
+            },
+            {
+              "text": ", et la refonte de l'authentification d'un code que plus personne n'ouvrait. Et je sais tenir un périmètre ",
+              "style": "plain"
+            },
+            {
+              "text": "seul",
+              "style": "strong"
+            },
+            {
+              "text": " quand c'est ce qu'il faut.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "Et ce que je cherche ailleurs, c'est la même chose : le ",
+              "style": "plain"
+            },
+            {
+              "text": "dépassement de soi",
+              "style": "strong"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ]
+        ],
+        "interests": [
+          "Musculation",
+          "Football",
+          "Photo de paysages",
+          "Voyages"
+        ]
       },
       "contact": {
         "email": "amissan.ag@outlook.fr",

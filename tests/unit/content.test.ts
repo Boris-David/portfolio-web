@@ -1,5 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { getProductionApps, getSiteContent, getTicketingApps } from "@/content/source";
+import {
+  getProductionApps,
+  getSiteContent,
+  getTicketingApps,
+} from "@/content/source";
 import { parseRichText } from "@/content/rich-text";
 import { LOCALES } from "@/lib/site";
 import type { Locale, SiteContent } from "@/content/types";
@@ -43,7 +47,8 @@ beforeAll(async () => {
  */
 function bySource(locale: Locale): SiteContent {
   const content = locale === "fr" ? fr : en;
-  if (content === undefined) throw new Error("content not resolved — beforeAll did not run");
+  if (content === undefined)
+    throw new Error("content not resolved — beforeAll did not run");
   return content;
 }
 
@@ -73,39 +78,51 @@ describe("the app grid and the figures announced", () => {
    * arbitration — that it is correct where it is written, and that it has not
    * come back where it was removed from.
    */
-  it.each(LOCALES)("announces the real number of apps in the %s content", async (locale) => {
-    const content = bySource(locale);
-    const count = String((await getTicketingApps(locale)).length);
+  it.each(LOCALES)(
+    "announces the real number of apps in the %s content",
+    async (locale) => {
+      const content = bySource(locale);
+      const count = String((await getTicketingApps(locale)).length);
 
-    // Where it sets the scale: the title of the section the grid proves.
-    expect(content.appsHead.title).toContain(count);
-    // And the search description, the only place read outside the page.
-    expect(content.meta.description).toContain(count);
-  });
+      // Where it sets the scale: the title of the section the grid proves.
+      expect(content.appsHead.title).toContain(count);
+      // And the search description, the only place read outside the page.
+      expect(content.meta.description).toContain(count);
+    },
+  );
 
   /** The other half of the arbitration: the figure does not come back where it was removed from. */
-  it.each(LOCALES)("does not put the network count back in a tile or a title (%s)", async (locale) => {
-    const content = bySource(locale);
-    const count = String((await getTicketingApps(locale)).length);
+  it.each(LOCALES)(
+    "does not put the network count back in a tile or a title (%s)",
+    async (locale) => {
+      const content = bySource(locale);
+      const count = String((await getTicketingApps(locale)).length);
 
-    content.proof.forEach((tile) => expect(tile.value).not.toBe(count));
-    const ticketingCase = content.cases.find((study) => study.kind === "workstreams");
-    expect(ticketingCase?.title).not.toContain(count);
-  });
+      content.proof.forEach((tile) => expect(tile.value).not.toBe(count));
+      const ticketingCase = content.cases.find(
+        (study) => study.kind === "workstreams",
+      );
+      expect(ticketingCase?.title).not.toContain(count);
+    },
+  );
 
   /**
    * The header's icon stack shows 5 apps and announces "+28". 5 + 28 has to make
    * 33, otherwise the header counts wrong.
    */
-  it.each(LOCALES)("makes the %s content's icon stack add up", async (locale) => {
-    const content = bySource(locale);
-    const apps = await getTicketingApps(content.locale);
-    const study = content.cases.find((item) => item.kind === "workstreams");
-    if (study?.kind !== "workstreams") throw new Error("ticketing case study missing");
+  it.each(LOCALES)(
+    "makes the %s content's icon stack add up",
+    async (locale) => {
+      const content = bySource(locale);
+      const apps = await getTicketingApps(content.locale);
+      const study = content.cases.find((item) => item.kind === "workstreams");
+      if (study?.kind !== "workstreams")
+        throw new Error("ticketing case study missing");
 
-    const more = Number(study.iconStackMore.replace("+", ""));
-    expect(study.iconStack.length + more).toBe(apps.length);
-  });
+      const more = Number(study.iconStackMore.replace("+", ""));
+      expect(study.iconStack.length + more).toBe(apps.length);
+    },
+  );
 
   it("only references icons whose slug exists in the source", async () => {
     const apps = await getProductionApps("fr");
@@ -138,7 +155,8 @@ describe("parity between the two locales", () => {
   });
 
   it("describes the same number of workstreams, experiences and skills", () => {
-    const study = (content: SiteContent) => content.cases.find((item) => item.kind === "workstreams");
+    const study = (content: SiteContent) =>
+      content.cases.find((item) => item.kind === "workstreams");
     const frCase = study(fr);
     const enCase = study(en);
     if (frCase?.kind !== "workstreams" || enCase?.kind !== "workstreams") {
@@ -154,15 +172,14 @@ describe("parity between the two locales", () => {
     );
     expect(en.background.skills).toHaveLength(fr.background.skills.length);
     expect(en.proof).toHaveLength(fr.proof.length);
-    expect(en.depth.map((item) => item.icon)).toEqual(fr.depth.map((item) => item.icon));
+    expect(en.depth.map((item) => item.icon)).toEqual(
+      fr.depth.map((item) => item.icon),
+    );
   });
 
   it("keeps the outbound links identical from one locale to the other", () => {
     const links = (content: SiteContent) =>
-      [
-        ...content.background.certifications,
-        ...content.background.openProjects,
-      ]
+      [...content.background.certifications, ...content.background.openProjects]
         .map((row) => row.link?.href)
         .filter(Boolean);
 
@@ -178,15 +195,44 @@ describe("parity between the two locales", () => {
   });
 });
 
+describe("who he is away from the code", () => {
+  it.each(LOCALES)(
+    "carries the sentences from the source and the labels from the chrome (%s)",
+    (locale) => {
+      const { personality } = bySource(locale);
+
+      expect(personality.summary.length).toBeGreaterThan(0);
+      expect(personality.interests.length).toBeGreaterThan(0);
+      // The headings only exist because there is a page: they come from the
+      // chrome, never from the API. The sentences under them are the opposite.
+      expect(personality.title.length).toBeGreaterThan(0);
+      expect(personality.interestsLabel.length).toBeGreaterThan(0);
+    },
+  );
+
+  it("says the same thing in both languages, in the same number of parts", () => {
+    expect(en.personality.summary).toHaveLength(fr.personality.summary.length);
+    expect(en.personality.interests).toHaveLength(
+      fr.personality.interests.length,
+    );
+    expect(en.personality.title).not.toBe(fr.personality.title);
+  });
+});
+
 describe("the editorial rules held by a guard", () => {
   const allText = (content: SiteContent) => JSON.stringify(content);
 
-  it.each(LOCALES)("publishes no contact channel other than email (%s)", (locale) => {
-    const content = bySource(locale);
-    expect(content.contact.email).toBe("amissan.ag@outlook.fr");
-    // No phone number, in any form.
-    expect(allText(content)).not.toMatch(/\+33[\s.\-]?\d|0\d([\s.\-]?\d{2}){4}/);
-  });
+  it.each(LOCALES)(
+    "publishes no contact channel other than email (%s)",
+    (locale) => {
+      const content = bySource(locale);
+      expect(content.contact.email).toBe("amissan.ag@outlook.fr");
+      // No phone number, in any form.
+      expect(allText(content)).not.toMatch(
+        /\+33[\s.\-]?\d|0\d([\s.\-]?\d{2}){4}/,
+      );
+    },
+  );
 
   /**
    * Explicit arbitrations from `.claude/rules/contenu-editorial.md`, each one
@@ -215,30 +261,43 @@ describe("the editorial rules held by a guard", () => {
    * invites a spoken question whose answer is not yet backed by a citable
    * source.
    */
-  it.each(LOCALES)("bounds the reach figure to the whole set of apps (%s)", (locale) => {
-    const content = bySource(locale);
-    const reach = content.proof.find((tile) => tile.unit === "M");
-    if (!reach) throw new Error("the reach tile has disappeared");
+  it.each(LOCALES)(
+    "bounds the reach figure to the whole set of apps (%s)",
+    (locale) => {
+      const content = bySource(locale);
+      const reach = content.proof.find((tile) => tile.unit === "M");
+      if (!reach) throw new Error("the reach tile has disappeared");
 
-    expect(reach.prefix).toBe("~");
-    expect(reach.label).toMatch(
-      locale === "fr" ? /applications auxquelles j'ai contribué/ : /apps I have contributed to/,
-    );
-    // No tile ties a user count to a named product.
-    content.proof.forEach((tile) => expect(tile.label).not.toMatch(/Mail Orange/i));
-  });
+      expect(reach.prefix).toBe("~");
+      expect(reach.label).toMatch(
+        locale === "fr"
+          ? /applications auxquelles j'ai contribué/
+          : /apps I have contributed to/,
+      );
+      // No tile ties a user count to a named product.
+      content.proof.forEach((tile) =>
+        expect(tile.label).not.toMatch(/Mail Orange/i),
+      );
+    },
+  );
 
-  it.each(LOCALES)("never describes the anti-fraud mechanism (%s)", (locale) => {
-    const content = bySource(locale);
-    const text = allText(content).toLowerCase();
-    // The library is described by what it does, never by how.
-    expect(text).not.toMatch(/uiscreen|iscaptured|screencapture|detectcapture/);
-  });
+  it.each(LOCALES)(
+    "never describes the anti-fraud mechanism (%s)",
+    (locale) => {
+      const content = bySource(locale);
+      const text = allText(content).toLowerCase();
+      // The library is described by what it does, never by how.
+      expect(text).not.toMatch(
+        /uiscreen|iscaptured|screencapture|detectcapture/,
+      );
+    },
+  );
 
   it.each(LOCALES)("exposes no internal network identifier (%s)", (locale) => {
     const content = bySource(locale);
     const study = content.cases.find((item) => item.kind === "workstreams");
-    if (study?.kind !== "workstreams") throw new Error("ticketing case study missing");
+    if (study?.kind !== "workstreams")
+      throw new Error("ticketing case study missing");
     // The icons are named by public slug, never "n57", "n104"…
     study.iconStack.forEach((slug) => expect(slug).not.toMatch(/^n\d+$/));
   });
@@ -261,8 +320,14 @@ describe("the editorial rules held by a guard", () => {
     ];
 
     for (const field of markupFields) {
-      expect((field.match(/\*\*/g) ?? []).length % 2, `unclosed bold: ${field}`).toBe(0);
-      expect((field.match(/`/g) ?? []).length % 2, `unclosed code: ${field}`).toBe(0);
+      expect(
+        (field.match(/\*\*/g) ?? []).length % 2,
+        `unclosed bold: ${field}`,
+      ).toBe(0);
+      expect(
+        (field.match(/`/g) ?? []).length % 2,
+        `unclosed code: ${field}`,
+      ).toBe(0);
       // The markup must produce at least one node: no empty string published.
       expect(parseRichText(field).length).toBeGreaterThan(0);
     }

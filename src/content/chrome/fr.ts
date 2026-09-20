@@ -10,8 +10,10 @@ import type { SiteChrome } from "@/content/chrome/types";
 export const frChrome: SiteChrome = {
   meta: {
     title: "Amissan Amoussou-G. — Ingénieur iOS senior",
-    description: "Ingénieur iOS senior, spécialiste de la billettique mobile chez Instant System. 33 applications de transport en production embarquent ma couche de billettique. Alpes-Maritimes, télétravail.",
-    ogImageAlt: "Amissan Amoussou-G., ingénieur iOS senior — billettique mobile",
+    description:
+      "Ingénieur iOS senior, spécialiste de la billettique mobile chez Instant System. 33 applications de transport en production embarquent ma couche de billettique. Alpes-Maritimes, télétravail.",
+    ogImageAlt:
+      "Amissan Amoussou-G., ingénieur iOS senior — billettique mobile",
   },
   chrome: {
     navLabel: "Navigation principale",
@@ -57,6 +59,11 @@ export const frChrome: SiteChrome = {
     education: "Formation",
     certifications: "Certifications",
     openProjects: "Projets ouverts",
+  },
+  personality: {
+    eyebrow: "Hors du code",
+    title: "Qui je suis",
+    interests: "Ce qui m'occupe ailleurs",
   },
   verifyCertificate: "Vérifier le certificat",
   sourceCode: "Code source",

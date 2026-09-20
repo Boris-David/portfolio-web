@@ -1119,6 +1119,28 @@
   color: var(--ink-2);
 }
 
+/* ── Personality ───────────────────────────────────────────────────────────── */
+
+/*
+ * A reading column and nothing else. The section carries no card, no border and
+ * no accent rail: it is the one place on the page written in the first person,
+ * and dressing it would make it read like another claim among the claims.
+ */
+.persona {
+  max-width: 62ch;
+  display: grid;
+  gap: var(--s4);
+}
+
+.persona__label {
+  font-size: var(--t-caption);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-block-end: calc(var(--s3) * -1 + var(--s2));
+}
+
 /* ── Contact and footer ────────────────────────────────────────────────────── */
 
 .contact {

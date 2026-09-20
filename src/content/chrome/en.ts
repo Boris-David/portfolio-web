@@ -8,7 +8,8 @@ import type { SiteChrome } from "@/content/chrome/types";
 export const enChrome: SiteChrome = {
   meta: {
     title: "Amissan Amoussou-G. — Senior iOS Engineer",
-    description: "Senior iOS engineer specialised in mobile ticketing at Instant System. 33 transport apps in production ship my ticketing layer. French Riviera, remote.",
+    description:
+      "Senior iOS engineer specialised in mobile ticketing at Instant System. 33 transport apps in production ship my ticketing layer. French Riviera, remote.",
     ogImageAlt: "Amissan Amoussou-G., senior iOS engineer — mobile ticketing",
   },
   chrome: {
@@ -55,6 +56,11 @@ export const enChrome: SiteChrome = {
     education: "Education",
     certifications: "Certifications",
     openProjects: "Open projects",
+  },
+  personality: {
+    eyebrow: "Away from the code",
+    title: "Who I am",
+    interests: "What keeps me busy elsewhere",
   },
   verifyCertificate: "Verify certificate",
   sourceCode: "Source code",

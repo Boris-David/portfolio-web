@@ -1,7 +1,7 @@
 {
   "meta": {
     "locale": "en",
-    "contentVersion": "vymZ6K1FYeAODkg6A2-OXj"
+    "contentVersion": "zCyvFyDuZPwpgbHPxtfu5A"
   },
   "data": {
     "profile": {
@@ -66,6 +66,66 @@
         },
         "description": "KCalories' dashboard: calorie needs at a glance, step count, the day's water intake — and a good deal more for anyone fasting or on a particular diet.",
         "caseStudy": "kcalories"
+      },
+      "personality": {
+        "summary": [
+          [
+            {
+              "text": "Class representative, president of the student committee, team captain: I have always taken the roles where somebody has to hold a group together. These days it is the ",
+              "style": "plain"
+            },
+            {
+              "text": "company football team",
+              "style": "strong"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "I am glad to take the subjects nobody wants: the anti-fraud library came out of an ",
+              "style": "plain"
+            },
+            {
+              "text": "initiative in an innovation sprint",
+              "style": "strong"
+            },
+            {
+              "text": ", and the authentication rebuild out of code nobody would open any more. And I can hold a scope ",
+              "style": "plain"
+            },
+            {
+              "text": "on my own",
+              "style": "strong"
+            },
+            {
+              "text": " when that is what it takes.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "And what I look for elsewhere is the same thing: ",
+              "style": "plain"
+            },
+            {
+              "text": "pushing myself",
+              "style": "strong"
+            },
+            {
+              "text": ".",
+              "style": "plain"
+            }
+          ]
+        ],
+        "interests": [
+          "Strength training",
+          "Football",
+          "Landscape photography",
+          "Travel"
+        ]
       },
       "contact": {
         "email": "amissan.ag@outlook.fr",
