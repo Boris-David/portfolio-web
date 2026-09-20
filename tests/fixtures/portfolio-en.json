@@ -1,7 +1,7 @@
 {
   "meta": {
     "locale": "en",
-    "contentVersion": "zCyvFyDuZPwpgbHPxtfu5A"
+    "contentVersion": "7oL7djThd2TQWtEjEo9y4g"
   },
   "data": {
     "profile": {
@@ -71,11 +71,25 @@
         "summary": [
           [
             {
-              "text": "Class representative, president of the student committee, team captain: I have always taken the roles where somebody has to hold a group together. These days it is the ",
+              "text": "Class representative, president of the student committee, team captain: I have always taken the roles where somebody has to hold a group together. These days, ",
               "style": "plain"
             },
             {
-              "text": "company football team",
+              "text": "Scrum Master and coach",
+              "style": "strong"
+            },
+            {
+              "text": " of my team, and captain of the company football team.",
+              "style": "plain"
+            }
+          ],
+          [
+            {
+              "text": "In 2024 the whole company voted, and I came out of it ",
+              "style": "plain"
+            },
+            {
+              "text": "Mister Good Mood",
               "style": "strong"
             },
             {
@@ -115,13 +129,14 @@
               "style": "strong"
             },
             {
-              "text": ".",
+              "text": ". Nutrition and the way the body works fascinate me — enough that I built an app out of it.",
               "style": "plain"
             }
           ]
         ],
         "interests": [
           "Strength training",
+          "Nutrition",
           "Football",
           "Landscape photography",
           "Travel"
