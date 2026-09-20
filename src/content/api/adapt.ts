@@ -103,7 +103,7 @@ export function adapt(
     locale,
     meta: chrome.meta,
     chrome: chrome.chrome,
-    fullName: profile.child("name").child("full").text(),
+    formalName: profile.child("name").child("formal").text(),
     hero: adaptHero(profile, chrome),
     proof: data.child("metrics").list().map(adaptMetric),
     casesHead: sections.get("case-studies") as SectionHead,
@@ -203,7 +203,11 @@ function adaptMetric(metric: Field): ProofPoint {
     value: match[2] as string,
     ...(prefix === undefined ? {} : { prefix }),
     ...(unit.isPresent ? { unit: unit.text() } : {}),
-    label: metric.child("caption").text(),
+    // `detail` and not `caption`: the proof bar is one column on a phone and
+    // four at 960px, so it has the measure for the full sentence. `caption` is
+    // the three-word form, for the résumé, where three metrics share a line on
+    // a document that has to stay at two pages.
+    label: metric.child("detail").text(),
     // A non-null `countTo` is the editorial decision "this number animates";
     // it is taken at the source, not deduced from the shape of the number.
     ...(metric.child("countTo").isPresent ? { counts: true } : {}),

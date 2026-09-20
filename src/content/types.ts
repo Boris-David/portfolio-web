@@ -240,7 +240,7 @@ export interface SiteContent {
    * that knew how the author spells their own name -- and the one that would
    * quietly stop agreeing with the resume.
    */
-  readonly fullName: string;
+  readonly formalName: string;
   readonly hero: Hero;
   readonly proof: readonly ProofPoint[];
   readonly casesHead: SectionHead;
